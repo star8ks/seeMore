@@ -1,0 +1,43 @@
+html {
+  font-size: 625%;
+}
+body {
+  font-family: tahoma, Arial, sans-serif;
+  font-size: .14rem;
+  padding: .08rem .08rem;
+  line-height: .22rem;
+}
+a {
+  color: rgb(51, 102, 204);
+  text-decoration: none;
+  display: block;
+}a:hover {
+  text-decoration: underline;
+}
+
+.engine > a:nth-child(1) {
+  line-height: .36rem;
+}
+.disable {
+  color: #aaa;
+}
+.hide {
+  display: none;
+}
+
+input {
+  width: 100%;
+  line-height: .2rem;
+}::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  font-size: .16rem;
+  text-align: right;
+  vertical-align: text-bottom;
+}::-moz-placeholder { /* Firefox 19+ */
+  font-size: .17rem;
+  text-align: right;
+}:-moz-placeholder { /* Firefox 18- */
+  font-size: .17rem;
+  text-align: right;
+}
+
+.setting { font-size: .14rem;}

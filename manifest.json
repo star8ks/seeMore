@@ -1,67 +1,37 @@
 ﻿{
   "name": "搜索拐杖",
-  "version": "3.10",
+  "version": "3.90",
   "description": "在Google，百度，必应等等搜索引擎间进行快捷切换，搜索关键词无需重输！",
   "homepage_url": "http://xuhehuan.com/2272.html",
-  "background" : { "scripts": ["js/background.js", "js/base.js"] },
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
-  "page_action" :
-  {
+  "background": {
+    "scripts": [
+      "js/config.js",
+      "js/base.js",
+      "js/background.js"
+    ]
+  },
+  "content_security_policy": "script-src 'self'; img-src 'self' data:; form-action 'self'; object-src 'self'",
+  "browser_action": {
     "default_icon": {
-         "19": "img/icon-19.png",
-         "38": "img/icon-38.png"
-      },
-    "default_title" : "点此切换搜索",
+      "19": "img/icon-19.png",
+      "38": "img/icon-38.png"
+    },
+    "default_title": "搜索拐杖",
     "default_popup": "popup.html"
   },
-  "permissions" : [
-    "tabs","*://*/*"
+  "permissions": [
+    "tabs",
+    "*://*/*"
   ],
-  "options_page": "options.html",
-  "content_scripts" : [
-	{
-      "matches" : [
-        "http://www.google.com.hk/*",
-        "http://www.google.com/*"
-      ],
-      "js" : ["js/toGoogleFinish.js","js/sendword.js"],
-      "run_at" : "document_end"
-    },
-	{
-      "matches" : [
-        "http://www.baidu.com/*"
-      ],
-      "js" : ["js/toBaidu.js","js/sendword.js"],
-      "run_at" : "document_end"
-    },
-	{
-      "matches" : [
-        "http://www.sogou.com/*"
-      ],
-      "js" : ["js/toSogou.js","js/sendword.js"],
-      "run_at" : "document_end"
-    },
-	{
-      "matches" : [
-        "http://search.yahoo.com/*"
-      ],
-      "js" : ["js/toYahoo.js","js/sendword.js"],
-      "run_at" : "document_end"
-    },
-    {
-      "matches" : [
-        "http://www.so.com/*"
-      ],
-      "js" : ["js/tohaosou.js","js/sendword.js"],
-      "run_at" : "document_end"
-    }
-  ],
-  "icons" : {
-    "16" : "img/icon-16.png",
-    "32" : "img/icon-32.png",
-    "48" : "img/icon-48.png",
-    "64" : "img/icon-64.png",
-    "128" : "img/icon-128.png"
+  "options_ui": {
+    "page": "setting.html"
+  },
+  "icons": {
+    "16": "img/icon-16.png",
+    "32": "img/icon-32.png",
+    "48": "img/icon-48.png",
+    "64": "img/icon-64.png",
+    "128": "img/icon-128.png"
   },
   "manifest_version": 2
 }
