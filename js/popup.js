@@ -47,10 +47,10 @@
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
       var tab = tabs[0];
 
-      localStorage['word'] = Url.getSearchWord(tab.url);
+      localStorage['word'] = decodeURIComponent(Url.getSearchWord(tab.url));
       $keyword.value = localStorage['word'];
       $keyword.onkeyup = function(){
-        localStorage['word'] = this.value;
+        localStorage['word'] = encodeURIComponent(this.value);
       };
 
       // @TODO insert custom engine link
@@ -58,7 +58,7 @@
       document.querySelectorAll('section .se').forEach(function ($link) {
         $link.onclick = function (evt) {
           var index = this.getAttribute('data-se');
-          var url = CONFIG.engines[index].url.replace('%s', localStorage.word);
+          var url = CONFIG.engines[index].url.replace('%s', localStorage['word']);
           var button = Util.getMouseButton(evt);
           switch (button) {
             case 'left':
