@@ -54,8 +54,4 @@ window.addEventListener("DOMContentLoaded", function () {
   // };
   // $customName.addEventListener('input', saveCustomOptions); //自定义名称
   // $customSearch.addEventListener('input', saveCustomOptions); //自定义搜索
-
-  Util.$('show_explain').addEventListener('click', function explain() {
-    Util.$('div_exp').classList.toggle('hide');
-  });
 });
