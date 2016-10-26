@@ -1,0 +1,18 @@
+html {
+  font-size: 625%;
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+body {
+  font: 400 .14rem/1.7 'Segoe UI','Helvetica Neue',Helvetica,Arial,'Microsoft YaHei','Hiragino Sans GB',STHeiti,SimHei,SimSun,sans-serif;
+  color: #333;
+  background-color: #fff;
+}
+.hide {
+  display: none;
+}
+.disable {
+  color: #aaa;
+}
