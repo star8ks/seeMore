@@ -38,27 +38,49 @@
       }
       rendered += tpl.render({
         'se-index': index,
-        'se-name': CONFIG.engines[index].displayName
+        'se-name': CONFIG.engines[index].displayName,
+        'se-favicon': "url('" + Url.getFaviconUrl(CONFIG.engines[index].url) + "')"
       });
     });
     $engineSection.innerHTML = rendered;
 
-
     chrome.tabs.query({currentWindow: true, active: true}, function(tabs){
       var tab = tabs[0];
 
+      // Set search box value to search word or selected text
       localStorage['word'] = decodeURIComponent(Url.getSearchWord(tab.url));
-      $keyword.value = localStorage['word'];
-      $keyword.onkeyup = function(){
-        localStorage['word'] = encodeURIComponent(this.value);
+      if (localStorage['word'] !== '') {
+        $keyword.value = localStorage['word'];
+      } else {
+        chrome.tabs.executeScript({
+          code: "window.getSelection().toString();"
+        }, function(selection) {
+          if(selection[0]) {
+            $keyword.value = localStorage['word'] = selection[0];
+          }
+        });
+      }
+
+      $keyword.onkeyup = function(e){
+        localStorage['word'] = this.value;
+        //@TODO if press enter, search word using first engine
+        // if(e.key == "Enter") {
+
+        // }
       };
+      $keyword.focus();
 
       // @TODO insert custom engine link
       // @TODO disable current engine link
       document.querySelectorAll('section .se').forEach(function ($link) {
+        // set icons
+        var index = $link.getAttribute('data-se');
+        var engine = CONFIG.engines[index];
+        $link.style.backgroundImage = $link.getAttribute('data-favicon');
+
         $link.onclick = function (evt) {
-          var index = this.getAttribute('data-se');
-          var url = CONFIG.engines[index].url.replace('%s', localStorage['word']);
+          var searchParam = encodeURIComponent(localStorage['word']);
+          var url = engine.url.replace('%s', searchParam);
           var button = Util.getMouseButton(evt);
           switch (button) {
             case 'left':
