@@ -50,7 +50,7 @@ var Util = {
 var Url = {
   getQueryVal: function (url, key) {
     var val = url.match(new RegExp(key + "=([^\&]*)(\&?)", 'i'));
-    return val ? val[1] : val;
+    return val ? val[1].replace(/\+/g, ' ') : val;
   },
 
   getSearchWord: function(url) {
@@ -64,20 +64,57 @@ var Url = {
       return '';
     }
     var searchKey = match[1];
-    return this.getQueryVal(url, searchKey);
+    var searchWord = this.getQueryVal(url, searchKey);
+    return searchWord ? searchWord : '';
   },
 
   getHost: function (url) {
-    if(url.match(/^chrome:\/\//)) {
+    if(url.match(/^chrome/)) {
       return 'chrome';
     }
-    
+
     var match = url.match(/^https?:\/\/([^\/]+)\/?/);
     if (!match) {
       throw Error('Not a valid url: ', url);
     } else {
       return match[1].toLowerCase();
     }
+  },
+
+  /**
+   * Get origin of url
+   * eg: origin part of 'https://se.com/g?q=3#t' is 'https://se.com'
+   * */
+  getOrigin: function (url) {
+    var match = url.match(/^(\w+?:\/\/[^\/]+)\/?/);
+    if (!match) {
+      throw Error('Not a valid url: ', url);
+    } else {
+      return match[1].toLowerCase();
+    }
+  },
+
+  /**
+   * A regular expression for identifying favicon URLs.
+   * @const {!RegExp}
+   */
+  FAVICON_URL_REGEX: /\.ico$/i,
+  /**
+   * Creates a favicon url depend on given url.
+   * @param {string} url Either the URL of the original page or of the favicon
+   *     itself.
+   * @param {number=} size Optional preferred size of the favicon.
+   * @param {string=} type Optional type of favicon to request. Valid values
+   *     are 'favicon' and 'touch-icon'. Default is 'favicon'.
+   * @return {string} url for the favicon.
+   */
+  getFaviconUrl: function(url, size, type) {
+    size = size || 16;
+    type = type || 'favicon';
+
+    return 'chrome://' + type + '/size/' + size + '@1x/' +
+      // Note: Literal 'iconurl' must match FAVICON_URL_REGEX
+      (this.FAVICON_URL_REGEX.test(url) ? 'iconurl/' : '') + this.getOrigin(url);
   },
 
   inRequiredHost: function (url) {

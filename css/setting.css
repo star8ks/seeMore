@@ -1,94 +1,46 @@
 body {
-  margin: 0;
-  font-family: tahoma, Arial, sans-serif;
-  font-size: 14px;
-  background: #ccc;
+  width: 100%;
+  height: 100%;
+  background: #fff;
 }
-
 .content {
-  margin: 0 auto;
-  padding: 10px 40px 10px;
   width: 670px;
+  margin: 0 auto;
+  padding: .10rem .40rem .10rem;
   background: #fff;
 }
 
 .heading {
-  padding: 0 0 10px;
-  border-bottom: 1px dashed #999;
+  padding: 0 0 .10rem;
+  border-bottom: .01rem dashed #999;
 }
-
 .heading img, .heading h1 {
   display: inline;
   vertical-align: middle;
 }
 
 #options {
-  margin: 10px 0 14px;
-  border-bottom: 1px dashed #999;
+  margin: .10rem 0 .14rem;
+  border-bottom: .01rem dashed #999;
 }
-
 #options p {
   margin-top: 0;
   line-height: 1.5;
 }
-
 #options form,
 #options img {
   display: inline-block;
   vertical-align: top;
 }
-
 #options label {
   line-height: 1.8;
   display: block;
 }
 #options input,
+
 .add_search {
   vertical-align: middle;
   margin-right: .4em;
-}
-
-#status {
-  background-color: #ddf;
-  text-align: center;
-  margin-top: 10px;
-}
-
-#div_exp {
-  color: #080;
-  line-height: 20px;
-}
-
-.hide {
-  display: none;
-}
-
-#div_recommend {
-  margin: -20px auto 10px;
-  padding: 20px 0;
-  width: 790px;
-  border: 1px solid #999;
-  border-radius: 6px;
-  background: #fff;
-}
-
-.add_search {
-  width: 24px;
-}
-
-.clearfix::after {
-  visibility: hidden;
-  display: block;
-  font-size: 0;
-  content: " ";
-  clear: both;
-  height: 0;
-}
-
-.about {
-  text-align: right;
-  line-height: 20px;
-  font-size: 10px;
 }
 
 #custom_name {
@@ -97,4 +49,16 @@ body {
 
 #custom_search {
   width: 300px;
+}
+
+#status {
+  background-color: #ddf;
+  text-align: center;
+  margin-top: .1rem;
+}
+
+.about {
+  text-align: right;
+  line-height: 20px;
+  font-size: 10px;
 }
