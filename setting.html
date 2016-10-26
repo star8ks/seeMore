@@ -3,8 +3,9 @@
 <head>
   <title>搜索拐杖 - 设置</title>
   <link rel="stylesheet" type="text/css" href="css/normalize.min.css">
+  <link rel="stylesheet" type="text/css" href="css/base.css">
   <link rel="stylesheet" type="text/css" href="css/setting.css">
-  <link rel="stylesheet" type="text/css" href="jiathis_share.css">
+  <link rel="stylesheet" type="text/css" href="css/jiathis_share.css">
 </head>
 
 <body>
@@ -28,11 +29,11 @@
         <label>
         	<input type="checkbox" class="required" id="se_aol" />AOL Search&nbsp;&nbsp;
           <a id="show_explain" href="#">(?)</a>
-          <div id="div_exp" class="hide">
+          <span id="div_exp" class="hide">
             基于Google搜索结果提供服务的网站：<br>
             <a href="http://www.aolsearch.com" target="_blank">http://www.aolsearch.com</a><br>
             当Google无法访问时，可以用来代替Google。
-          </div>
+          </span>
         </label>
 
         <label>
@@ -59,11 +60,10 @@
           <input type="checkbox" id="remove_redirect"/>略过 Google 跳转页直接访问目标页&nbsp;&nbsp;<a href="http://xuhehuan.com/2272.html#SearchDirect" target="_blank">(?)</a>
         </label>
 
-        <p style="margin-top:5px;">
-          自定义搜索：<a href="http://xuhehuan.com/2272.html#CustomSearch" target="_blank" title="如何配置？">(?)</a>
-        </p>
+        <!--<p style="margin-top:5px;">-->
+          <!--自定义搜索：<a href="http://xuhehuan.com/2272.html#CustomSearch" target="_blank" title="如何配置？">(?)</a>-->
+        <!--</p>-->
 
-        <!--@TODO add custom search-->
         <!--<table>-->
           <!--<tr>-->
           	<!--<td><input type="text" id="custom_name" /></td>-->
@@ -75,7 +75,7 @@
         <div id="status"></div>
       </form>
 
-      <img src='SearchCrutch.png' />
+      <img src='img/searchCrutch.png' />
     </div>
 
     <!-- JiaThis Button BEGIN -->
