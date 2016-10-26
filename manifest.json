@@ -10,7 +10,7 @@
       "js/background.js"
     ]
   },
-  "content_security_policy": "script-src 'self'; img-src 'self' data:; form-action 'self'; object-src 'self'",
+  "content_security_policy": "script-src 'self'; form-action 'self'; object-src 'self'",
   "browser_action": {
     "default_icon": {
       "19": "img/icon-19.png",
@@ -21,7 +21,7 @@
   },
   "permissions": [
     "tabs",
-    "*://*/*"
+    "<all_urls>"
   ],
   "options_ui": {
     "page": "setting.html"
