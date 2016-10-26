@@ -36,10 +36,13 @@
       if (!CONFIG.engines[index]) {
         return;
       }
+
+      var iconKey = 'icon_' + Url.getHost(CONFIG.engines[index].url);
+      var iconUrl = localStorage[iconKey] ? localStorage[iconKey] : Url.getFaviconUrl(CONFIG.engines[index].url);
       rendered += tpl.render({
         'se-index': index,
         'se-name': CONFIG.engines[index].displayName,
-        'se-favicon': "url('" + Url.getFaviconUrl(CONFIG.engines[index].url) + "')"
+        'se-favicon': "url('" + iconUrl + "')"
       });
     });
     $engineSection.innerHTML = rendered;

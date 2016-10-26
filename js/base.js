@@ -114,7 +114,7 @@ var Url = {
 
     return 'chrome://' + type + '/size/' + size + '@1x/' +
       // Note: Literal 'iconurl' must match FAVICON_URL_REGEX
-      (this.FAVICON_URL_REGEX.test(url) ? 'iconurl/' : '') + this.getOrigin(url);
+      (this.FAVICON_URL_REGEX.test(url) ? 'iconurl/' + url : this.getOrigin(url));
   },
 
   inRequiredHost: function (url) {

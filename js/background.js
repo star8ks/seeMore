@@ -30,8 +30,13 @@ var Listener = (function () {
         return;
       }
       if (/^chrome/.test(tab.url)) {
-        localStorage["word"] = '';
+        localStorage['word'] = '';
         return;
+      }
+
+      if(tab.favIconUrl) {
+        var iconKey = 'icon_' + Url.getHost(tab.url);
+        localStorage[iconKey] = tab.favIconUrl;
       }
 
       if (localStorage['remove_redirect'] && Url.isGoogleRedirect(tab.url)) {

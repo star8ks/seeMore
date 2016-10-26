@@ -11,13 +11,15 @@ a {
   text-decoration: underline;
 }
 
+.icon-link {
+  /*background: no-repeat 0 .04rem;*/
+  background: no-repeat 0 .04rem;
+  background-size: 16px 16px;
+  text-indent: .2rem;
+}
 .engine > a:nth-child(1) {
   line-height: .36rem;
   background-position-y: .1rem;
-}
-a.se {
-  background: no-repeat 0 .04rem;
-  text-indent: .2rem;
 }
 
 input {
@@ -25,4 +27,7 @@ input {
   line-height: .2rem;
 }
 
-.setting { font-size: .14rem;}
+.setting {
+  font-size: .14rem;
+  background-image: url('chrome://favicon/size/16@1x/chrome://settings/');
+}
