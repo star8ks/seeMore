@@ -1,0 +1,25 @@
+{
+  "name": "searchCrutch",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "node_modules",
+    "bower_components",
+    "test", "tests",
+    "src"
+  ],
+  "install": {
+    "path": "vendor",
+    "sources": {
+      "bluebird": ["bower_components/bluebird/js/browser/bluebird.min.js"],
+      "localforage": ["bower_components/localforage/dist/localforage.min.js"]
+    }
+  },
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "localforage": "^1.4.3"
+  }
+}
