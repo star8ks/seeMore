@@ -1,2 +1,4 @@
 .idea/
 desktop.ini
+bower_components/
+node_modules/
