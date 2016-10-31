@@ -1,57 +1,60 @@
-var Option = {
+;(function () {
+var option = (function (){
   // Restores select box state to saved value from localStorage.
-  restore: function () {
-    var requiredOptionKeys = Store.getRequiredOptionKeys();
-    requiredOptionKeys.forEach(function (key) {
-      var $checkbox = Util.$(key);
-      if (!$checkbox) {
-        localStorage.removeItem(key);
-        return;
-      }
-      $checkbox.checked = localStorage[key];
+  function restore() {
+    Setting.get('cfg_remove_redirect').then(function (val) {
+      util.$('cfg_remove_redirect').checked = val;
     });
-
-    Util.$('remove_redirect').checked = localStorage['remove_redirect'];
     // $('custom_name').value = localStorage.custom_name ? localStorage.custom_name : '';
     // $('custom_search').value = localStorage.custom_search ? localStorage.custom_search : '';
-  },
-  showStatus: function () {
-    var status = Util.$("status");
-    status.textContent = "选项已保存";
-    setTimeout(function () {
-      status.textContent = "";
-    }, 1000);
   }
-};
 
+  function show() {
+    // store.get();
+    var tpl = new Tpl('tpl-se-link');
+    var rendered = '';
+    var $engineSection = document.querySelector('.selected');
+
+    return Engine.getOpen().map(function (se) {
+      var oUrl = new Url(se.url);
+      var iconKey = 'icon_' + oUrl.host;
+
+      return Icon.get(iconKey).then(function (url) {
+        var iconUrl = url || oUrl.faviconUrl;
+        rendered += tpl.render({
+          'se-index': se.$$key,
+          'se-name': se.displayName,
+          'se-favicon': "url('" + iconUrl + "')"
+        });
+      });
+    }).then(function (promiseArr) {
+      return new Promise.all(promiseArr);
+    }).then(function () {
+      $engineSection.innerHTML = rendered;
+    });
+  }
+
+  return {
+    restore: restore,
+    show: show
+  };
+})();
 
 window.addEventListener("DOMContentLoaded", function () {
   document.querySelector('.about').innerHTML += '&nbsp;v' + chrome.runtime.getManifest().version;
-  document.querySelector('form').onsubmit = function (e) {
-    e.preventDefault();
-    return false;
-  };
 
-  Option.restore();
-  document.querySelectorAll('#options .required').forEach(function (checkbox) {
-    Util.$(checkbox.id).addEventListener('click', function saveOption(evt) {
-      localStorage[evt.target.id] = evt.target.checked ? 'checked' : '';
-      Option.showStatus();
+  option.restore();
+  option.show().then(function () {
+    // set icons
+    document.querySelectorAll('.selected .se').forEach(function ($link) {
+      $link.style.backgroundImage = $link.getAttribute('data-favicon');
     });
   });
 
-  Util.$('remove_redirect').addEventListener('click', function (evt) {
-    localStorage['remove_redirect'] = evt.target.checked ? 'checked' : '';
-    Option.showStatus();
+  util.$('cfg_remove_redirect').addEventListener('click', function (evt) {
+    Setting.set('cfg_remove_redirect', evt.target.checked);
   });
 
-  // var $customName = $('custom_name');
-  // var $customSearch = $('custom_search');
-  // var saveCustomOptions = function () {
-  //   localStorage.custom_name = $customName.value;
-  //   localStorage.custom_search = $customSearch.value;
-  //   showStatus();
-  // };
-  // $customName.addEventListener('input', saveCustomOptions); //自定义名称
-  // $customSearch.addEventListener('input', saveCustomOptions); //自定义搜索
 });
+
+})();

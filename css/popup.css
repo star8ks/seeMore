@@ -2,21 +2,17 @@ body {
   padding: .08rem .08rem;
   min-width: 120px;
 }
-a {
-  line-height: .26rem;
-  color: rgb(51, 102, 204);
-  text-decoration: none;
-  display: block;
-}a:hover {
-  text-decoration: underline;
-}
 
 .icon-link {
-  /*background: no-repeat 0 .04rem;*/
+  display: block;
+  text-indent: .2rem;
+  text-decoration: none;
+  line-height: .26rem;
   background: no-repeat 0 .04rem;
   background-size: 16px 16px;
-  text-indent: .2rem;
-}
+  color: rgb(51, 102, 204); }
+.icon-link:hover {
+  text-decoration: underline;}
 .engine > a:nth-child(1) {
   line-height: .36rem;
   background-position-y: .1rem;
@@ -25,6 +21,8 @@ a {
 input {
   width: 100%;
   line-height: .2rem;
+  border: .01rem solid gray;
+  border-radius: .02rem;
 }
 
 .setting {

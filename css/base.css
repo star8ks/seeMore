@@ -10,6 +10,11 @@ body {
   color: #333;
   background-color: #fff;
 }
+input[type=checkbox] {
+  width: .14rem; height: .14rem;
+  margin-right: .06rem;
+  vertical-align: sub;
+}
 .clearfix::after {
   visibility: hidden;
   display: block;
@@ -22,5 +27,12 @@ body {
   display: none;
 }
 .disable {
-  color: #aaa;
+  color: #aaa !important;
+}
+.unselectable {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;
 }

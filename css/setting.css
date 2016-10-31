@@ -27,35 +27,15 @@ body {
   margin-top: 0;
   line-height: 1.5;
 }
-#options form,
-#options img {
-  display: inline-block;
-  vertical-align: top;
-}
-#options label {
-  line-height: 1.8;
+
+.icon-link {
+  cursor: pointer;
   display: block;
-}
-#options input,
-
-.add_search {
-  vertical-align: middle;
-  margin-right: .4em;
-}
-
-#custom_name {
-  width: 120px;
-}
-
-#custom_search {
-  width: 300px;
-}
-
-#status {
-  background-color: #ddf;
-  text-align: center;
-  margin-top: .1rem;
-}
+  text-indent: .2rem;
+  text-decoration: none;
+  background: no-repeat 0 .1rem;
+  background-size: 16px 16px;
+  line-height:.36rem;}
 
 .about {
   text-align: right;
