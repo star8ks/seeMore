@@ -4,28 +4,30 @@ var Listener = (function () {
 
   function removeRedirect(tab) {
     return Promise.all([
-      Engine.get('cfg_remove_redirect'),
+      Setting.get('cfg_remove_redirect'),
       Engine.get('google')
     ]).spread(function(removeRedirect, engine) {
       if(!removeRedirect) {
         return;
       }
 
-      var oUrl = new Url(tab.url);
-      if(engine.hosts.includes(oUrl.host)) {
+      var tabUrl = new Url(tab.url);
+      if(!engine.hosts.includes(tabUrl.host)) {
+        clog('not a google url');
         return;
       }
-      if(!oUrl.includes('url?') && !oUrl.includes('imgres?')) {
+      if(!tabUrl.includes('url?') && !tabUrl.includes('imgres?')) {
+        clog('not a google redirect url');
         return;
       }
 
-      var originUrl = oUrl.getQueryVal('url');
-      var originImgUrl = oUrl.getQueryVal('imgrefurl');
+      var originUrl = tabUrl.getQueryVal('url');
+      var originImgUrl = tabUrl.getQueryVal('imgrefurl');
       if (originUrl) {
         clog.info('█████Remove redirection: ', tab.url, ' to ', decodeURIComponent(originUrl));
         chrome.tabs.update(tab.id, {url: decodeURIComponent(originUrl)});
       } else if (originImgUrl) {
-        // clog.info('█████Remove redirection: ', tab.url, ' to ', decodeURIComponent(originImgUrl));
+        clog.info('█████Remove redirection: ', tab.url, ' to ', decodeURIComponent(originImgUrl));
         chrome.tabs.update(tab.id, {url: decodeURIComponent(originImgUrl)});
       }
     }).catch(function (error) {
@@ -40,7 +42,7 @@ var Listener = (function () {
       // AFTER tab.url is ready(at most of time).
       // This way takes shorter time compare to chrome.tabs.onUpdated
       chrome.tabs.get(tabInfo.id, function (tab) {
-        if(!tab.url) {
+        if(!tab.url || !/^https?/.test(tab.url)) {
           return;
         }
         removeRedirect(tab);
@@ -49,15 +51,14 @@ var Listener = (function () {
 
     onTabUpdated: function (tabId, changeInfo, tab) {
       if (!changeInfo.status || 'loading' != changeInfo.status
-        || !tab.url || tab.url==='about:blank' || /^chrome/.test(tab.url)) {
+        || !tab.url || !/^https?/.test(tab.url)) {
         return;
       }
 
       var oUrl = new Url(tab.url);
       if(tab.favIconUrl) {
         clog('on updated favicon', tab.favIconUrl);
-        var iconKey = 'icon_' + oUrl.host;
-        Icon.set(iconKey, tab.favIconUrl);
+        Icon.set(oUrl.host, tab.favIconUrl);
       }
 
       removeRedirect(tab);
@@ -79,6 +80,8 @@ var Listener = (function () {
 
       if (!CONFIG.devMode) {
         chrome.tabs.create({url: 'chrome://extensions/?options=' + chrome.runtime.id});
+      } else {
+        chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/setting.html'});
       }
     }
   }
