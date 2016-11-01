@@ -55,9 +55,8 @@
       var $engineSection = document.querySelector('section.engine');
       Engine.getOpen().map(function (se) {
         var seUrl = new Url(se.url);
-        var iconKey = 'icon_' + seUrl.host;
 
-        return Icon.get(iconKey).then(function (url) {
+        return Icon.get(seUrl.host).then(function (url) {
           var iconUrl = url || seUrl.faviconUrl;
           rendered += tpl.render({
             'se-index': se.$$key,
@@ -77,25 +76,27 @@
         document.querySelectorAll('section .se').forEach(function ($link) {
           // set icons
           var index = $link.getAttribute('data-se');
-          var engine = CONFIG.engines[index];
-          $link.style.backgroundImage = $link.getAttribute('data-favicon');
 
-          $link.onclick = function (evt) {
-            var searchParam = encodeURIComponent($keyword.value);
-            var url = engine.url.replace('%s', searchParam);
-            var button = util.getMouseButton(evt);
-            switch (button) {
-              case 'left':
-                chrome.tabs.update(tab.id, {url: url});
-                break;
-              case 'middle':
-                chrome.tabs.create({url: url});
-                break;
-              default:
-                break;
+          Engine.get(index).then(function (engine) {
+            $link.style.backgroundImage = $link.getAttribute('data-favicon');
+
+            $link.onclick = function (evt) {
+              var searchParam = encodeURIComponent($keyword.value);
+              var url = engine.url.replace('%s', searchParam);
+              var button = util.getMouseButton(evt);
+              switch (button) {
+                case 'left':
+                  chrome.tabs.update(tab.id, {url: url});
+                  break;
+                case 'middle':
+                  chrome.tabs.create({url: url});
+                  break;
+                default:
+                  break;
+              }
+              evt.preventDefault();
             }
-            evt.preventDefault();
-          }
+          });
         });
       }
 

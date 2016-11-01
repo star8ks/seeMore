@@ -17,9 +17,8 @@ var option = (function (){
 
     return Engine.getOpen().map(function (se) {
       var oUrl = new Url(se.url);
-      var iconKey = 'icon_' + oUrl.host;
 
-      return Icon.get(iconKey).then(function (url) {
+      return Icon.get(oUrl.host).then(function (url) {
         var iconUrl = url || oUrl.faviconUrl;
         rendered += tpl.render({
           'se-index': se.$$key,
