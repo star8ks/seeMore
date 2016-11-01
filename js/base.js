@@ -39,6 +39,7 @@ if (!Array.prototype.includes) {
     return false;
   };
 }
+//@TODO case insensitive search Array.prototype.includeString
 
 var clog = function() {
   if(CONFIG.devMode) {
@@ -115,6 +116,7 @@ function searchEngineKeys(url) {
   clog('search Engine Keys: url=', url);
   var host = (new Url(url)).host;
   return Engine.getOpen().filter(function (se) {
+    //@TODO it should be case insensitive includes here
     return se.hosts.includes(host);
   }).then(function (engines) {
     return Object.keys(DB.assoc(engines));

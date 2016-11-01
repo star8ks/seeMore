@@ -82,7 +82,7 @@
 
             $link.onclick = function (evt) {
               var searchParam = encodeURIComponent($keyword.value);
-              var url = engine.url.replace('%s', searchParam);
+              var url = engine.url.replace(/%s/g, searchParam);
               var button = util.getMouseButton(evt);
               switch (button) {
                 case 'left':

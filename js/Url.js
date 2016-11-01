@@ -76,6 +76,7 @@ var Url = (function () {
   };
   Url.FAVICON_URL_REGEX = /\.ico$/i;
   Url.prototype = {
+    //@TODO add case sensitive option, and set insensitive default
     includes: function (search) {
       return this.url.includes(search);
     },

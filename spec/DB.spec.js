@@ -4,9 +4,7 @@
 describe('DB', function() {
   'use strict';
   var store = new DB(localforage, 'test');
-  // beforeEach(function (done) {
-  //   done();
-  // });
+
   beforeEach(function(done) {
     store.lf.ready().then(function() {
       return store.lf.clear();
