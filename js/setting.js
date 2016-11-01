@@ -26,8 +26,6 @@ var option = (function (){
           'se-favicon': "url('" + iconUrl + "')"
         });
       });
-    }).then(function (promiseArr) {
-      return new Promise.all(promiseArr);
     }).then(function () {
       $engineSection.innerHTML = rendered;
     });

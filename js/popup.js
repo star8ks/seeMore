@@ -65,8 +65,6 @@
             'se-current': seUrl.origin === tabUrl.origin ? 'disable' : ''
           });
         });
-      }).then(function (promiseArr) {
-        return new Promise.all(promiseArr);
       }).then(function () {
         $engineSection.innerHTML = rendered;
         setLinks();
