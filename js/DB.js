@@ -44,9 +44,7 @@ var DB = (function () {
     keyName = keyName||'$$key';
     if(typeof obj === 'object' && obj !== null && !obj.hasOwnProperty('$$key')) {
       Object.defineProperty(obj, keyName, {
-        get: function () {
-          return key;
-        },
+        value: key,
         enumerable: false
       });
     }
@@ -88,6 +86,9 @@ Engine.getAll = function (assoc) {
   return this.keys().map(function(key) {
     return this.get(key, true);
   }.bind(this)).then(function (engines){
+    engines.sort(function (engineA, engineB) {
+      return engineA.order - engineB.order;
+    });
     return assoc ? DB.assoc(engines) : engines;
   }).catch(function (err) {
     throw new Error('Error in engine.getAll: ', err);
@@ -102,7 +103,9 @@ Engine.getOpen = function (assoc) {
   return this.keys().map(function(key) {
     return this.get(key, true);
   }.bind(this)).then(function (engines){
-    var openEngines = engines.filter(function(engine) {
+    var openEngines = engines.sort(function (engineA, engineB) {
+      return engineA.order - engineB.order;
+    }).filter(function(engine) {
       return engine.open;
     });
     return assoc ? DB.assoc(openEngines) : openEngines;

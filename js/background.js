@@ -72,14 +72,14 @@ var Listener = (function () {
 
     onInstalled: function () {
       var manifest = chrome.runtime.getManifest();
-      Object.keys(CONFIG.engines).forEach(function (key) {
-        Engine.set(key, CONFIG.engines[key]);
-      });
-      Setting.set('cfg_remove_redirect', true);
       Setting.set('version', manifest.version);
 
       if (!CONFIG.devMode) {
         chrome.tabs.create({url: 'chrome://extensions/?options=' + chrome.runtime.id});
+        Object.keys(CONFIG.engines).forEach(function (key) {
+          Engine.set(key, CONFIG.engines[key]);
+        });
+        Setting.set('cfg_remove_redirect', true);
       } else {
         chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/setting.html'});
       }

@@ -2,6 +2,7 @@ var CONFIG = {
   engines: {
     // Search engines
     google: {
+      order: 1,
       displayName: 'Google',
       open: true,
       // view-source:https://www.google.com/supported_domains
@@ -206,18 +207,21 @@ var CONFIG = {
       url: 'https://www.google.com.hk/search?q=%s'
     },
     aol: {
+      order: 4,
       displayName: 'Aol Search',
-      open: true,
+      open: false,
       hosts: ['www.aolsearch.com', 'search.aol.com'],
       url: 'http://www.aolsearch.com/search?q=%s'
     },
     baidu: {
+      order: 2,
       displayName: '百度',
       open: true,
       hosts: ['www.baidu.com'],
       url: 'https://www.baidu.com/s?wd=%s'
     },
     bing: {
+      order: 3,
       displayName: '必应',
       open: true,
       hosts: [
@@ -226,26 +230,30 @@ var CONFIG = {
       url: 'https://cn.bing.com/search?q=%s'
     },
     yahoo: {
+      order: 5,
       displayName: '雅虎',
-      open: true,
+      open: false,
       hosts: [
         'at.search.yahoo.com', 'au.search.yahoo.com', 'br.search.yahoo.com', 'ca.search.yahoo.com', 'qc.search.yahoo.com', 'ch.search.yahoo.com', 'chfr.search.yahoo.com', 'chit.search.yahoo.com', 'cl.search.yahoo.com', 'cn.search.yahoo.com', 'yahoo.cn', 'co.search.yahoo.com', 'espanol.search.yahoo.com', 'search.yahoo.com', 'de.search.yahoo.com', 'dk.search.yahoo.com', 'es.search.yahoo.com', 'fi.search.yahoo.com', 'fr.search.yahoo.com', 'gr.search.yahoo.com', 'hk.search.yahoo.com', 'id.search.yahoo.com', 'in.search.yahoo.com', 'it.search.yahoo.com', 'maktoob.search.yahoo.com', 'search.yahoo.co.jp', 'kr.search.yahoo.com', 'mx.search.yahoo.com', 'malaysia.search.yahoo.com', 'nl.search.yahoo.com', 'no.search.yahoo.com', 'nz.search.yahoo.com', 'pe.search.yahoo.com', 'ph.search.yahoo.com', 'pl.search.yahoo.com', 'ru.search.yahoo.com', 'se.search.yahoo.com', 'sg.search.yahoo.com', 'th.search.yahoo.com', 'tr.search.yahoo.com', 'tw.search.yahoo.com', 'uk.search.yahoo.com', 've.search.yahoo.com', 'vn.search.yahoo.com'
       ],
       url: 'https://search.yahoo.com/search?p=%s'
     },
     sogou: {
+      order: 6,
       displayName: '搜狗',
-      open: true,
+      open: false,
       hosts: ['www.sogou.com'],
       url: 'https://www.sogou.com/web?query=%s'
     },
     360: {
+      order: 7,
       displayName: '360搜索',
-      open: true,
+      open: false,
       hosts: ['www.so.com'],
       url: 'https://www.so.com/s?q=%s'
     },
     duck: {
+      order: 8,
       displayName: 'DuckDuckGo',
       open: true,
       hosts: ['duckduckgo.com'],
@@ -253,55 +261,64 @@ var CONFIG = {
     },
     // Movie, Video, Sub
     doubanMovie: {
+      order: 9,
       displayName: '豆瓣电影',
       open: true,
       hosts: ['movie.douban.com'],
       url: 'https://movie.douban.com/subject_search?search_text=%s'
     },
     RARBG: {
+      order: 10,
       displayName: 'RARBG',
       open: true,
       hosts: ['rarbg.to'],
       url: 'https://rarbg.to/torrents.php?search=%s'
     },
     AcFun: {
+      order: 11,
       displayName: 'AcFun',
-      open: true,
+      open: false,
       hosts: ['www.acfun.tv'],
       url: 'http://www.acfun.tv/search/#query=%s'
     },
     bilibili: {
+      order: 12,
       displayName: 'bilibili',
       open: true,
       hosts: ['search.bilibili.com'],
       url: 'http://search.bilibili.com/all?keyword=%s'
     },
     tencentVideo: {
+      order: 13,
       displayName: '腾讯视频',
       open: true,
       hosts: ['v.qq.com'],
       url: 'http://v.qq.com/x/search/?q=%s'
     },
     youtube: {
+      order: 14,
       displayName: 'YouTube',
       open: true,
       hosts: ['www.youtube.com'],
       url: 'https://www.youtube.com/results?search_query=%s'
     },
     subHD: {
+      order: 15,
       displayName: 'Sub HD',
       open: true,
       hosts: ['subhd.com'],
       url: 'http://subhd.com/search/%s'
     },
     zimuku: {
+      order: 16,
       displayName: '字幕库',
-      open: true,
+      open: false,
       hosts: ['www.zimuku.net'],
       url: 'http://www.zimuku.net/search?q=%s'
     },
     // Dictionary
     iciba: {
+      order: 17,
       displayName: '爱词霸',
       open: true,
       hosts: ['www.iciba.com'],
@@ -309,14 +326,16 @@ var CONFIG = {
     },
     // EBook
     readFree: {
+      order: 18,
       displayName: 'readFree',
       open: true,
       hosts: ['readfree.me'],
       url: 'http://readfree.me/search/?q=%s'
     },
     ITeBooks: {
+      order: 19,
       displayName: 'IT eBooks',
-      open: true,
+      open: false,
       hosts: ['it-ebooks.info'],
       url: 'https://cse.google.com/cse?cx=013493258683483688568:xhfa6ctm1ki&q=%s#gsc.tab=0&gsc.q=%s'
     }
