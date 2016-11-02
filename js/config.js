@@ -1,8 +1,22 @@
 var CONFIG = {
+  engineTypes: {
+    1: {name: 'Search Engine', default: true},
+    2: {name: 'Video', default: true},
+    3: {name: 'Dictionary', default: true},
+    4: {name: 'EBook', default: true},
+    5: {name: 'Search Engine'},
+    6: {name: 'Video'},
+    7: {name: 'Dictionary'},
+    8: {name: 'EBook'},
+    9: {name: 'Sub', default: true},
+    10: {name: 'Torrents', default: true},
+  },
   engines: {
     // Search engines
     google: {
       order: 1,
+      typeId: 5,
+      defaultTypeId: 1,
       displayName: 'Google',
       open: true,
       // view-source:https://www.google.com/supported_domains
@@ -208,6 +222,8 @@ var CONFIG = {
     },
     aol: {
       order: 4,
+      typeId: 5,
+      defaultTypeId: 1,
       displayName: 'Aol Search',
       open: false,
       hosts: ['www.aolsearch.com', 'search.aol.com'],
@@ -215,14 +231,18 @@ var CONFIG = {
     },
     baidu: {
       order: 2,
-      displayName: '百度',
+      typeId: 5,
+      defaultTypeId: 1,
+      displayName: 'Baidu',
       open: true,
       hosts: ['www.baidu.com'],
       url: 'https://www.baidu.com/s?wd=%s'
     },
     bing: {
       order: 3,
-      displayName: '必应',
+      typeId: 5,
+      defaultTypeId: 1,
+      displayName: 'Bing',
       open: true,
       hosts: [
         'www.bing.com', 'bing.co', 'bing.co.uk', 'bing.com', 'be.bing.com', 'br.bing.com', 'ca.bing.com', 'cn.bing.com', 'de.bing.com', 'fr.bing.com', 'hk.bing.com', 'it.bing.com', 'jp.bing.com', 'm.bing.com', 'nz.bing.com', 'ssl.bing.com', 'uk.bing.com'
@@ -231,7 +251,9 @@ var CONFIG = {
     },
     yahoo: {
       order: 5,
-      displayName: '雅虎',
+      typeId: 5,
+      defaultTypeId: 1,
+      displayName: 'Yahoo',
       open: false,
       hosts: [
         'at.search.yahoo.com', 'au.search.yahoo.com', 'br.search.yahoo.com', 'ca.search.yahoo.com', 'qc.search.yahoo.com', 'ch.search.yahoo.com', 'chfr.search.yahoo.com', 'chit.search.yahoo.com', 'cl.search.yahoo.com', 'cn.search.yahoo.com', 'yahoo.cn', 'co.search.yahoo.com', 'espanol.search.yahoo.com', 'search.yahoo.com', 'de.search.yahoo.com', 'dk.search.yahoo.com', 'es.search.yahoo.com', 'fi.search.yahoo.com', 'fr.search.yahoo.com', 'gr.search.yahoo.com', 'hk.search.yahoo.com', 'id.search.yahoo.com', 'in.search.yahoo.com', 'it.search.yahoo.com', 'maktoob.search.yahoo.com', 'search.yahoo.co.jp', 'kr.search.yahoo.com', 'mx.search.yahoo.com', 'malaysia.search.yahoo.com', 'nl.search.yahoo.com', 'no.search.yahoo.com', 'nz.search.yahoo.com', 'pe.search.yahoo.com', 'ph.search.yahoo.com', 'pl.search.yahoo.com', 'ru.search.yahoo.com', 'se.search.yahoo.com', 'sg.search.yahoo.com', 'th.search.yahoo.com', 'tr.search.yahoo.com', 'tw.search.yahoo.com', 'uk.search.yahoo.com', 've.search.yahoo.com', 'vn.search.yahoo.com'
@@ -240,20 +262,26 @@ var CONFIG = {
     },
     sogou: {
       order: 6,
-      displayName: '搜狗',
+      typeId: 5,
+      defaultTypeId: 1,
+      displayName: 'Sogou',
       open: false,
       hosts: ['www.sogou.com'],
       url: 'https://www.sogou.com/web?query=%s'
     },
     360: {
       order: 7,
-      displayName: '360搜索',
+      typeId: 5,
+      defaultTypeId: 1,
+      displayName: '360',
       open: false,
       hosts: ['www.so.com'],
       url: 'https://www.so.com/s?q=%s'
     },
     duck: {
       order: 8,
+      typeId: 5,
+      defaultTypeId: 1,
       displayName: 'DuckDuckGo',
       open: true,
       hosts: ['duckduckgo.com'],
@@ -262,13 +290,17 @@ var CONFIG = {
     // Movie, Video, Sub
     doubanMovie: {
       order: 9,
-      displayName: '豆瓣电影',
+      typeId: 6,
+      defaultTypeId: 2,
+      displayName: 'douban movie',
       open: true,
       hosts: ['movie.douban.com'],
       url: 'https://movie.douban.com/subject_search?search_text=%s'
     },
     RARBG: {
       order: 10,
+      typeId: 6,
+      defaultTypeId: 10,
       displayName: 'RARBG',
       open: true,
       hosts: ['rarbg.to'],
@@ -276,6 +308,8 @@ var CONFIG = {
     },
     AcFun: {
       order: 11,
+      typeId: 6,
+      defaultTypeId: 2,
       displayName: 'AcFun',
       open: false,
       hosts: ['www.acfun.tv'],
@@ -283,6 +317,8 @@ var CONFIG = {
     },
     bilibili: {
       order: 12,
+      typeId: 6,
+      defaultTypeId: 2,
       displayName: 'bilibili',
       open: true,
       hosts: ['search.bilibili.com'],
@@ -290,13 +326,17 @@ var CONFIG = {
     },
     tencentVideo: {
       order: 13,
-      displayName: '腾讯视频',
+      typeId: 6,
+      defaultTypeId: 2,
+      displayName: 'Tencent Video',
       open: true,
       hosts: ['v.qq.com'],
       url: 'http://v.qq.com/x/search/?q=%s'
     },
     youtube: {
       order: 14,
+      typeId: 6,
+      defaultTypeId: 2,
       displayName: 'YouTube',
       open: true,
       hosts: ['www.youtube.com'],
@@ -304,6 +344,8 @@ var CONFIG = {
     },
     subHD: {
       order: 15,
+      typeId: 6,
+      defaultTypeId: 9,
       displayName: 'Sub HD',
       open: true,
       hosts: ['subhd.com'],
@@ -311,7 +353,9 @@ var CONFIG = {
     },
     zimuku: {
       order: 16,
-      displayName: '字幕库',
+      typeId: 6,
+      defaultTypeId: 9,
+      displayName: 'zimuku',
       open: false,
       hosts: ['www.zimuku.net'],
       url: 'http://www.zimuku.net/search?q=%s'
@@ -319,14 +363,27 @@ var CONFIG = {
     // Dictionary
     iciba: {
       order: 17,
-      displayName: '爱词霸',
+      typeId: 7,
+      defaultTypeId: 3,
+      displayName: 'iciba',
       open: true,
       hosts: ['www.iciba.com'],
       url: 'http://www.iciba.com/%s'
     },
+    zdic: {
+      order: 17,
+      typeId: 7,
+      defaultTypeId: 3,
+      displayName: '汉典',
+      open: true,
+      hosts: ['www.zdic.net'],
+      url: 'http://www.zdic.net/search/?c=3&q=%s'
+    },
     // EBook
     readFree: {
       order: 18,
+      typeId: 8,
+      defaultTypeId: 4,
       displayName: 'readFree',
       open: true,
       hosts: ['readfree.me'],
@@ -334,8 +391,10 @@ var CONFIG = {
     },
     ITeBooks: {
       order: 19,
+      typeId: 8,
+      defaultTypeId: 4,
       displayName: 'IT eBooks',
-      open: false,
+      open: true,
       hosts: ['it-ebooks.info'],
       url: 'https://cse.google.com/cse?cx=013493258683483688568:xhfa6ctm1ki&q=%s#gsc.tab=0&gsc.q=%s'
     }

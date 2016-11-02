@@ -78,7 +78,7 @@ var Url = (function () {
   Url.prototype = {
     //@TODO add case sensitive option, and set insensitive default
     includes: function (search) {
-      return this.url.includes(search);
+      return this.url.includeString(search);
     },
 
     getQueryVal: function (key) {

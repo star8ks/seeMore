@@ -4,7 +4,7 @@
     chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
       var tab = tabs[0];
       var tabUrl = new Url(tab.url);
-      var $keyword = util.$('keyword');
+      var $keyword = util.$('#keyword');
 
       getSearchString().then(function (searchString) {
         clog('get searchString: ', searchString);
@@ -13,7 +13,7 @@
       function getSearchString() {
         // get search string from selected text
         var getSelection = new Promise(function (resolve) {
-          if(tab.url.match(/^chrome/)){ // not support chrome pages now
+          if(tabUrl.url.match(/^chrome/)){ // not support chrome pages now
             resolve('');
           }
           chrome.tabs.executeScript({
@@ -24,8 +24,8 @@
         });
 
         // get search string from url param
-        return getSelection.then(function (selectString) {
-          return selectString ? selectString : searchEngineKeys(tabUrl.url).then(function (keys) {
+        return getSelection.then(function (str) {
+          return str ? str : Engine.searchKeys(tabUrl.host).then(function (keys) {
             if (keys.length <= 0) {
               return '';
             }
@@ -43,7 +43,7 @@
         $keyword.onkeyup = function (e) {
           //if press enter, search word using first enabled engine
           if(e.key == "Enter") {
-            document.querySelector('.se:not(.disable)').click();
+            util.$('.se:not(.disable)').click();
           }
         };
         $keyword.focus();
@@ -52,7 +52,7 @@
 
       var tpl = new Tpl('tpl-engine');
       var rendered = '';
-      var $engineSection = document.querySelector('section.engine');
+      var $engineSection = util.$('section.engine');
       Engine.getOpen().map(function (se) {
         var seUrl = new Url(se.url);
 
@@ -71,7 +71,7 @@
       });
 
       function setLinks() {
-        document.querySelectorAll('section .se').forEach(function ($link) {
+        util.$all('section .se').forEach(function ($link) {
           // set icons
           var index = $link.getAttribute('data-se');
 

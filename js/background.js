@@ -12,12 +12,8 @@ var Listener = (function () {
       }
 
       var tabUrl = new Url(tab.url);
-      if(!engine.hosts.includes(tabUrl.host)) {
-        clog('not a google url');
-        return;
-      }
-      if(!tabUrl.includes('url?') && !tabUrl.includes('imgres?')) {
-        clog('not a google redirect url');
+      if(!engine.hosts.includes(tabUrl.host.toLowerCase())
+        || !tabUrl.includes('url?') || !tabUrl.includes('imgres?')) {
         return;
       }
 
@@ -63,7 +59,7 @@ var Listener = (function () {
 
       removeRedirect(tab);
 
-      searchEngineKeys(tab.url).then(function (keys) {
+      Engine.searchKeys(oUrl.host).then(function (keys) {
         if(keys.length > 0) {
           chrome.browserAction.setTitle({title: '点击切换搜索引擎', tabId: tabId});
         }
@@ -74,12 +70,15 @@ var Listener = (function () {
       var manifest = chrome.runtime.getManifest();
       Setting.set('version', manifest.version);
 
+      Object.keys(CONFIG.engineTypes).forEach(function (typeId) {
+        EngineType.set(typeId, CONFIG.engineTypes[typeId]);
+      });
+      Object.keys(CONFIG.engines).forEach(function (key) {
+        Engine.set(key, CONFIG.engines[key]);
+      });
+      Setting.set('cfg_remove_redirect', true);
       if (!CONFIG.devMode) {
         chrome.tabs.create({url: 'chrome://extensions/?options=' + chrome.runtime.id});
-        Object.keys(CONFIG.engines).forEach(function (key) {
-          Engine.set(key, CONFIG.engines[key]);
-        });
-        Setting.set('cfg_remove_redirect', true);
       } else {
         chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/setting.html'});
       }

@@ -15,19 +15,28 @@
       <h1>搜索拐杖 - 设置</h1>
     </div>
 
-    <div id="options" class="clearfix">
+    <div class="options clearfix">
       <p>
         Google不通时，快捷切换其他搜索！<br>
         <strong>只显示我想切换的搜索：</strong>
       </p>
 
-      <div class="selected">
+      <div class="preview">
+      </div>
+      <div class="engines">
       </div>
 
-      <p style="margin-top:5px;">辅助小功能：</p>
+      <p style="margin-top:5px;">其它选项：</p>
       <label>
         <input type="checkbox" id="cfg_remove_redirect"/>略过 Google 跳转页直接访问目标页&nbsp;&nbsp;<a href="http://xuhehuan.com/2272.html#SearchDirect" target="_blank">(?)</a>
       </label>
+      <!--<label>-->
+        <!--<input type="checkbox" name="cfg_auto_keyword">智能获取页面关键词-->
+      <!--</label>-->
+      <!--<label>-->
+        <!--<input type="checkbox" name="cfg_auto_keyword">英文词自动翻译-->
+      <!--</label>-->
+
 
       <!--<p style="margin-top:5px;">-->
         <!--自定义搜索：<a href="http://xuhehuan.com/2272.html#CustomSearch" target="_blank" title="如何配置？">(?)</a>-->
@@ -62,7 +71,7 @@
   </div>
 
   <script id="tpl-se-link" type="text/template">
-    <a class="se unselectable icon-link" data-se="${se-index}" data-favicon="${se-favicon}">${se-name}</a>
+    <li class="se unselectable icon-link" data-se="${se-index}" data-favicon="${se-favicon}">${se-name}</li>
   </script>
 
   <script type="text/javascript" src="vendor/bluebird/bluebird.min.js"></script>

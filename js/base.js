@@ -4,9 +4,27 @@ if (!String.prototype.includes) {
     if (typeof start !== 'number') {
       start = 0;
     }
-    return start + search.length > this.length ? false : this.indexOf(search, start) !== -1;
+    return start + search.length > this.length
+      ? false
+      : this.indexOf(search, start) !== -1;
   };
 }
+/**
+ * case insensitive version of String.prototype.includes
+ * */
+String.prototype.includeString = function (search, start, caseSensitive) {
+  'use strict';
+  caseSensitive = caseSensitive === void 0 ? false : !!caseSensitive;
+  if(caseSensitive) {
+    return this.includes(search, start);
+  }
+  if (typeof start !== 'number') {
+    start = 0;
+  }
+  return start + search.length > this.length
+    ? false
+    : this.toLowerCase().indexOf(search.toLowerCase(), start) !== -1;
+};
 if (!Array.prototype.includes) {
   Array.prototype.includes = function(searchElement /*, fromIndex*/) {
     'use strict';
@@ -39,7 +57,6 @@ if (!Array.prototype.includes) {
     return false;
   };
 }
-//@TODO case insensitive search Array.prototype.includeString
 
 var clog = function() {
   if(CONFIG.devMode) {
@@ -58,8 +75,11 @@ clog.warn = function() {
 };
 
 var util = {
-  '$': function(objStr) {
-    return document.getElementById(objStr);
+  $: function(selector) {
+    return document.querySelector(selector);
+  },
+  $all: function (selector) {
+    return document.querySelectorAll(selector);
   },
   getMouseButton: function (evt) {
     // Handle different event models
@@ -84,7 +104,7 @@ var Tpl = function (tplId) {
   this.openTag = '${';
   this.closeTag = '}';
   this.tplSelectorPre = "script[type='text/template']";
-  this.$tpl = document.querySelector(this.tplSelectorPre + "#" + tplId);
+  this.$tpl = util.$(this.tplSelectorPre + "#" + tplId);
   if (!this.$tpl) {
     throw new Error('No template found!');
   }
@@ -104,23 +124,3 @@ Tpl.prototype = {
     return this.output;
   }
 };
-
-/**
- * @param {String} url A valid url
- * @param {Boolean?} openOnly Only search open engines
- * @return {Promise}
- * if not found in hosts, next then() will get false,
- * if found, next then() will get the engine keys
- * */
-function searchEngineKeys(url) {
-  clog('search Engine Keys: url=', url);
-  var host = (new Url(url)).host;
-  return Engine.getOpen().filter(function (se) {
-    //@TODO it should be case insensitive includes here
-    return se.hosts.includes(host);
-  }).then(function (engines) {
-    return Object.keys(DB.assoc(engines));
-  }).catch(function (err) {
-    throw new Error('Error in searchEngineKeys(url = ' + url + '): ', err);
-  });
-}

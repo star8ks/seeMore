@@ -14,12 +14,24 @@ describe('DB', function() {
   });
 
   it('has some API', function() {
+    expect(typeof DB.array).toBe('function');
+    expect(typeof DB.assoc).toBe('function');
     expect(typeof store.get).toBe('function');
+    expect(typeof store.getAll).toBe('function');
     expect(typeof store.set).toBe('function');
     expect(typeof store.clear).toBe('function');
+    expect(typeof store.keys).toBe('function');
   });
   it('config localforage driver', function () {
     expect(store.lf._driver).toBe('asyncStorage');
+  });
+
+  describe('DB.assoc', function () {
+
+  });
+
+  describe('DB.array', function () {
+
   });
 
   describe('set', function () {
@@ -51,6 +63,57 @@ describe('DB', function() {
         done();
       });
     }, 500);
+    describe('with inner key', function () {
+      it('should return an object with $$key(get an object)', function (done) {
+        store.set('google', {id: 1, order: 1}).then(function () {
+          return store.get('google', true);
+        }).then(function (engine) {
+          var google = Object.defineProperty({id: 1, order: 1}, '$$key', {
+            value: 'google',
+            enumerable: false
+          });
+          expect(engine).toEqual(google);
+          expect(engine['$$key']).toEqual(google['$$key']);
+          done();
+        });
+      });
+      it('should return an object with $$key(get a number)', function (done) {
+        store.set('google', 1).then(function () {
+          return store.get('google', true);
+        }).then(function (engine) {
+          var google = Object.defineProperty({google: 1}, '$$key', {
+            value: 'google',
+            enumerable: false
+          });
+          expect(engine).toEqual(google);
+          expect(engine['$$key']).toEqual(google['$$key']);
+          done();
+        });
+      });
+      it('should return an object with $$key(get a string)', function (done) {
+        store.set('google', 'google is good').then(function () {
+          return store.get('google', true);
+        }).then(function (engine) {
+          var google = Object.defineProperty({google: 'google is good'}, '$$key', {
+            value: 'google',
+            enumerable: false
+          });
+          expect(engine).toEqual(google);
+          expect(engine['$$key']).toEqual(google['$$key']);
+          done();
+        });
+      });
+      it('should throw an Error if get by a not exist key', function (done) {
+        store.get('not-exist', true).catch(function (err) {
+          expect(err.toString()).toBe('Error: Can not define inner key of null or undefined');
+          done();
+        });
+      });
+    });
+  });
+
+  describe('getAll', function () {
+
   });
 
   describe('clear', function () {
@@ -105,15 +168,26 @@ describe('engine', function () {
     });
   });
 
-  describe('getAll', function () {
+  describe('set', function () {
+    it('should lower case all hosts', function (done) {
+      Engine.get('google').then(function (engine) {
+        expect(engine.hosts).toEqual(CONFIG.engines.google.hosts.map(function (host) {
+          return host.toLowerCase();
+        }));
+        done();
+      });
+    })
+  });
+
+  describe('getSortedAll', function () {
     it('should return assoc object', function (done) {
-      Engine.getAll(true).then(function (engines) {
+      Engine.getSortedAll(true).then(function (engines) {
         expect(engines).toEqual(CONFIG.engines);
         done();
       });
     });
     it('should return array', function (done) {
-      Engine.getAll().then(function (engines) {
+      Engine.getSortedAll().then(function (engines) {
         expect(DB.assoc(engines)).toEqual(CONFIG.engines);
         done();
       });
@@ -130,10 +204,25 @@ describe('engine', function () {
       });
     });
     it('should return array', function (done) {
-      Engine.getAll().then(function (engines) {
-        expect(DB.assoc(engines)).toEqual(CONFIG.engines);
+      Engine.getOpen().then(function (engines) {
+        expect(DB.assoc(engines)).toEqual(DB.assoc(openEngines));
         done();
       });
     });
-  })
+  });
+
+  describe('searchKeys', function () {
+    it('should compare host case insensitively', function (done) {
+      Engine.searchKeys('www.Google.com').then(function (keys) {
+        expect(keys).toEqual(['google']);
+        done();
+      });
+    });
+    it('should return an empty array if not found', function (done) {
+      Engine.searchKeys('www.3140.com').then(function (keys) {
+        expect(keys).toEqual([]);
+        done();
+      });
+    });
+  });
 });

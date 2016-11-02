@@ -4,7 +4,7 @@ body {
   background: #fff;
 }
 .content {
-  width: 670px;
+  width: 9.68rem;
   margin: 0 auto;
   padding: .10rem .40rem .10rem;
   background: #fff;
@@ -19,15 +19,22 @@ body {
   vertical-align: middle;
 }
 
-#options {
+.options {
   margin: .10rem 0 .14rem;
   border-bottom: .01rem dashed #999;
 }
-#options p {
+.options p {
   margin-top: 0;
   line-height: 1.5;
 }
 
+.options ul {
+  width: 1.30rem;
+  padding: 0;
+  display: inline-block;
+  vertical-align: top;
+  overflow-x: hidden;
+}
 .icon-link {
   cursor: pointer;
   display: block;
