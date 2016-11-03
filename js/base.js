@@ -99,28 +99,3 @@ var util = {
     return btnCode[e.button] ? btnCode[e.button] : '';
   }
 };
-
-var Tpl = function (tplId) {
-  this.openTag = '${';
-  this.closeTag = '}';
-  this.tplSelectorPre = "script[type='text/template']";
-  this.$tpl = util.$(this.tplSelectorPre + "#" + tplId);
-  if (!this.$tpl) {
-    throw new Error('No template found!');
-  }
-  this.tpl = this.$tpl.innerHTML.trim();
-  this.output = this.tpl;
-};
-Tpl.prototype = {
-  replace: function (search, replaceText) {
-    this.output = this.output.replace(this.openTag + search + this.closeTag, replaceText);
-    return this;
-  },
-  render: function (data) {
-    this.output = this.tpl;
-    Object.keys(data).forEach(function (key) {
-      this.replace(key, data[key]);
-    }.bind(this));
-    return this.output;
-  }
-};
