@@ -8,18 +8,27 @@
   "ignore": [
     "node_modules",
     "bower_components",
-    "test", "tests",
+    "test",
+    "tests",
     "src"
   ],
   "install": {
     "path": "vendor",
     "sources": {
-      "bluebird": ["bower_components/bluebird/js/browser/bluebird.min.js"],
-      "localforage": ["bower_components/localforage/dist/localforage.min.js"]
+      "bluebird": [
+        "bower_components/bluebird/js/browser/bluebird.min.js"
+      ],
+      "localforage": [
+        "bower_components/localforage/dist/localforage.min.js"
+      ],
+      "mustache.js": [
+        "bower_components/mustache.js/mustache.min.js"
+      ]
     }
   },
   "dependencies": {
     "bluebird": "^3.4.6",
-    "localforage": "^1.4.3"
+    "localforage": "^1.4.3",
+    "mustache.js": "mustache#^2.2.1"
   }
 }

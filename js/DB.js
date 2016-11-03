@@ -133,7 +133,7 @@ Engine.getSortedAll = function (assoc, filter) {
     });
     return assoc ? DB.assoc(engines) : engines;
   }).catch(function (err) {
-    throw new Error('Error in engine.getAll: ', err);
+    throw new Error('Error in engine.getAll: ' + err);
   });
 };
 /**
@@ -143,6 +143,7 @@ Engine.getSortedAll = function (assoc, filter) {
  * */
 Engine.getOpen = function (assoc, filter) {
   assoc = assoc===void 0 ? false : !!assoc;
+  filter = filter || function(){return true};
   return this.getAll(true, function(engine) {
     return engine.open && filter(engine);
   }).then(function (engines){
@@ -151,7 +152,7 @@ Engine.getOpen = function (assoc, filter) {
     });
     return assoc ? DB.assoc(openEngines) : openEngines;
   }).catch(function (err) {
-    throw new Error('Error in engine.getOpen: ', err);
+    throw new Error('Error in engine.getOpen: ' + err);
   });
 };
 
@@ -169,6 +170,6 @@ Engine.searchKeys = function(host) {
   }).then(function (engines) {
     return Object.keys(DB.assoc(engines));
   }).catch(function (err) {
-    throw new Error('Error in searchEngineKeys(host = ' + host + '): ', err);
+    throw new Error('Error in searchEngineKeys(host = ' + host + '): ' + err);
   });
 };

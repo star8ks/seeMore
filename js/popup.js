@@ -50,33 +50,22 @@
       }
 
 
-      var tpl = new Tpl('tpl-engine');
-      var rendered = '';
-      var $engineSection = util.$('section.engine');
-      Engine.getOpen().map(function (se) {
-        var seUrl = new Url(se.url);
+      var engineListTpl = util.$('#tpl-engines').innerHTML.trim();
+      var $enginesSection = util.$('.engines');
 
-        return Icon.get(seUrl.host).then(function (url) {
-          var iconUrl = url || seUrl.faviconUrl;
-          rendered += tpl.render({
-            'se-index': se.$$key,
-            'se-name': se.displayName,
-            'se-favicon': "url('" + iconUrl + "')",
-            'se-current': seUrl.origin === tabUrl.origin ? 'disable' : ''
-          });
-        });
+      Render.openEngines(engineListTpl).then(function (rendered) {
+        $enginesSection.innerHTML = rendered;
       }).then(function () {
-        $engineSection.innerHTML = rendered;
         setLinks();
       });
 
       function setLinks() {
-        util.$all('section .se').forEach(function ($link) {
+        util.$all('section .icon-link').forEach(function ($link) {
           // set icons
           var index = $link.getAttribute('data-se');
 
           Engine.get(index).then(function (engine) {
-            $link.style.backgroundImage = $link.getAttribute('data-favicon');
+            $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
 
             $link.onclick = function (evt) {
               var searchParam = encodeURIComponent($keyword.value);

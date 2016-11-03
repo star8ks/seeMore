@@ -1,9 +1,21 @@
 body {
   padding: .08rem .08rem;
-  min-width: 120px;
 }
-
+.engines { min-width:2.8rem;}
+.engines ul {
+  width: 1.30rem;
+  margin-right: .1rem;
+  padding: .08rem;
+  border: .02rem solid lightblue;
+  border-radius: .04rem;
+  display: inline-block;
+  vertical-align: top;
+  overflow-x: hidden;
+  list-style-type: none;
+}
+.engines ul>.head {font-weight: bold}
 .icon-link {
+  cursor: pointer;
   display: block;
   text-indent: .2rem;
   text-decoration: none;
@@ -13,10 +25,6 @@ body {
   color: rgb(51, 102, 204); }
 .icon-link:hover {
   text-decoration: underline;}
-.engine > a:nth-child(1) {
-  line-height: .36rem;
-  background-position-y: .1rem;
-}
 
 input {
   width: 100%;
@@ -27,5 +35,5 @@ input {
 
 .setting {
   font-size: .14rem;
-  background-image: url('chrome://favicon/size/16@1x/chrome://settings/');
+  background-image: url('chrome://favicon/size/16@1x/chrome://settings');
 }

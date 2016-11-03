@@ -30,12 +30,17 @@ body {
 
 .options ul {
   width: 1.30rem;
-  padding: 0;
+  margin-right: .1rem;
+  padding: .08rem;
+  border: .02rem solid lightblue;
+  border-radius: .04rem;
   display: inline-block;
   vertical-align: top;
   overflow-x: hidden;
+  list-style-type: none;
 }
-.icon-link {
+ul .head {font-weight: bold;}
+ul .icon-link {
   cursor: pointer;
   display: block;
   text-indent: .2rem;
