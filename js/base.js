@@ -70,6 +70,11 @@ clog.info = function() {
 };
 clog.warn = function() {
   Array.prototype.slice.call(arguments).forEach(function(text){
+    clog('%c'+ text, 'color: yellow');
+  });
+};
+clog.err = function() {
+  Array.prototype.slice.call(arguments).forEach(function(text){
     clog('%c'+ text, 'color: red');
   });
 };
