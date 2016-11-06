@@ -49,10 +49,8 @@
         $keyword.focus();
       }
 
-
       var engineListTpl = util.$('#tpl-engines').innerHTML.trim();
       var $enginesSection = util.$('.engines');
-
       Render.openEngines(engineListTpl).then(function (rendered) {
         $enginesSection.innerHTML = rendered;
       }).then(function () {
@@ -60,14 +58,14 @@
       });
 
       function setLinks() {
-        util.$all('section .icon-link').forEach(function ($link) {
+        util.$all('.engines .icon-link').forEach(function ($link) {
           // set icons
           var index = $link.getAttribute('data-se');
 
           Engine.get(index).then(function (engine) {
             $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
 
-            $link.onclick = function (evt) {
+            $link.onmousedown = function (evt) {
               var searchParam = encodeURIComponent($keyword.value);
               var url = engine.url.replace(/%s/g, searchParam);
               var button = util.getMouseButton(evt);
