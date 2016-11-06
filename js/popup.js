@@ -12,7 +12,7 @@
       });
       function getSearchString() {
         // get search string from selected text
-        var getSelection = new Promise(function (resolve) {
+        var getSelectionP = new Promise(function (resolve) {
           if(tabUrl.url.match(/^chrome/)){ // not support chrome pages now
             resolve('');
           }
@@ -24,8 +24,15 @@
         });
 
         // get search string from url param
-        return getSelection.then(function (str) {
-          return str ? str : Engine.searchKeys(tabUrl.host).then(function (keys) {
+        return  getSelectionP.then(function (str) {
+          return str ? str : getSearchString(tabUrl);
+        });
+
+        function getSearchString(tabUrl) {
+          if(Url.googleFailedUrlPattern.test(tabUrl.url)) {
+            tabUrl = new Url(decodeURIComponent(tabUrl.getQueryVal('continue')));
+          }
+          return Engine.searchKeys(tabUrl.host).then(function (keys) {
             if (keys.length <= 0) {
               return '';
             }
@@ -35,8 +42,7 @@
               return decodeURIComponent(searchString ? searchString : '');
             });
           })
-        });
-
+        }
       }
       function setKeywordInput(searchString) {
         $keyword.value = searchString;

@@ -75,6 +75,7 @@ var Url = (function () {
     });
   };
   Url.FAVICON_URL_REGEX = /\.ico$/i;
+  Url.googleFailedUrlPattern = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
   Url.prototype = {
     //@TODO add case sensitive option, and set insensitive default
     includes: function (search) {
