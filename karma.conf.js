@@ -11,7 +11,7 @@ module.exports = function(config) {
 
     files: [
       "vendor/bluebird/bluebird.min.js",
-      "vendor/localforage/localforage.min.js",
+      "vendor/localforage/localforage.nopromises.min.js",
       "js/CONFIG.dev.js",
       "js/DB.js",
       "spec/*.js"

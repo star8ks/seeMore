@@ -6,7 +6,7 @@
   "background": {
     "scripts": [
       "vendor/bluebird/bluebird.min.js",
-      "vendor/localforage/localforage.min.js",
+      "vendor/localforage/localforage.nopromises.min.js",
       "js/config.js",
       "js/base.js",
       "js/DB.js",

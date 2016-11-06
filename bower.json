@@ -19,7 +19,7 @@
         "bower_components/bluebird/js/browser/bluebird.min.js"
       ],
       "localforage": [
-        "bower_components/localforage/dist/localforage.min.js"
+        "bower_components/localforage/dist/localforage.nopromises.min.js"
       ],
       "mustache.js": [
         "bower_components/mustache.js/mustache.min.js"
