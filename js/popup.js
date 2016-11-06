@@ -49,7 +49,10 @@
         $keyword.onkeyup = function (e) {
           //if press enter, search word using first enabled engine
           if(e.key == "Enter") {
-            util.$('.se:not(.disable)').click();
+            util.$('.se:not(.disable)').dispatchEvent(new MouseEvent(
+              'click',
+              {button:0}
+            ));
           }
         };
         $keyword.focus();
@@ -71,7 +74,7 @@
           Engine.get(index).then(function (engine) {
             $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
 
-            $link.onmousedown = function (evt) {
+            $link.onclick = function (evt) {
               var searchParam = encodeURIComponent($keyword.value);
               var url = engine.url.replace(/%s/g, searchParam);
               var button = util.getMouseButton(evt);

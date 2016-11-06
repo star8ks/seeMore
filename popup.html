@@ -17,9 +17,9 @@
 
 <script id="tpl-engines" type="x-tmpl-mustache">
   <ul>
-    <li class="se unselectable head"><span>{{typeName}}</span></li>
+    <li class="type unselectable"><span>{{typeName}}</span></li>
     {{#engines}}
-    <li class="se unselectable icon-link" data-se="{{index}}" data-favicon="{{favicon}}">{{displayName}}</li>
+    <li><a class="se icon-link unselectable" data-se="{{index}}" data-favicon="{{favicon}}" href="">{{displayName}}</a></li>
     {{/engines}}
   </ul>
 </script>

@@ -13,7 +13,7 @@ body {
   overflow-x: hidden;
   list-style-type: none;
 }
-.engines ul>.head {font-weight: bold}
+.engines ul>.type {font-weight: bold}
 .icon-link {
   cursor: pointer;
   display: block;
