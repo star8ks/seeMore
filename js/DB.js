@@ -10,9 +10,10 @@ var DB = (function () {
    * */
   function DB(localforage, storeName, name) {
     storeName = storeName || 'app';
-    name = name || 'localforage';
+    name = name || 'sc';
     this.lf = localforage.createInstance({
-      driver: localforage.INDEXEDDB,
+      // driver: localforage.INDEXEDDB,
+      driver: localforage.LOCALSTORAGE,
       name: name,
       storeName: storeName
     });
@@ -100,6 +101,8 @@ EngineType.getAllDefault = function () {
   return this.getAll(true).then(function (types) {
     return types.filter(function (type) {
       return type.default;
+    }).sort(function(typeA, typeB){
+      return typeA.order - typeB.order;
     });
   });
 };
@@ -107,13 +110,14 @@ EngineType.getAllReal = function () {
   return this.getAll(true).then(function (types) {
     return types.filter(function (type) {
       return !type.default;
+    }).sort(function(typeA, typeB){
+      return typeA.order - typeB.order;
     });
   });
 };
 
 var Engine = new DB(localforage, 'engine');
 Engine.set = function (key, engine) {
-  //@TODO do some validation here
   // ensure all hosts are lower case
   engine.hosts = engine.hosts.map(function (host) {
     return host.toLowerCase();
@@ -165,7 +169,6 @@ Engine.getOpen = function (assoc, filter) {
 Engine.searchKeys = function(host) {
   host = host.toLowerCase();
   return this.getOpen().filter(function (se) {
-    //@TODO it should be case insensitive includes here
     return se.hosts.includes(host);
   }).then(function (engines) {
     return Object.keys(DB.assoc(engines));
