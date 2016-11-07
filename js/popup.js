@@ -63,6 +63,11 @@
       Render.openEngines(engineListTpl).then(function (rendered) {
         $enginesSection.innerHTML = rendered;
       }).then(function () {
+        new Mason(util.$('.engines'), {
+          itemSelector: '.pin',
+          columnWidth: 140,
+          columnNum: 2
+        });
         setLinks();
       });
 

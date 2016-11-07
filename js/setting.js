@@ -38,6 +38,8 @@ window.addEventListener("DOMContentLoaded", function () {
     util.$all('.icon-link').forEach(function ($link) {
       $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
     });
+  }).catch(function (err) {
+    clog.err('render failed ' + err);
   });
 
   util.$('#cfg_remove_redirect').addEventListener('click', function (evt) {

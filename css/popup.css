@@ -1,15 +1,16 @@
 body {
   padding: .08rem .08rem;
 }
-.engines { min-width:2.8rem;}
+.engines {
+  min-width:2.8rem;
+  margin: .08rem 0;
+}
 .engines ul {
   width: 1.30rem;
-  margin-right: .1rem;
+  margin: 0 0 .08rem;
   padding: .08rem;
   border: .02rem solid lightblue;
   border-radius: .04rem;
-  display: inline-block;
-  vertical-align: top;
   overflow-x: hidden;
   list-style-type: none;
 }

@@ -72,10 +72,14 @@ var Listener = (function () {
       Setting.set('version', manifest.version);
 
       Object.keys(CONFIG.engineTypes).forEach(function (typeId) {
-        EngineType.set(typeId, CONFIG.engineTypes[typeId]);
+        EngineType.set(typeId, CONFIG.engineTypes[typeId]).catch(function (err) {
+          clog.err('Error when init set engineTypes' + err);
+        });
       });
       Object.keys(CONFIG.engines).forEach(function (key) {
-        Engine.set(key, CONFIG.engines[key]);
+        Engine.set(key, CONFIG.engines[key]).catch(function (err) {
+          clog.err('Error when init set engines' + err);
+        });
       });
       Setting.set('cfg_remove_redirect', true);
       if (!CONFIG.devMode) {
