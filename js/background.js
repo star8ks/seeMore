@@ -14,7 +14,7 @@ var Listener = (function () {
       var tabUrl = new Url(tab.url);
       if(!engine.hosts.includes(tabUrl.host.toLowerCase())
         || (!tabUrl.includes('url?') && !tabUrl.includes('imgres?'))) {
-        clog('Not a valid google redirect url', tab.url);
+        // clog('Not a valid google redirect url', tab.url);
         return;
       }
 
