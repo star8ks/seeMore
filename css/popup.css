@@ -2,14 +2,14 @@ body {
   padding: .08rem .08rem;
 }
 .engines {
-  min-width:2.8rem;
+  min-width:2.66rem;
   margin: .08rem 0;
 }
 .engines ul {
   width: 1.30rem;
-  margin: 0 0 .08rem;
+  margin: 0 .04rem .08rem 0;
   padding: .08rem;
-  border: .02rem solid lightblue;
+  border: .01rem solid lightblue;
   border-radius: .04rem;
   overflow-x: hidden;
   list-style-type: none;
