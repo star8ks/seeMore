@@ -20,7 +20,7 @@ var Mason = (function() {
     this.$items = this.$container.querySelectorAll(this.itemSelector);
     this.columnNum = option.columnNum;
     this.colHeightArr = new Array(option.columnNum).fill(0);
-    this.columnWidth = option.columnWidth;
+    this.columnWidth = option.columnWidth ? option.columnWidth : getRealWidth(this.$items[0]);
     // @TODO add container's max height option
     // this.containerMaxHeight = option.containerMaxHeight ? option.containerMaxHeight : window.document.body.scrollHeight;
     this.renderAll();
@@ -56,6 +56,12 @@ var Mason = (function() {
       throw new Error('Error: element have no style named ' + property);
     }
     return parseFloat(style[property].slice(0, -2));
+  }
+
+  function getRealWidth($el) {
+    var marginLeft = getComputedVal($el, 'marginLeft');
+    var marginRight = getComputedVal($el, 'marginRight');
+    return $el.offsetWidth + marginLeft + marginRight;
   }
 
   function getRealHeight($el) {
