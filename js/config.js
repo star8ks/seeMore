@@ -18,7 +18,7 @@ var CONFIG = {
   engines: {
     // Search engines
     google: {
-      order: 1,
+      order: 100,
       typeId: 101,
       defaultTypeId: 1,
       displayName: 'Google',
@@ -225,7 +225,7 @@ var CONFIG = {
       url: 'https://www.google.com.hk/search?q=%s'
     },
     aol: {
-      order: 4,
+      order: 400,
       typeId: 101,
       defaultTypeId: 1,
       displayName: 'Aol Search',
@@ -234,7 +234,7 @@ var CONFIG = {
       url: 'http://www.aolsearch.com/search?q=%s'
     },
     baidu: {
-      order: 2,
+      order: 200,
       typeId: 101,
       defaultTypeId: 1,
       displayName: 'Baidu',
@@ -243,7 +243,7 @@ var CONFIG = {
       url: 'https://www.baidu.com/s?wd=%s'
     },
     bing: {
-      order: 3,
+      order: 300,
       typeId: 101,
       defaultTypeId: 1,
       displayName: 'Bing',
@@ -254,7 +254,7 @@ var CONFIG = {
       url: 'https://cn.bing.com/search?q=%s'
     },
     yahoo: {
-      order: 5,
+      order: 500,
       typeId: 101,
       defaultTypeId: 1,
       displayName: 'Yahoo',
@@ -265,7 +265,7 @@ var CONFIG = {
       url: 'https://search.yahoo.com/search?p=%s'
     },
     sogou: {
-      order: 6,
+      order: 600,
       typeId: 101,
       defaultTypeId: 1,
       displayName: 'Sogou',
@@ -274,7 +274,7 @@ var CONFIG = {
       url: 'https://www.sogou.com/web?query=%s'
     },
     360: {
-      order: 7,
+      order: 700,
       typeId: 101,
       defaultTypeId: 1,
       displayName: '360',
@@ -283,7 +283,7 @@ var CONFIG = {
       url: 'https://www.so.com/s?q=%s'
     },
     duck: {
-      order: 8,
+      order: 800,
       typeId: 101,
       defaultTypeId: 1,
       displayName: 'DuckDuckGo',
@@ -293,16 +293,16 @@ var CONFIG = {
     },
     // Movie, Video, Sub
     doubanMovie: {
-      order: 9,
+      order: 900,
       typeId: 102,
       defaultTypeId: 2,
-      displayName: 'douban movie',
+      displayName: '豆瓣电影',
       open: true,
       hosts: ['movie.douban.com'],
       url: 'https://movie.douban.com/subject_search?search_text=%s'
     },
     RARBG: {
-      order: 10,
+      order: 1000,
       typeId: 102,
       defaultTypeId: 8,
       displayName: 'RARBG',
@@ -311,7 +311,7 @@ var CONFIG = {
       url: 'https://rarbg.to/torrents.php?search=%s'
     },
     AcFun: {
-      order: 11,
+      order: 1100,
       typeId: 102,
       defaultTypeId: 2,
       displayName: 'AcFun',
@@ -320,7 +320,7 @@ var CONFIG = {
       url: 'http://www.acfun.tv/search/#query=%s'
     },
     bilibili: {
-      order: 12,
+      order: 1200,
       typeId: 102,
       defaultTypeId: 2,
       displayName: 'bilibili',
@@ -329,16 +329,16 @@ var CONFIG = {
       url: 'http://search.bilibili.com/all?keyword=%s'
     },
     tencentVideo: {
-      order: 13,
+      order: 1300,
       typeId: 102,
       defaultTypeId: 2,
-      displayName: 'Tencent Video',
+      displayName: '腾讯视频',
       open: true,
       hosts: ['v.qq.com'],
       url: 'http://v.qq.com/x/search/?q=%s'
     },
     youtube: {
-      order: 14,
+      order: 1400,
       typeId: 102,
       defaultTypeId: 2,
       displayName: 'YouTube',
@@ -347,7 +347,7 @@ var CONFIG = {
       url: 'https://www.youtube.com/results?search_query=%s'
     },
     subHD: {
-      order: 15,
+      order: 1500,
       typeId: 102,
       defaultTypeId: 7,
       displayName: 'Sub HD',
@@ -356,7 +356,7 @@ var CONFIG = {
       url: 'http://subhd.com/search/%s'
     },
     zimuku: {
-      order: 16,
+      order: 1600,
       typeId: 102,
       defaultTypeId: 7,
       displayName: 'zimuku',
@@ -366,16 +366,34 @@ var CONFIG = {
     },
     // Dictionary
     iciba: {
-      order: 17,
+      order: 1700,
       typeId: 103,
       defaultTypeId: 3,
-      displayName: 'iciba',
+      displayName: '爱词霸',
       open: true,
       hosts: ['www.iciba.com'],
       url: 'http://www.iciba.com/%s'
     },
+    youdaoTranslate: {
+      order: 1710,
+      typeId: 103,
+      defaultTypeId: 3,
+      displayName: '有道翻译',
+      open: false,
+      hosts: ['fanyi.youdao.com'],
+      url: 'http://fanyi.youdao.com/translate?i=%s'
+    },
+    youdaoDict: {
+      order: 1720,
+      typeId: 103,
+      defaultTypeId: 3,
+      displayName: '有道词典',
+      open: true,
+      hosts: ['dict.youdao.com'],
+      url: 'http://dict.youdao.com/w/%s'
+    },
     zdic: {
-      order: 17,
+      order: 1750,
       typeId: 103,
       defaultTypeId: 3,
       displayName: '汉典',
@@ -385,7 +403,7 @@ var CONFIG = {
     },
     // EBook
     readFree: {
-      order: 18,
+      order: 1800,
       typeId: 104,
       defaultTypeId: 4,
       displayName: 'readFree',
@@ -394,7 +412,7 @@ var CONFIG = {
       url: 'http://readfree.me/search/?q=%s'
     },
     ITeBooks: {
-      order: 19,
+      order: 1900,
       typeId: 104,
       defaultTypeId: 4,
       displayName: 'IT eBooks',
@@ -404,7 +422,7 @@ var CONFIG = {
     },
     // Development
     explainShell: {
-      order: 20,
+      order: 2000,
       typeId: 105,
       defaultTypeId: 6,
       displayName: 'explainShell',
@@ -413,7 +431,7 @@ var CONFIG = {
       url: 'http://explainshell.com/explain?cmd=%s'
     },
     mdn: {
-      order: 21,
+      order: 2100,
       typeId: 105,
       defaultTypeId: 6,
       displayName: 'MDN',
@@ -422,7 +440,7 @@ var CONFIG = {
       url: 'https://developer.mozilla.org/search?q=%s'
     },
     gitHub: {
-      order: 22,
+      order: 2200,
       typeId: 105,
       defaultTypeId: 6,
       displayName: 'GitHub',
@@ -430,8 +448,17 @@ var CONFIG = {
       hosts: ['github.com'],
       url: 'https://github.com/search?utf8=%E2%9C%93&q=%s'
     },
+    htmlPreview: {
+      order: 2300,
+      typeId: 105,
+      defaultTypeId: 6,
+      displayName: 'HTMLPreview',
+      open: true,
+      hosts: ['htmlpreview.github.io'],
+      url: 'htmlpreview.github.io/?%s'
+    },
     devDocs: {
-      order: 23,
+      order: 2400,
       typeId: 105,
       defaultTypeId: 6,
       displayName: 'DevDocs',
@@ -440,7 +467,7 @@ var CONFIG = {
       url: 'http://devdocs.io/#q=%s'
     },
     stackoverflow: {
-      order: 24,
+      order: 2500,
       typeId: 105,
       defaultTypeId: 6,
       displayName: 'stackoverflow',
@@ -450,43 +477,43 @@ var CONFIG = {
     },
     //Shopping
     etao: {
-      order: 25,
+      order: 2600,
       typeId: 106,
-      defaultTypeId: 6,
+      defaultTypeId: 5,
       displayName: 'etao',
       open: false,
       hosts: ['s.etao.com'],
       url: 'http://s.etao.com/search?q=%s'
     },
     tmall: {
-      order: 26,
+      order: 2700,
       typeId: 106,
-      defaultTypeId: 6,
+      defaultTypeId: 5,
       displayName: '天猫',
       open: true,
       hosts: ['list.tmall.com'],
       url: 'https://list.tmall.com/search_product.htm?q=%s'
     },
     jd: {
-      order: 27,
+      order: 2800,
       typeId: 106,
-      defaultTypeId: 6,
+      defaultTypeId: 5,
       displayName: '京东',
       open: true,
       hosts: ['search.jd.com'],
       url: 'http://search.jd.com/Search?keyword=%s&enc=utf-8'
     },
     amazon: {
-      order: 28,
+      order: 2900,
       typeId: 106,
-      defaultTypeId: 6,
+      defaultTypeId: 5,
       displayName: '亚马逊',
       open: true,
       hosts: ['list.tmall.com'],
       url: 'https://www.amazon.cn/s/?field-keywords=%s'
     },
     taobao: {
-      order: 29,
+      order: 3000,
       typeId: 106,
       defaultTypeId: 6,
       displayName: '淘宝',
