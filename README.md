@@ -1,13 +1,28 @@
-## 搜索拐杖
-搜索拐杖（SearchCrutch），基于[Google搜索拐杖](http://www.kkksou.com/product/gc.html)修改而来，可以在搜索关键词不重输的情况下切换Google，百度，必应等等搜索引擎。
+## SeeMore
+`SeeMore` is search center for Chrome. You can
+1. Switch between search engines: search the keywords at other search engines or website like Google, DuckDuckGo, Amazon, *without retype keywords*.
+2. Select keywords and click `SeeMore` icon to see more at other websites or search engines.
+3. Add custom search engines and engine groups, list all engines by group.
+4. Skip Google redirect url, directly send you to destination.
 
-## 功能
-1. 使用 Google、百度、必应等等搜索时，显示切换搜索图标；
-2. 点击切换搜索图标可切换 AOL Search/百度/必应/雅虎/搜狗/360搜索/自定义；
-3. 保持搜索关键词，无需重输；
-4. 支持略过 Google 跳转页直接访问目标页面；
-5. 支持自定义的搜索引擎切换；
-6. 可通过单击图标来切换搜索引擎(勾选“单击图标轮流切换搜索”选项)。
 
-## 安装地址：
-Chrome应用商店：[点击安装](https://chrome.google.com/webstore/detail/%E6%90%9C%E7%B4%A2%E6%8B%90%E6%9D%96/bgenmocoeejdpobiakjlppafcdimnfho?hl=zh-CN)
+## 搜索+
+`搜索+`（SeeMore），是一个 Chrome 的搜索增强插件。
+1. 自由切换搜索引擎：在*不重新输入*关键词的情况下在 Google，百度，淘宝，知乎等搜索引擎或网站搜索更多相关内容.
+2. 在任意页面*选中*关键词，点击`搜索+`图标，即可对选中词展开搜索。
+3. 添加*自定义*搜索引擎及分组，分组列出搜索引擎。
+4. 支持略过 Google 跳转页直接访问目标页面。
+
+## Install 安装
+Currently under development, you can load it to chrome at chrome://extensions/ . Check developer mode, and load the source directory.
+
+## TODO
+- Shortcut for SeeMore.
+- Intelligently get any page's keywords as search words.
+- Translate keywords.
+- Preview results in popup page.
+- Search local files， open directory.
+- Customize chrome new tab search engine and style.
+- Customize popup page.
+- Search history and bookmarks.
+- Support search engines need to POST keywords.
