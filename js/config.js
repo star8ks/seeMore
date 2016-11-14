@@ -455,7 +455,7 @@ var CONFIG = {
       displayName: 'HTMLPreview',
       open: true,
       hosts: ['htmlpreview.github.io'],
-      url: 'htmlpreview.github.io/?%s'
+      url: 'http://htmlpreview.github.io/?%s'
     },
     devDocs: {
       order: 2400,
