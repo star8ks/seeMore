@@ -1,8 +1,10 @@
 var CONFIG = {
+  selectionMaxLength: 200,
+  translateMaxLength: 80,
   engineTypes: {
     1: {name: 'Search Engine', order: 1, default: true},
     2: {name: 'Video', order: 2, default: true},
-    3: {name: 'Dictionary', order: 3, default: true},
+    3: {name: 'Translate', order: 3, default: true},
     4: {name: 'EBook', order: 4, default: true},
     5: {name: 'Shopping', order: 5, default: true},
     6: {name: 'Development', order: 6, default: true},
@@ -10,7 +12,7 @@ var CONFIG = {
     8: {name: 'Torrents', order: 8, default: true},
     101: {name: 'Search Engine', order: 1},
     102: {name: 'Video', order: 2},
-    103: {name: 'Dictionary', order: 3},
+    103: {name: 'Translate', order: 3},
     104: {name: 'EBook', order: 4},
     105: {name: 'Development', order: 5},
     106: {name: 'Shopping', order: 6}

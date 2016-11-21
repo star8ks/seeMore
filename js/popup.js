@@ -1,10 +1,40 @@
 ;(function () {
+  tjs.add(new tjs.BaiDu());
+  tjs.add(new tjs.Bing());
+  tjs.add(new tjs.Google())
+  tjs.add(new tjs.GoogleCN())
+  tjs.add(new tjs.YouDao({ apiKey: '1631498396', keyFrom: 'crx-translate7551' }));
+  function translate(str) {
+    // @TODO only translate some language, from user config
+    // @TODO not translate some language, from user config
+    // if(chrome.i18n.detect)
+    if(str.length > CONFIG.translateMaxLength) {
+      return Promise.reject('[Translation]trans string too long');
+    }
+
+    var lang = navigator.language.split('-', 1)[0];
+    return tjs.translate({
+      api: 'Google',
+      text: str,
+      to: lang === 'zh' ? navigator.language : lang
+    }).then(function (resultObj) {
+      return resultObj.detailed ? resultObj.detailed : resultObj.result;
+    }).then(function (translated) {
+      var html = '';
+      translated.forEach(function (line) {
+        html += line + '<br>';
+      });
+      return html;
+    });
+  }
+
   window.addEventListener("DOMContentLoaded", function onLoad() {
 
     chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
       var tab = tabs[0];
       var tabUrl = new Url(tab.url);
       var $keyword = util.$('#keyword');
+      var $translation = util.$('.translation');
 
       getSearchString().then(function (searchString) {
         clog('get searchString: ', searchString);
@@ -19,7 +49,10 @@
           chrome.tabs.executeScript({
             code: "window.getSelection().toString();"
           }, function (selection) {
-            resolve(selection ? selection[0] : '');
+            if(selection.length && selection[0].length <= CONFIG.selectionMaxLength) {
+              resolve(selection[0]);
+            }
+            resolve('');
           });
         });
 
@@ -46,16 +79,26 @@
       }
       function setKeywordInput(searchString) {
         $keyword.value = searchString;
-        $keyword.onkeyup = function (e) {
+        $keyword.onkeyup = util.debounce(function (e) {
           //if press enter, search word using first enabled engine
-          if(e.key == "Enter") {
+          if(e.key == 'Enter') {
             util.$('.se:not(.disable)').dispatchEvent(new MouseEvent(
               'click',
               {button:0}
             ));
           }
-        };
+          translate(this.value).then(function (html) {
+            $translation.innerHTML = html;
+          });
+        }, 500);
         $keyword.focus();
+
+        if($keyword.value) {
+          clog('trans', $keyword.value);
+          translate($keyword.value).then(function (html) {
+            $translation.innerHTML = html;
+          });
+        }
       }
 
       var engineListTpl = util.$('#tpl-engines').innerHTML.trim();

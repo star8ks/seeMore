@@ -86,6 +86,27 @@ var util = {
   $all: function (selector) {
     return document.querySelectorAll(selector);
   },
+
+  /**
+   * Returns a function, that, as long as it continues to be invoked, will not
+   * be triggered. The function will be called after it stops being called for
+   * `delay` milliseconds. If `atBegin` is passed, trigger the function on the
+   * leading edge, instead of the trailing.
+   * */
+  debounce: function(fn, delay, atBegin) {
+    var timeout;
+    return function(){
+      var that = this, args = arguments;
+      clearTimeout(timeout);
+      timeout = setTimeout(function () {
+        timeout = null;
+        if(!atBegin) fn.apply(that, args);
+      }, delay);
+      if(atBegin && !timeout) {
+        fn.apply(that, args);
+      }
+    };
+  },
   getMouseButton: function (evt) {
     // Handle different event models
     var e = evt || window.event;
