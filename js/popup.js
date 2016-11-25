@@ -1,9 +1,6 @@
 ;(function () {
   tjs.add(new tjs.BaiDu());
-  tjs.add(new tjs.Bing());
-  tjs.add(new tjs.Google())
-  tjs.add(new tjs.GoogleCN())
-  tjs.add(new tjs.YouDao({ apiKey: '1631498396', keyFrom: 'crx-translate7551' }));
+  tjs.add(new tjs.Google());
   function translate(str) {
     // @TODO only translate some language, from user config
     // @TODO not translate some language, from user config
@@ -14,17 +11,20 @@
 
     var lang = navigator.language.split('-', 1)[0];
     return tjs.translate({
-      api: 'Google',
+      api: navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
       text: str,
       to: lang === 'zh' ? navigator.language : lang
-    }).then(function (resultObj) {
-      return resultObj.detailed ? resultObj.detailed : resultObj.result;
+    }).then(function (resultObj, err) {
+      clog(resultObj, err);
+      if(resultObj.error) return null;
+      return resultObj.detailed || resultObj.result;
     }).then(function (translated) {
-      var html = '';
-      translated.forEach(function (line) {
+      return util.isEmpty(translated) ? '' : translated.filter(function (line) {
+        return line !== str;
+      }).reduce(function (html, line) {
         html += line + '<br>';
-      });
-      return html;
+        return html;
+      }, '');
     });
   }
 
@@ -35,6 +35,7 @@
       var tabUrl = new Url(tab.url);
       var $keyword = util.$('#keyword');
       var $translation = util.$('.translation');
+      var $links;
 
       getSearchString().then(function (searchString) {
         clog('get searchString: ', searchString);
@@ -46,10 +47,13 @@
           if(tabUrl.url.match(/^chrome/)){ // not support chrome pages now
             resolve('');
           }
+
+          // @TODO move it to contentScript.js
+          // @TODO don't block popup here
           chrome.tabs.executeScript({
             code: "window.getSelection().toString();"
           }, function (selection) {
-            if(selection.length && selection[0].length <= CONFIG.selectionMaxLength) {
+            if(!util.isEmpty(selection) && selection[0].length <= CONFIG.selectionMaxLength) {
               resolve(selection[0]);
             }
             resolve('');
@@ -87,6 +91,7 @@
               {button:0}
             ));
           }
+          updateLinkHref($links, this.value);
           translate(this.value).then(function (html) {
             $translation.innerHTML = html;
           });
@@ -105,16 +110,17 @@
       var $enginesSection = util.$('.engines');
       Render.openEngines(engineListTpl).then(function (rendered) {
         $enginesSection.innerHTML = rendered;
+        $links = util.$all('.engines .icon-link');
       }).then(function () {
         new Mason(util.$('.engines'), {
           itemSelector: '.pin',
           columnNum: 2
         });
-        setLinks();
+        setLinks($links);
       });
 
-      function setLinks() {
-        util.$all('.engines .icon-link').forEach(function ($link) {
+      function setLinks($links) {
+        $links.forEach(function ($link) {
           // set icons
           var index = $link.getAttribute('data-se');
 
@@ -141,6 +147,11 @@
         });
       }
 
+      function updateLinkHref($links, searchWord) {
+        $links.forEach(function ($link) {
+          $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
+        });
+      }
     });
 
   });

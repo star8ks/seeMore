@@ -21,7 +21,11 @@
   <ul class="pin">
     <li class="type unselectable"><span>{{typeName}}</span></li>
     {{#engines}}
-    <li><a class="se icon-link unselectable" data-se="{{index}}" data-favicon="{{favicon}}" href="">{{displayName}}</a></li>
+    <li><a class="se icon-link unselectable"
+      data-se="{{index}}"
+      data-favicon="{{favicon}}"
+      data-url="{{url}}"
+      href="">{{displayName}}</a></li>
     {{/engines}}
   </ul>
 </script>

@@ -88,7 +88,7 @@ var util = {
   },
 
   /**
-   * undefined, null, void 0, [], {},
+   * undefined, null, void 0, [], {}, ''
    * with .length === 0 is empty,
    * object without a own enumerable property is empty
    * @param Object obj

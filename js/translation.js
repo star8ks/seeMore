@@ -324,12 +324,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var from = queryObj.from
 
 	    if (from) {
-	      if (langResolve(from)) {
-	        resolve(from)
-	      } else {
-	        reject(null)
-	      }
-	      return
+	      return resolve(langResolve(from) ? from : null)
 	    }
 
 	    superagent
@@ -344,7 +339,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (lang) return resolve(lang)
 	        }
 
-	        reject(null)
+	        resolve(null)
 	      })
 	  })
 	}
@@ -357,7 +352,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	p.audio = function (queryObj) {
 	  return this
 	    .detect(queryObj)
-	    .then(function (lang) { return 'http://fanyi.baidu.com/gettts?lan=' + langResolve(lang) + '&text=' + queryObj.text + '&spd=2&source=web' })
+	    .then(function (lang) {
+	      if (!lang) return null
+	      var l = langResolve(lang)
+	      return l
+	        ? 'http://fanyi.baidu.com/gettts?lan=' + l + '&text=' + queryObj.text + '&spd=2&source=web'
+	        : null
+	    })
 	}
 
 	module.exports = BaiDu
@@ -529,7 +530,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (langTransform(from)) {
 	      resolve(from)
 	    } else {
-	      reject(null)
+	      resolve(null)
 	    }
 	  })
 	}
@@ -543,8 +544,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return this
 	    .detect(queryObj)
 	    .then(function (lang) {
+	      if (!lang) return null
 	      var l = langTransform(lang)
-	      return 'http://tts.youdao.com/fanyivoice?keyfrom=fanyi%2Eweb%2Eindex&le=' + l + '&word=' + queryObj.text
+	      return l
+	        ? 'http://tts.youdao.com/fanyivoice?keyfrom=fanyi%2Eweb%2Eindex&le=' + l + '&word=' + queryObj.text
+	        : null
 	    })
 	}
 
@@ -683,12 +687,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @returns {Promise}
 	 */
 	p.detect = function (queryObj) {
-	  return new Promise(function (resolve, reject) {
+	  return new Promise(function (resolve) {
 	    var from = queryObj.from
 	    if (langTransform(from)) {
 	      resolve(from)
 	    } else {
-	      reject(null)
+	      resolve(null)
 	    }
 	  })
 	}
@@ -698,7 +702,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @returns {Promise}
 	 */
 	p.audio = function () {
-	  return Promise.reject(null)
+	  return Promise.resolve(null)
 	}
 
 	module.exports = Bing
@@ -800,12 +804,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Google 翻译返回的数据结构
 	 * @typedef {Object} GoogleRes
 	 * @property {String} src - 原字符串语种，ISO839-1 格式，如果 queryObj dt 为空，则返回 json 只有这一个字段
-	 * @property {Object[]}= sentences
+	 * @property {Object[]} sentences
 	 * @property {{trans: String, orig: String, backend: Number}} sentences[0] trans:翻译结果，orig:被翻译的字符串
-	 * @property {{translit: String, src_translit: String}}= sentences[1] translit:翻译结果音标，src_translit:原字符串音标
-	 * @property {{pos: String, terms: String[], entry: Object[]}[]}= dict 查词结果，只有请求单个单词翻译时会有，
+	 * @property {{translit: String, src_translit: String}} sentences[1] translit:翻译结果音标，src_translit:原字符串音标
+	 * @property {{pos: String, terms: String[], entry: Object[]}[]} dict 查词结果，只有请求单个单词翻译时会有，
 	 * 中翻英经常有，小语种经常没有 pos:词性 terms:词语列表 entry:对每个词的详解
-	 * @property {{srclangs: String[], srclangs_confidences: Number[], extended_srclangs: String[]}}= ld_result
+	 * @property {{srclangs: String[], srclangs_confidences: Number[], extended_srclangs: String[]}} ld_result
 	 */
 	/**
 	 * 将谷歌翻译的数据转换为统一格式
@@ -861,12 +865,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	p.detect = function (queryObj) {
 	  var from = queryObj.from
 	  if (from) {
-	    return (supportedLang.indexOf(from) > -1) ? Promise.resolve(from) : Promise.reject(null)
+	    return (supportedLang.indexOf(from) > -1) ? Promise.resolve(from) : Promise.resolve(null)
 	  }
 
 	  return this.translate(queryObj)
 	    .then(function (result) {
-	      return result.from
+	      return result.from ? Promise.resolve(result.from) : Promise.resolve(null)
 	    })
 	}
 
@@ -879,8 +883,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var that = this
 	  return this.detect(queryObj)
 	    .then(function (lang) {
-	      return encodeURI(that.audioRoot + '?ie=UTF-8&q=' +
-	        encodeURIComponent(queryObj.text) + '&tl=' + lang + '&client=gtx')
+	      return supportedLang.indexOf(lang) > -1
+	        ? that.audioRoot + '?ie=UTF-8&q=' + encodeURIComponent(queryObj.text) + '&tl=' + lang + '&client=gtx'
+	        : null
 	    })
 	}
 
