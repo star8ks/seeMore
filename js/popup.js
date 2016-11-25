@@ -83,7 +83,7 @@
       }
       function setKeywordInput(searchString) {
         $keyword.value = searchString;
-        $keyword.onkeyup = util.debounce(function (e) {
+        $keyword.oninput = util.debounce(function (e) {
           //if press enter, search word using first enabled engine
           if(e.key == 'Enter') {
             util.$('.se:not(.disable)').dispatchEvent(new MouseEvent(
