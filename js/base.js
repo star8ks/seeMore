@@ -88,6 +88,19 @@ var util = {
   },
 
   /**
+   * undefined, null, void 0, [], {},
+   * with .length === 0 is empty,
+   * object without a own enumerable property is empty
+   * @param Object obj
+   * @return Boolean
+   */
+  isEmpty: function(obj) {
+    if(obj == null) return true
+    if(obj.length !== undefined) return obj.length === 0
+    return Object.keys(obj).length === 0
+  },
+
+  /**
    * Returns a function, that, as long as it continues to be invoked, will not
    * be triggered. The function will be called after it stops being called for
    * `delay` milliseconds. If `atBegin` is passed, trigger the function on the
