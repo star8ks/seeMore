@@ -18,6 +18,7 @@
       var $links;
 
       getSearchString().then(function (searchString) {
+        searchString = searchString.trim();
         clog('get searchString: ', searchString);
         setKeywordInput(searchString);
         searchString && updateLinkHref($links, searchString);
@@ -55,7 +56,7 @@
           return resultObj.detailed || resultObj.result;
         }).then(function (translated) {
           return util.isEmpty(translated) ? '' : translated.filter(function (line) {
-            return line !== str;
+            return line.toLowerCase() !== str.toLowerCase();
           }).reduce(function (html, line) {
             html += line + '<br>';
             return html;
@@ -75,7 +76,7 @@
             code: "window.getSelection().toString();"
           }, function (selection) {
             if(!util.isEmpty(selection) && selection[0].length <= CONFIG.selectionMaxLength) {
-              resolve(selection[0].trim());
+              resolve(selection[0]);
             }
             resolve('');
           });
@@ -83,10 +84,10 @@
 
         // get search string from url param
         return  getSelectionP.then(function (str) {
-          return str ? str : getSearchString(tabUrl);
+          return str ? str : getQueryString(tabUrl);
         });
 
-        function getSearchString(tabUrl) {
+        function getQueryString(tabUrl) {
           if(Url.googleFailedUrlPattern.test(tabUrl.url)) {
             tabUrl = new Url(decodeURIComponent(tabUrl.getQueryVal('continue')));
           }
@@ -97,7 +98,7 @@
             return Engine.get(keys[0]).then(function (engine) {
               var searchKey = (new Url(engine.url)).searchKey;
               var searchString = tabUrl.getQueryVal(searchKey);
-              searchString = searchString ? searchString[0].trim() : '';
+              searchString = searchString ? searchString : '';
               return decodeURIComponent(searchString || '');
             });
           })
