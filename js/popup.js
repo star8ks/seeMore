@@ -1,31 +1,11 @@
 ;(function () {
   tjs.add(new tjs.BaiDu());
   tjs.add(new tjs.Google());
-  function translate(str) {
-    // @TODO only translate some language, from user config
-    // @TODO not translate some language, from user config
-    // if(chrome.i18n.detect)
-    if(str.length > CONFIG.translateMaxLength) {
-      return Promise.reject('[Translation]trans string too long');
-    }
 
-    var lang = navigator.language.split('-', 1)[0];
-    return tjs.translate({
-      api: navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
-      text: str,
-      to: lang === 'zh' ? navigator.language : lang
-    }).then(function (resultObj, err) {
-      clog(resultObj, err);
-      if(resultObj.error) return null;
-      return resultObj.detailed || resultObj.result;
-    }).then(function (translated) {
-      return util.isEmpty(translated) ? '' : translated.filter(function (line) {
-        return line !== str;
-      }).reduce(function (html, line) {
-        html += line + '<br>';
-        return html;
-      }, '');
-    });
+  var popupErr = minErr('Popup');
+  function errorHandler(e) {
+    clog.err(e.toString());
+    clog.err('Error stack: ', e.stack);
   }
 
   window.addEventListener("DOMContentLoaded", function onLoad() {
@@ -40,7 +20,48 @@
       getSearchString().then(function (searchString) {
         clog('get searchString: ', searchString);
         setKeywordInput(searchString);
-      });
+        searchString && updateLinkHref($links, searchString);
+      }).catch(errorHandler);
+
+      var engineListTpl = util.$('#tpl-engines').innerHTML.trim();
+      var $enginesSection = util.$('.engines');
+      Render.openEngines(engineListTpl).then(function (rendered) {
+        $enginesSection.innerHTML = rendered;
+        $links = util.$all('.engines .icon-link');
+      }).then(function () {
+        new Mason(util.$('.engines'), {
+          itemSelector: '.pin',
+          columnNum: 2
+        });
+        setLinks($links);
+      }).catch(errorHandler);
+
+      function translate(str) {
+        // @TODO only translate some language, from user config
+        // @TODO not translate some language, from user config
+        // if(chrome.i18n.detect)
+        if(str.length > CONFIG.translateMaxLength) {
+          return Promise.reject('[Translation]trans string too long');
+        }
+
+        var lang = navigator.language.split('-', 1)[0];
+        return tjs.translate({
+          api: navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
+          text: str,
+          to: lang === 'zh' ? navigator.language : lang
+        }).then(function (resultObj, err) {
+          clog(resultObj, err);
+          if(resultObj.error) return null;
+          return resultObj.detailed || resultObj.result;
+        }).then(function (translated) {
+          return util.isEmpty(translated) ? '' : translated.filter(function (line) {
+            return line !== str;
+          }).reduce(function (html, line) {
+            html += line + '<br>';
+            return html;
+          }, '');
+        });
+      }
       function getSearchString() {
         // get search string from selected text
         var getSelectionP = new Promise(function (resolve) {
@@ -54,7 +75,7 @@
             code: "window.getSelection().toString();"
           }, function (selection) {
             if(!util.isEmpty(selection) && selection[0].length <= CONFIG.selectionMaxLength) {
-              resolve(selection[0]);
+              resolve(selection[0].trim());
             }
             resolve('');
           });
@@ -76,7 +97,8 @@
             return Engine.get(keys[0]).then(function (engine) {
               var searchKey = (new Url(engine.url)).searchKey;
               var searchString = tabUrl.getQueryVal(searchKey);
-              return decodeURIComponent(searchString ? searchString : '');
+              searchString = searchString ? searchString[0].trim() : '';
+              return decodeURIComponent(searchString || '');
             });
           })
         }
@@ -105,19 +127,6 @@
           });
         }
       }
-
-      var engineListTpl = util.$('#tpl-engines').innerHTML.trim();
-      var $enginesSection = util.$('.engines');
-      Render.openEngines(engineListTpl).then(function (rendered) {
-        $enginesSection.innerHTML = rendered;
-        $links = util.$all('.engines .icon-link');
-      }).then(function () {
-        new Mason(util.$('.engines'), {
-          itemSelector: '.pin',
-          columnNum: 2
-        });
-        setLinks($links);
-      });
 
       function setLinks($links) {
         $links.forEach(function ($link) {
@@ -148,6 +157,7 @@
       }
 
       function updateLinkHref($links, searchWord) {
+        if(!searchWord) return new popupErr('invalid param', 'updateLinkHref with empty string');
         $links.forEach(function ($link) {
           $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
         });
