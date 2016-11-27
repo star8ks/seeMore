@@ -88,7 +88,21 @@ var util = {
   $all: function (selector) {
     return document.querySelectorAll(selector);
   },
-
+  onceLoaded: function (onLoad) {
+    return new Promise(function (resolve) {
+      window.addEventListener("DOMContentLoaded", function () {
+        resolve(onLoad());
+      });
+    });
+  },
+  getCurrentTab: function () {
+    return new Promise(function (resolve) {
+      chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+        var tab = tabs[0];
+        resolve(tab);
+      })
+    });
+  },
   /**
    * undefined, null, void 0, [], {}, ''
    * with .length === 0 is empty,

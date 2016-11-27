@@ -38,6 +38,14 @@ window.addEventListener("DOMContentLoaded", function () {
     util.$all('.icon-link').forEach(function ($link) {
       $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
     });
+    new Mason(util.$('.preview'), {
+      itemSelector: 'ul',
+      columnNum: 6
+    });
+    new Mason(util.$('.engines'), {
+      itemSelector: 'ul',
+      columnNum: 6
+    });
   }).catch(function (err) {
     clog.err('render failed ' + err);
   });
