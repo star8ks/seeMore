@@ -2,8 +2,8 @@
 `SeeMore` is search center for Chrome. You can
 
 1. Switch between search engines: search the keywords at other search engines or website like Google, DuckDuckGo, Amazon, *without retype keywords*.
-2. Select keywords and click `SeeMore` icon to see more at other websites or search engines.
-3. Translate keywords as soon as you click `SeeMore` icon. 
+2. Select keywords on any webpage, then click `SeeMore` button to see more at other websites or search engines.
+3. Translate keywords as soon as you click `SeeMore` button. 
 3. Add custom search engines and engine groups, list all engines by group.
 4. Skip Google redirect url, directly send you to destination.
 
