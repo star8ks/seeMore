@@ -107,13 +107,13 @@ var util = {
    * undefined, null, void 0, [], {}, ''
    * with .length === 0 is empty,
    * object without a own enumerable property is empty
-   * @param Object obj
    * @return Boolean
+   * @param {Object} obj
    */
   isEmpty: function (obj) {
-    if (obj == null) return true
-    if (obj.length !== undefined) return obj.length === 0
-    return Object.keys(obj).length === 0
+    if (obj == null) return true;
+    if (obj.length !== undefined) return obj.length === 0;
+    return Object.keys(obj).length === 0;
   },
 
   /**

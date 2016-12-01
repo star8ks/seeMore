@@ -5,12 +5,7 @@
   "homepage_url": "http://xuhehuan.com/2272.html",
   "background": {
     "scripts": [
-      "vendor/bluebird/bluebird.min.js",
-      "vendor/localforage/localforage.nopromises.min.js",
-      "js/config.js",
-      "js/base.js",
-      "js/DB.js",
-      "js/Url.js",
+      "js/common.js",
       "js/background.js"
     ]
   },

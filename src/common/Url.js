@@ -89,3 +89,5 @@ var Url = (function () {
   };
   return Url;
 })();
+
+export default Url;

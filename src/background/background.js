@@ -1,5 +1,11 @@
-(function () {
-'use strict';
+import CONFIG from "../common/config.js";
+import "../common/base.js";
+import Engine from "../common/db/Engine.js";
+import EngineType from "../common/db/EngineType.js";
+import Setting from "../common/db/Setting.js";
+import Icon from "../common/db/Icon.js";
+import Url from "../common/Url.js";
+
 var Listener = (function () {
 
   function removeRedirect(tab) {
@@ -98,4 +104,3 @@ chrome.tabs.onCreated.addListener(Listener.onTabCreated);
 chrome.tabs.onUpdated.addListener(Listener.onTabUpdated);
 
 // @TODO 兼容旧版本数据
-})();

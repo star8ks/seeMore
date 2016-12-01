@@ -1,4 +1,4 @@
-var CONFIG = {
+const CONFIG = {
   selectionMaxLength: 200,
   translateMaxLength: 80,
   engineTypes: {
@@ -526,3 +526,5 @@ var CONFIG = {
   },
   devMode: true
 };
+
+export default CONFIG;
