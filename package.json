@@ -1,22 +1,33 @@
 {
   "name": "search-crutch",
   "version": "1.0.0",
-  "description": "搜索拐杖（SearchCrutch），基于[Google搜索拐杖](http://www.kkksou.com/product/gc.html)修改而来，可以在搜索关键词不重输的情况下切换Google，百度，必应等等搜索引擎。",
+  "description": "搜索+(SeeMore)，Chrome 的搜索增强插件",
   "main": "index.js",
   "scripts": {
+    "build": "webpack --config tool/webpack.build.config.js",
+    "lint": "",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://git.coding.net/ray/SearchCrutch.git"
+    "url": "https://github.com/ray7551/seeMore"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "bower-installer": "^1.2.0",
+    "clean-webpack-plugin": "^0.1.14",
+    "copy-webpack-plugin": "^4.0.1",
+    "html-webpack-plugin": "^2.24.1",
     "jasmine": "^2.5.2",
     "karma": "^1.3.0",
     "karma-chrome-launcher": "^2.0.0",
-    "karma-jasmine": "^1.0.2"
+    "karma-jasmine": "^1.0.2",
+    "webpack": "^1.13.3"
+  },
+  "dependencies": {
+    "bluebird": "^3.4.6",
+    "localforage": "^1.4.3",
+    "mustache": "^2.3.0",
+    "superagent": "^3.1.0"
   }
 }
