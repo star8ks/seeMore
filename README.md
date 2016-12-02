@@ -1,5 +1,5 @@
 ## SeeMore
-`SeeMore` is search center for Chrome. You can
+`SeeMore` is a search enhance extension for browser. You can
 
 1. Switch between search engines: search the keywords at other search engines or website like Google, DuckDuckGo, Amazon, *without retype keywords*.
 2. Select keywords on any webpage, then click `SeeMore` button to see more at other websites or search engines.
@@ -9,7 +9,7 @@
 
 
 ## 搜索+
-`搜索+`（SeeMore），是一个 Chrome 的搜索增强插件。
+`搜索+`（SeeMore），是一个浏览器搜索增强插件。
 
 1. 自由切换搜索引擎：在*不重新输入*关键词的情况下在 Google，百度，淘宝，知乎等搜索引擎或网站搜索更多相关内容.
 2. 在任意页面*选中*关键词，点击`搜索+`图标，即可对选中词展开搜索。
