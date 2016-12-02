@@ -1,8 +1,8 @@
 ﻿{
-  "name": "搜索拐杖",
+  "name": "搜索+(SeeMore)",
   "version": "3.95",
-  "description": "在 Google，百度，必应等等搜索引擎间进行快捷切换，搜索关键词无需重输！",
-  "homepage_url": "http://xuhehuan.com/2272.html",
+  "description": "浏览器的搜索增强插件。A browser search enhance extension.",
+  "homepage_url": "https://github.com/ray7551/seeMore",
   "background": {
     "scripts": [
       "js/common.js",
@@ -15,7 +15,7 @@
       "19": "img/icon-19.png",
       "38": "img/icon-38.png"
     },
-    "default_title": "搜索拐杖",
+    "default_title": "SeeMore",
     "default_popup": "popup.html"
   },
   "permissions": [
