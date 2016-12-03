@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+<link href="css/popup.css" rel="stylesheet"></head>
+
+<body>
+<input id="keyword" type="text" placeholder="请输入关键词">
+<section class="translation">
+
+</section>
+<section class="engines">
+</section>
+<hr>
+<a href="setting.html" class="setting icon-link" target="_blank">设置</a>
+
+<script id="tpl-engines" type="x-tmpl-mustache">
+  <ul class="pin">
+    <li class="type unselectable"><span>{{typeName}}</span></li>
+    {{#engines}}
+    <li><a class="se icon-link unselectable"
+      data-se="{{index}}"
+      data-favicon="{{favicon}}"
+      data-url="{{url}}"
+      href="">{{displayName}}</a></li>
+    {{/engines}}
+  </ul>
+</script>
+
+<script type="text/javascript" src="js/manifest.js"></script><script type="text/javascript" src="js/common.js"></script><script type="text/javascript" src="js/popup.js"></script></body>
+
+</html>

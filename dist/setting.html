@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>搜索拐杖 - 设置</title>
+  <meta charset="utf-8">
+<link href="css/setting.css" rel="stylesheet"></head>
+
+<body>
+  <div class="content">
+    <div class="heading">
+      <img src='icon-48.png' />
+      <h1>搜索拐杖 - 设置</h1>
+    </div>
+
+    <div class="options clearfix">
+      <p>
+        Google不通时，快捷切换其他搜索！<br>
+        <strong>只显示我想切换的搜索引擎：</strong>
+      </p>
+
+      <div class="preview">
+      </div>
+
+      <p>
+        <strong>所有备选搜索引擎：</strong>
+      </p>
+      <div class="engines">
+      </div>
+
+      <p style="margin-top:5px;">其它选项：</p>
+      <label>
+        <input type="checkbox" id="cfg_remove_redirect"/>略过 Google 跳转页直接访问目标页
+      </label>
+      <!--<label>-->
+        <!--<input type="checkbox" name="cfg_auto_keyword">智能获取页面关键词-->
+      <!--</label>-->
+      <!--<label>-->
+        <!--<input type="checkbox" name="cfg_auto_keyword">英文词自动翻译-->
+      <!--</label>-->
+
+
+      <!--<p style="margin-top:5px;">-->
+        <!--自定义搜索：<a href="http://xuhehuan.com/2272.html#CustomSearch" target="_blank" title="如何配置？">(?)</a>-->
+      <!--</p>-->
+
+      <!--<table>-->
+        <!--<tr>-->
+          <!--<td><input type="text" id="custom_name" /></td>-->
+          <!--<td><input type="text" id="custom_search" /></td>-->
+          <!--<td><button class="add_search">+</button></td>-->
+        <!--</tr>-->
+      <!--</table>-->
+
+    </div>
+
+    <p class="about">
+      反馈建议：请在<a href="https://github.com/ray7551/seeMore/issues" target="_blank">搜索+</a>留言，<br>作者：<a href="mailto:ray7551@gmail.com" target="_blank">ray7551</a>
+    </p>
+  </div>
+
+  <script id="tpl-engines" type="x-tmpl-mustache">
+    <ul>
+      <li class="se unselectable head"><span>{{typeName}}</span><i class=""></i></li>
+      {{#engines}}
+      <li class="se unselectable icon-link" data-se="{{index}}" data-favicon="{{favicon}}">{{displayName}}</li>
+      {{/engines}}
+    </ul>
+  </script>
+
+<script type="text/javascript" src="js/manifest.js"></script><script type="text/javascript" src="js/common.js"></script><script type="text/javascript" src="js/setting.js"></script></body>
+</html>
