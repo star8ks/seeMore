@@ -170,8 +170,6 @@ webpackJsonp([1,4],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	__webpack_require__("//Fk").default = __webpack_require__("0Qa9");
-
 	_translation2.default.add(new _translation2.default.BaiDu());
 	_translation2.default.add(new _translation2.default.Google());
 

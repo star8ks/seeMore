@@ -1,5 +1,3 @@
-require('babel-runtime/core-js/promise').default = require('bluebird');
-
 import tjs from './translation';
 import CONFIG from '../common/config';
 import {clog, util, minErr} from "../common/base.js";
