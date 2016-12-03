@@ -1,5 +1,5 @@
 import CONFIG from "../common/config.js";
-import "../common/base.js";
+import {clog} from "../common/base.js";
 import Engine from "../common/db/Engine.js";
 import EngineType from "../common/db/EngineType.js";
 import Setting from "../common/db/Setting.js";

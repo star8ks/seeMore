@@ -1,4 +1,4 @@
-var CONFIG = {
+const CONFIG = {
   engines: {
     google: {
       displayName: 'Google',
@@ -25,3 +25,5 @@ var CONFIG = {
   },
   devMode: true
 };
+
+export default CONFIG;

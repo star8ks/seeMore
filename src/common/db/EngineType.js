@@ -1,4 +1,5 @@
 import DB from './DB';
+import localforage from '../localforage-bluebird';
 
 let EngineType = new DB(localforage, 'engineType');
 EngineType.getAllDefault = function () {

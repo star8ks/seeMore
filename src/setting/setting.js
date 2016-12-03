@@ -1,4 +1,8 @@
-;(function () {
+import {clog, util} from "../common/base.js";
+import Setting from '../common/db/Setting';
+import Render from '../common/Render';
+import Mason from '../common/Mason';
+
 var option = (function (){
   // Restores select box state to saved value from db.
   function restore() {
@@ -55,5 +59,3 @@ window.addEventListener("DOMContentLoaded", function () {
   });
 
 });
-
-})();

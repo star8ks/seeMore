@@ -5,6 +5,7 @@
   "homepage_url": "https://github.com/ray7551/seeMore",
   "background": {
     "scripts": [
+      "js/manifest.js",
       "js/common.js",
       "js/background.js"
     ]

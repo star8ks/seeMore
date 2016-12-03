@@ -1,4 +1,5 @@
 import DB from './DB';
+import localforage from '../localforage-bluebird';
 
 let Engine = new DB(localforage, 'engine');
 Engine.set = function (key, engine) {

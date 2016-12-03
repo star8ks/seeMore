@@ -1,7 +1,6 @@
 /**
  * Created by ray7551@gmail.com on 16-10-27.
  */
-import {localforage} from 'localforage'
 
 /**
  * @param {LocalForage} localforage

@@ -21,9 +21,9 @@
 Currently under development, you can load it manually.
 
 1. Open chrome://extensions/
-2. Enable "Developer mode"
-3. Click "Load unpacked extension"
-4. Select the source directory.
+2. Enable 'Developer mode'
+3. Click 'Load unpacked extension'
+4. Select the 'dist' directory.
 
 ## TODO
 

@@ -1,0 +1,109 @@
+"use strict";
+const path = require('path');
+const webpack = require('webpack');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HashedModuleIdsPlugin = require('./HashedModuleIdsPlugin');
+const CommonsChunkPlugin = require("webpack/lib/optimize/CommonsChunkPlugin");
+
+function getBaseConfig(distDirectory) {
+  return {
+    debug: true,
+    watch: true,
+    entry: {
+      background: './src/background/',
+      setting: './src/setting/',
+      popup: './src/popup/'
+    },
+    output : {
+      // publicPath : 'chrome-extension://__MSG_@@extension_id__/bundle/' ,
+      filename : 'js/[name].js',
+      path: path.resolve('./' + distDirectory)
+    },
+    resolve: {
+      alias: { localforage: path.resolve('./node_modules/localforage/dist/localforage.nopromises.js') }
+    },
+    module: {
+      loaders: [{
+        test: /\.js$/,
+        // include: [
+        //   path.resolve(__dirname, '../src')
+        // ],
+        // exclude: /node_modules\/((?!localforage\/).)+/, // transform localforage
+        exclude: /node_modules/,
+        loader: 'babel-loader?cacheDirectory&presets[]=es2015'
+        // loader: 'babel-loader?cacheDirectory&presets[]=es2015&presets[]=stage-3'
+      }, {
+        test: /\.css$/, loader : ExtractTextPlugin.extract( 'style-loader' , 'css-loader?sourceMap' )
+      }, {
+        test: /\.html$/, loader: 'html-loader'
+      }, {
+        test : /\.(png|jpg|woff)$/ ,
+        loader : 'file-loader' ,
+        query : {
+          name : '[name].[ext]'
+        }
+      }, {
+        test: require.resolve('localforage'), loader: 'expose?localforage'
+      }]
+    },
+    postcss: function () {
+      return [require('autoprefixer')()]
+    },
+    plugins: [
+      new HashedModuleIdsPlugin(),
+      new CleanWebpackPlugin([distDirectory], {
+        root: path.resolve(__dirname, '../')
+      }),
+      /*new CommonsChunkPlugin({
+        name: 'vendor',
+        minChunks: function (module, count) {
+          // any required modules inside node_modules are extracted to vendor
+          return (
+            module.resource &&
+            /\.(js|css)$/.test(module.resource) &&
+            module.resource.indexOf(
+              path.join(__dirname, '../node_modules')
+            ) === 0
+          )
+        }
+      }),*/
+      new CommonsChunkPlugin({
+        name: 'common',
+        filename: 'js/common.js',
+        chunks: ['background', 'popup', 'setting']
+      }),
+      // extract webpack runtime and module manifest to its own file in order to
+      // prevent vendor hash from being updated whenever app bundle is updated
+      new CommonsChunkPlugin({
+        name: 'manifest',
+        // chunks: ['vendor']
+      }),
+      new HtmlWebpackPlugin({
+        filename: 'popup.html',
+        chunks: ['manifest', 'common', 'popup'],
+        // chunksSortMode: 'dependency',
+        template: './src/popup/popup.html'
+      }),
+      new HtmlWebpackPlugin({
+        filename: 'setting.html',
+        chunks: ['manifest', 'common', 'setting'],
+        // chunksSortMode: 'dependency',
+        template: './src/setting/setting.html'
+      }),
+      new CopyWebpackPlugin([{
+        from: 'src/manifest.json'
+      }]),
+      new CopyWebpackPlugin([{
+        from: 'img/icon-+(16|19|32|38|48|64|128).png',
+      }]),
+
+      new ExtractTextPlugin( 'css/[name].css' )
+    ]
+  };
+}
+
+let distDirectory = 'dist';
+module.exports = getBaseConfig(distDirectory);
