@@ -109,8 +109,10 @@ util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
   function getSearchString() {
     // get search string from selected text
     var getSelectionP = new Promise(function (resolve) {
-      if (tabUrl.url.match(/^chrome/)) { // not support chrome pages now
+      clog('current tab url: ', tabUrl.url);
+      if (tabUrl.url.match(/^chrome/)) { // chrome.tabs.executeScript not support chrome pages
         resolve('');
+        return;
       }
 
       // @TODO move it to contentScript.js

@@ -1,13 +1,15 @@
-webpackJsonp([0,4],{
+webpackJsonp([0,5],{
 
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
-	__webpack_require__("//Fk").default = __webpack_require__("0Qa9");
+	// require('babel-runtime/core-js/promise').default = require('bluebird');
+	global.Promise = __webpack_require__("qgje");
 
 	__webpack_require__("/FMp");
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 
@@ -15,14 +17,6 @@ webpackJsonp([0,4],{
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-
-	var _keys = __webpack_require__("fZjL");
-
-	var _keys2 = _interopRequireDefault(_keys);
-
-	var _promise = __webpack_require__("//Fk");
-
-	var _promise2 = _interopRequireDefault(_promise);
 
 	var _config = __webpack_require__("wYMm");
 
@@ -55,7 +49,7 @@ webpackJsonp([0,4],{
 	var Listener = function () {
 
 	  function removeRedirect(tab) {
-	    return _promise2.default.all([_Setting2.default.get('cfg_remove_redirect'), _Engine2.default.get('google')]).spread(function (removeRedirect, engine) {
+	    return Promise.all([_Setting2.default.get('cfg_remove_redirect'), _Engine2.default.get('google')]).spread(function (removeRedirect, engine) {
 	      if (!removeRedirect) {
 	        return;
 	      }
@@ -118,12 +112,12 @@ webpackJsonp([0,4],{
 	      var manifest = chrome.runtime.getManifest();
 	      _Setting2.default.set('version', manifest.version);
 
-	      (0, _keys2.default)(_config2.default.engineTypes).forEach(function (typeId) {
+	      Object.keys(_config2.default.engineTypes).forEach(function (typeId) {
 	        _EngineType2.default.set(typeId, _config2.default.engineTypes[typeId]).catch(function (err) {
 	          _base.clog.err('Error when init set engineTypes' + err);
 	        });
 	      });
-	      (0, _keys2.default)(_config2.default.engines).forEach(function (key) {
+	      Object.keys(_config2.default.engines).forEach(function (key) {
 	        _Engine2.default.set(key, _config2.default.engines[key]).catch(function (err) {
 	          _base.clog.err('Error when init set engines' + err);
 	        });
@@ -167,7 +161,7 @@ webpackJsonp([0,4],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var Setting = new _DB2.default(_localforageBluebird2.default, 'setting');
+	let Setting = new _DB2.default(_localforageBluebird2.default, 'setting');
 	exports.default = Setting;
 
 /***/ }
