@@ -108,8 +108,7 @@ util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
 
   function getSearchString() {
     // get search string from selected text
-    var getSelectionP = new Promise(function (resolve) {
-      clog('current tab url: ', tabUrl.url);
+    var getSelectionP = new Promise(function (resolve, reject) {
       if (tabUrl.url.match(/^chrome/)) { // chrome.tabs.executeScript not support chrome pages
         resolve('');
         return;
@@ -120,8 +119,13 @@ util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
       chrome.tabs.executeScript({
         code: "window.getSelection().toString();"
       }, function (selection) {
+        if(chrome.runtime.lastError) {
+          reject(new popupErr(chrome.runtime.lastError.message));
+          return;
+        }
         if (!util.isEmpty(selection) && selection[0].length <= CONFIG.selectionMaxLength) {
           resolve(selection[0]);
+          return;
         }
         resolve('');
       });
