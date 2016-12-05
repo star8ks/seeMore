@@ -8,6 +8,7 @@ import Mason from '../common/Mason';
 
 tjs.add(new tjs.BaiDu());
 tjs.add(new tjs.Google());
+if(CONFIG.devMode) tjs.add(new tjs.GoogleCN());
 
 var popupErr = minErr('Popup');
 
@@ -79,7 +80,11 @@ util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
     return null;
   }).catch(errorHandler);
 
+  /**
+   * @param {String} str
+   * */
   function translate(str) {
+    str = str.trim() || '';
     // @TODO only translate some language, from user config
     // @TODO not translate some language, from user config
     // if(chrome.i18n.detect)
@@ -89,7 +94,9 @@ util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
 
     var lang = navigator.language.split('-', 1)[0];
     return tjs.translate({
-      api: navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
+      api: CONFIG.devMode
+        ? 'GoogleCN'
+        : (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
       text: str,
       to: lang === 'zh' ? navigator.language : lang
     }).then(function (resultObj, err) {
@@ -106,8 +113,7 @@ util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
     });
   }
 
-  function getSearchString() {
-    // get search string from selected text
+  function getSearchString() {    // get search string from selected text
     var getSelectionP = new Promise(function (resolve, reject) {
       if (tabUrl.url.match(/^chrome/)) { // chrome.tabs.executeScript not support chrome pages
         resolve('');
@@ -124,7 +130,7 @@ util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
           return;
         }
         if (!util.isEmpty(selection) && selection[0].length <= CONFIG.selectionMaxLength) {
-          resolve(selection[0]);
+          resolve(selection[0].trim());
           return;
         }
         resolve('');

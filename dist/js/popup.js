@@ -58,6 +58,7 @@ webpackJsonp([1,5],{
 
 	_translation2.default.add(new _translation2.default.BaiDu());
 	_translation2.default.add(new _translation2.default.Google());
+	if (_config2.default.devMode) _translation2.default.add(new _translation2.default.GoogleCN());
 
 	var popupErr = (0, _base.minErr)('Popup');
 
@@ -129,7 +130,11 @@ webpackJsonp([1,5],{
 	    return null;
 	  }).catch(errorHandler);
 
+	  /**
+	   * @param {String} str
+	   * */
 	  function translate(str) {
+	    str = str.trim() || '';
 	    // @TODO only translate some language, from user config
 	    // @TODO not translate some language, from user config
 	    // if(chrome.i18n.detect)
@@ -139,7 +144,7 @@ webpackJsonp([1,5],{
 
 	    var lang = navigator.language.split('-', 1)[0];
 	    return _translation2.default.translate({
-	      api: navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
+	      api: _config2.default.devMode ? 'GoogleCN' : navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
 	      text: str,
 	      to: lang === 'zh' ? navigator.language : lang
 	    }).then(function (resultObj, err) {
@@ -158,8 +163,7 @@ webpackJsonp([1,5],{
 
 	  function getSearchString() {
 	    // get search string from selected text
-	    var getSelectionP = new Promise(function (resolve) {
-	      (0, _base.clog)('current tab url: ', tabUrl.url);
+	    var getSelectionP = new Promise(function (resolve, reject) {
 	      if (tabUrl.url.match(/^chrome/)) {
 	        // chrome.tabs.executeScript not support chrome pages
 	        resolve('');
@@ -171,8 +175,13 @@ webpackJsonp([1,5],{
 	      chrome.tabs.executeScript({
 	        code: "window.getSelection().toString();"
 	      }, function (selection) {
+	        if (chrome.runtime.lastError) {
+	          reject(new popupErr(chrome.runtime.lastError.message));
+	          return;
+	        }
 	        if (!_base.util.isEmpty(selection) && selection[0].length <= _config2.default.selectionMaxLength) {
-	          resolve(selection[0]);
+	          resolve(selection[0].trim());
+	          return;
 	        }
 	        resolve('');
 	      });
