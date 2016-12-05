@@ -17,34 +17,29 @@ function getBaseConfig(distDirectory) {
       setting: './src/setting/',
       popup: './src/popup/'
     },
-    output : {
+    output: {
       // publicPath : 'chrome-extension://__MSG_@@extension_id__/bundle/' ,
-      filename : 'js/[name].js',
+      filename: 'js/[name].js',
       path: path.resolve('./' + distDirectory)
     },
     resolve: {
       alias: {
         localforage: path.resolve('./node_modules/localforage/dist/localforage.nopromises.js'),
-        // bluebird: path.resolve('./node_modules/bluebird/js/browser/bluebird.js'),
-        // mustache: path.resolve('./node_modules/mustache/mustache.js'),
+        bluebird: path.resolve('./node_modules/bluebird/js/browser/bluebird.js'),
+        mustache: path.resolve('./node_modules/mustache/mustache.js'),
       }
     },
     module: {
       loaders: [{
         test: /\.js$/,
-        // exclude: /node_modules\/((?!localforage\/).)+/, // transform localforage
         exclude: /node_modules/,
         loader: 'babel-loader?cacheDirectory'// will use .babelrc config by default
-        // loader: 'babel-loader?cacheDirectory&presets[]=es2015&presets[]=stage-3',]
       }, {
-        test: /\.css$/, loader : ExtractTextPlugin.extract('style-loader', 'css-loader?sourceMap')
+        test: /\.css$/, loader: ExtractTextPlugin.extract('style-loader', 'css-loader?sourceMap!postcss-loader')
       }, {
-        test: /\.html$/, loader: 'html-loader?' + JSON.stringify({
+        test: /\.html$/, loader: 'html-loader?interpolate=require&' + JSON.stringify({
           attrs: ["img:src", "link:href"]
         })
-      }, {
-        test : /\.(png|jpg)$/ ,
-        loader : 'file-loader?name=img/[name].[ext]'
       }]
     },
     postcss: function () {
@@ -97,13 +92,14 @@ function getBaseConfig(distDirectory) {
         template: './src/setting/setting.html'
       }),
       new CopyWebpackPlugin([{
-        from: 'src/manifest.json'
-      }]),
-      new CopyWebpackPlugin([{
+        from: './*',
+        context: 'static'
+      }, {
         from: 'img/icon-+(16|19|32|38|48|64|128).png',
+        context: 'static'
       }]),
 
-      new ExtractTextPlugin( 'css/[name].css' )
+      new ExtractTextPlugin('css/[name].css')
     ]
   };
 }
