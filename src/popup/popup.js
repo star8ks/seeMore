@@ -1,10 +1,11 @@
+import _ from 'lodash';
 import tjs from './translation';
 import CONFIG from '../common/config';
-import {clog, util, minErr} from "../common/base.js";
+import {clog, $, $all, filterEmptyStr, onceLoaded, getCurrentTab, getMouseButton, minErr} from "../common/base";
 import Url from '../common/Url';
-import Engine from '../common/db/Engine';
 import Render from '../common/Render';
 import Mason from '../common/Mason';
+import getKeyword from './keyword';
 
 tjs.add(new tjs.BaiDu());
 tjs.add(new tjs.Google());
@@ -30,7 +31,7 @@ Links.prototype.init = function (tabId) {
     $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
 
     $link.onclick = function (evt) {
-      var button = util.getMouseButton(evt);
+      var button = getMouseButton(evt);
       switch (button) {
         case 'left':
           chrome.tabs.update(tabId, {url: this.href});
@@ -45,38 +46,51 @@ Links.prototype.init = function (tabId) {
     }
   });
 };
-
 Links.prototype.updateHref = function (searchWord) {
-  if (!searchWord) return new popupErr('invalid param', 'updateLinkHref with empty string');
+  if (!searchWord) return popupErr('invalid param', 'updateLinkHref with empty string');
   this.$links.forEach(function ($link) {
     $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
   });
 };
 
-util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
+onceLoaded(getCurrentTab).then(function onLoad(tab) {
   var tabUrl = new Url(tab.url);
-  var $keyword = util.$('#keyword');
-  var $translation = util.$('.translation');
+  var $keyword = $('#keyword');
+  var $translation = $('.translation');
   var links;
-  var engineListTpl = util.$('#tpl-engines').innerHTML.trim();
-  var $enginesSection = util.$('.engines');
+  var engineListTpl = $('#tpl-engines').innerHTML.trim();
+  var $enginesSection = $('.engines');
+
+  $keyword.focus();
+  $keyword.onkeypress = _.debounce(function (e) {
+    //if press enter, search word using first enabled engine
+    if(e.key === 'Enter') {
+      $('.se:not(.disable)').dispatchEvent(new MouseEvent(
+        'click',
+        {button: 0}
+      ));
+    }
+    onKeywordUpdate(this.value);
+  }, 500);
 
   Render.openEngines(engineListTpl).then(function (rendered) {
     $enginesSection.innerHTML = rendered;
-    links = new Links(util.$all('.engines .icon-link'));
+    links = new Links($all('.engines .icon-link'));
   }).then(function () {
-    new Mason(util.$('.engines'), {
+    new Mason($('.engines'), {
       itemSelector: '.pin',
       columnNum: 2
     });
     links.init(tab.id, $keyword.value);
   }).catch(errorHandler);
 
-  getSearchString().then(function (searchString) {
-    searchString = searchString.trim();
-    clog('get searchString: ', searchString);
-    setKeywordInput(searchString);
-    if (searchString && links) links.updateHref(searchString);
+  getKeyword(tabUrl).then(function (keywords) {
+    clog('get keywords: ', JSON.stringify(keywords));
+    var displayStr = keywords[0].word.trim();
+    // @TODO if input is not empty, cancel getKeyWord and don't change input and link
+    // @TODO add all keywords to auto-complete suggestion list
+    onKeywordUpdate(displayStr);
+    if (displayStr && links) links.updateHref(displayStr);
     return null;
   }).catch(errorHandler);
 
@@ -99,90 +113,28 @@ util.onceLoaded(util.getCurrentTab).then(function onLoad(tab) {
         : (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
       text: str,
       to: lang === 'zh' ? navigator.language : lang
-    }).then(function (resultObj, err) {
-      clog(resultObj, err);
+    }).then(function (resultObj) {
       if (resultObj.error) return null;
       return resultObj.detailed || resultObj.result;
     }).then(function (translated) {
-      return util.isEmpty(translated) ? '' : translated.filter(function (line) {
+      return _.isEmpty(filterEmptyStr(translated)) ? '' : translated.filter(function (line) {
         return line.toLowerCase() !== str.toLowerCase();
       }).reduce(function (html, line) {
-        html += line + '<br>';
+        html += line + '\n';
         return html;
       }, '');
     });
   }
 
-  function getSearchString() {    // get search string from selected text
-    var getSelectionP = new Promise(function (resolve, reject) {
-      if (tabUrl.url.match(/^chrome/)) { // chrome.tabs.executeScript not support chrome pages
-        resolve('');
-        return;
-      }
-
-      // @TODO move it to contentScript.js
-      // @TODO don't block popup here
-      chrome.tabs.executeScript({
-        code: "window.getSelection().toString();"
-      }, function (selection) {
-        if(chrome.runtime.lastError) {
-          reject(new popupErr(chrome.runtime.lastError.message));
-          return;
-        }
-        if (!util.isEmpty(selection) && selection[0].length <= CONFIG.selectionMaxLength) {
-          resolve(selection[0].trim());
-          return;
-        }
-        resolve('');
-      });
-    });
-
-    // get search string from url param
-    return getSelectionP.then(function (str) {
-      return str ? str : getQueryString(tabUrl);
-    });
-
-    function getQueryString(tabUrl) {
-      if (Url.googleFailedUrlPattern.test(tabUrl.url)) {
-        tabUrl = new Url(decodeURIComponent(tabUrl.getQueryVal('continue')));
-      }
-      return Engine.searchKeys(tabUrl.host).then(function (keys) {
-        if (keys.length <= 0) {
-          return '';
-        }
-        return Engine.get(keys[0]).then(function (engine) {
-          var searchKey = (new Url(engine.url)).searchKey;
-          var searchString = tabUrl.getQueryVal(searchKey);
-          searchString = searchString ? searchString : '';
-          return decodeURIComponent(searchString || '');
-        });
-      })
-    }
-  }
-
-  function setKeywordInput(searchString) {
+  function onKeywordUpdate(searchString) {
     if (searchString) {
       $keyword.value = searchString;
       clog('trans', $keyword.value);
       translate($keyword.value).then(function (html) {
-        $translation.innerHTML = html;
+        $translation.innerText = html;
       });
     }
-
-    $keyword.oninput = util.debounce(function (e) {
-      //if press enter, search word using first enabled engine
-      e.key === 'Enter' && util.$('.se:not(.disable)').dispatchEvent(new MouseEvent(
-        'click',
-        {button: 0}
-      ));
-
-      links && links.updateHref(this.value);
-      translate(this.value).then(function (html) {
-        $translation.innerHTML = html;
-      });
-    }, 500);
-    $keyword.focus();
-
+    links && links.updateHref(searchString);
   }
 
 });
