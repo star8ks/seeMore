@@ -52,18 +52,18 @@ webpackJsonp([2,5],{
 	  // Restores select box state to saved value from db.
 	  function restore() {
 	    _Setting2.default.get('cfg_remove_redirect').then(function (val) {
-	      _base.util.$('#cfg_remove_redirect').checked = val;
+	      (0, _base.$)('#cfg_remove_redirect').checked = val;
 	    });
 	  }
 
 	  function render() {
-	    var engineListTpl = _base.util.$('#tpl-engines').innerHTML.trim();
+	    var engineListTpl = (0, _base.$)('#tpl-engines').innerHTML.trim();
 
 	    var previewRender = _Render2.default.openEngines(engineListTpl).then(function (rendered) {
-	      _base.util.$('.preview').innerHTML = rendered;
+	      (0, _base.$)('.preview').innerHTML = rendered;
 	    });
 	    var defaultRender = _Render2.default.defaultEngines(engineListTpl).then(function (rendered) {
-	      _base.util.$('.engines').innerHTML = rendered;
+	      (0, _base.$)('.engines').innerHTML = rendered;
 	    });
 
 	    return Promise.all([previewRender, defaultRender]);
@@ -76,19 +76,19 @@ webpackJsonp([2,5],{
 	}();
 
 	window.addEventListener('DOMContentLoaded', function () {
-	  _base.util.$('.about').innerHTML += '&nbsp;v' + chrome.runtime.getManifest().version;
+	  (0, _base.$)('.about').innerHTML += '&nbsp;v' + chrome.runtime.getManifest().version;
 
 	  option.restore();
 	  option.render().then(function () {
 	    // set icons
-	    _base.util.$all('.icon-link').forEach(function ($link) {
+	    (0, _base.$all)('.icon-link').forEach(function ($link) {
 	      $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
 	    });
-	    new _Mason2.default(_base.util.$('.preview'), {
+	    new _Mason2.default((0, _base.$)('.preview'), {
 	      itemSelector: 'ul',
 	      columnNum: 6
 	    });
-	    new _Mason2.default(_base.util.$('.engines'), {
+	    new _Mason2.default((0, _base.$)('.engines'), {
 	      itemSelector: 'ul',
 	      columnNum: 6
 	    });
@@ -96,7 +96,7 @@ webpackJsonp([2,5],{
 	    _base.clog.err('render failed ' + err);
 	  });
 
-	  _base.util.$('#cfg_remove_redirect').addEventListener('click', function (evt) {
+	  (0, _base.$)('#cfg_remove_redirect').addEventListener('click', function (evt) {
 	    _Setting2.default.set('cfg_remove_redirect', evt.target.checked);
 	  });
 	});
