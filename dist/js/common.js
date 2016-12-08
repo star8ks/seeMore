@@ -119,13 +119,38 @@ webpackJsonp([4,5],{
 	          return !match ? '' : match[1];
 	        },
 	        enumerable: true
+	      },
+	      queryPairs: {
+	        get: function get() {
+	          var pairs = this.url.match(/([^#?&]+)=([^&]*)/g);
+	          return pairs ? pairs.map(function (pair) {
+	            var group = pair.split('=');
+	            return {
+	              key: group[0],
+	              val: decodeURIComponent(group[1])
+	            };
+	          }) : [];
+	        },
+	        enumerable: true
+	      },
+	      isNormal: {
+	        get: function get() {
+	          return Url.NORMAL_REGEX.test(this.url);
+	        },
+	        enumerable: true
+	      },
+	      isGoogleFail: {
+	        get: function get() {
+	          return Url.GOOGLE_FAILED_REGEX.test(this.url);
+	        },
+	        enumerable: true
 	      }
 	    });
 	  };
+	  Url.NORMAL_REGEX = /^https?:\/\//i;
 	  Url.FAVICON_URL_REGEX = /\.ico$/i;
-	  Url.googleFailedUrlPattern = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
+	  Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
 	  Url.prototype = {
-	    //@TODO add case sensitive option, and set insensitive default
 	    includes: function includes(search) {
 	      return this.url.includeString(search);
 	    },
@@ -573,14 +598,157 @@ webpackJsonp([4,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.minErr = exports.clog = exports.util = undefined;
+	exports.minErr = exports.clog = exports.includeString = exports.getMouseButton = exports.debounce = exports.filterEmptyStr = exports.isEmpty = exports.getCurrentTab = exports.onceLoaded = exports.$all = exports.$ = undefined;
 
-	var _config = __webpack_require__("wYMm");
+	var _includeString = __webpack_require__("zdlF");
 
-	var _config2 = _interopRequireDefault(_config);
+	var _includeString2 = _interopRequireDefault(_includeString);
+
+	var _minErr = __webpack_require__("iIaI");
+
+	var _minErr2 = _interopRequireDefault(_minErr);
+
+	var _clog = __webpack_require__("3JzL");
+
+	var _clog2 = _interopRequireDefault(_clog);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function $(selector) {
+	  return document.querySelector(selector);
+	}
+
+	function $all(selector) {
+	  return document.querySelectorAll(selector);
+	}
+
+	function onceLoaded(onLoad) {
+	  return new Promise(function (resolve) {
+	    window.addEventListener("DOMContentLoaded", function () {
+	      resolve(onLoad());
+	    });
+	  });
+	}
+
+	function getCurrentTab() {
+	  return new Promise(function (resolve) {
+	    chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+	      var tab = tabs[0];
+	      resolve(tab);
+	    });
+	  });
+	}
+
+	/**
+	 * undefined, null, void 0, [], {}
+	 * Object with .length === 0 is empty,
+	 * object without a own enumerable property is empty
+	 * @param {Object} obj
+	 * @param {Boolean} [emptyStrIsEmpty=false]
+	 * @param {Boolean} [zeroIsEmpty=false]
+	 * @return Boolean
+	 */
+	function isEmpty(obj, emptyStrIsEmpty = false, zeroIsEmpty = false) {
+	  if (obj == null) return true;
+	  if (obj === '') return emptyStrIsEmpty;
+	  if (obj === 0) return !!zeroIsEmpty;
+
+	  if (Array.isArray(obj)) {
+	    const filtered = obj.filter(item => !isEmpty(item));
+	    return filtered.length === 0;
+	  }
+	  if (obj.length !== undefined) return obj.length === 0;
+	  return Object.keys(obj).length === 0;
+	}
+
+	/**
+	 * @param {String|String[]} arr
+	 * trim every item of arr, and filter empty string
+	 * */
+	function filterEmptyStr(arr) {
+	  if (typeof arr === 'string') {
+	    return arr.trim();
+	  }
+	  return Array.isArray(arr) ? arr.map(str => filterEmptyStr(str)).filter(str => str) : [];
+	}
+
+	/**
+	 * Returns a function, that, as long as it continues to be invoked, will not
+	 * be triggered. The function will be called after it stops being called for
+	 * `delay` milliseconds. If `atBegin` is passed, trigger the function on the
+	 * leading edge, instead of the trailing.
+	 * */
+	function debounce(fn, delay, atBegin) {
+	  var timeout;
+	  return function () {
+	    var that = this,
+	        args = arguments;
+	    clearTimeout(timeout);
+	    timeout = setTimeout(function () {
+	      timeout = null;
+	      if (!atBegin) fn.apply(that, args);
+	    }, delay);
+	    if (atBegin && !timeout) {
+	      fn.apply(that, args);
+	    }
+	  };
+	}
+
+	function getMouseButton(evt) {
+	  // Handle different event models
+	  var e = evt || window.event;
+	  var btnCode = {
+	    0: 'left',
+	    1: 'middle',
+	    2: 'right'
+	  };
+
+	  if ('object' !== typeof e) {
+	    throw Error('evt must be an object');
+	  } else if (typeof e.button === 'undefined') {
+	    throw Error("evt must hasOwnProperty 'button'");
+	  }
+
+	  return btnCode[e.button] ? btnCode[e.button] : '';
+	}
+
+	var util = {
+	  $: $,
+	  $all: $all,
+	  onceLoaded: onceLoaded,
+	  getCurrentTab: getCurrentTab,
+	  isEmpty: isEmpty,
+	  filterEmptyStr: filterEmptyStr,
+	  debounce: debounce,
+	  getMouseButton: getMouseButton
+	};
+
+	exports.default = util;
+	exports.$ = $;
+	exports.$all = $all;
+	exports.onceLoaded = onceLoaded;
+	exports.getCurrentTab = getCurrentTab;
+	exports.isEmpty = isEmpty;
+	exports.filterEmptyStr = filterEmptyStr;
+	exports.debounce = debounce;
+	exports.getMouseButton = getMouseButton;
+	exports.includeString = _includeString2.default;
+	exports.clog = _clog2.default;
+	exports.minErr = _minErr2.default;
+
+/***/ },
+
+/***/ "zdlF":
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	/**
+	 * Created by ray7551@gmail.com on 12.06 006.
+	 */
 	/**
 	 * case insensitive version of String.prototype.includes
 	 * */
@@ -596,143 +764,36 @@ webpackJsonp([4,5],{
 	  }
 	  return start + search.length > this.length ? false : this.toLowerCase().indexOf(search.toLowerCase(), start) !== -1;
 	};
-	if (!Array.prototype.includes) {
-	  Array.prototype.includes = function (searchElement /*, fromIndex*/) {
-	    'use strict';
 
-	    if (this == null) {
-	      throw new TypeError('Array.prototype.includes called on null or undefined');
-	    }
+	exports.default = String.prototype.includeString;
 
-	    var O = Object(this);
-	    var len = parseInt(O.length, 10) || 0;
-	    if (len === 0) {
-	      return false;
-	    }
-	    var n = parseInt(arguments[1], 10) || 0;
-	    var k;
-	    if (n >= 0) {
-	      k = n;
-	    } else {
-	      k = len + n;
-	      if (k < 0) {
-	        k = 0;
-	      }
-	    }
-	    var currentElement;
-	    while (k < len) {
-	      currentElement = O[k];
-	      if (searchElement === currentElement || searchElement !== searchElement && currentElement !== currentElement) {
-	        // NaN !== NaN
-	        return true;
-	      }
-	      k++;
-	    }
-	    return false;
-	  };
-	}
+/***/ },
 
-	var clog = function clog() {
-	  if (_config2.default.devMode) {
-	    console.log.apply(this, arguments);
-	  }
-	};
-	clog.info = function () {
-	  Array.prototype.slice.call(arguments).forEach(function (text) {
-	    clog('%c' + text, 'color: blue');
-	  });
-	};
-	clog.warn = function () {
-	  Array.prototype.slice.call(arguments).forEach(function (text) {
-	    clog('%c' + text, 'color: yellow');
-	  });
-	};
-	clog.err = function () {
-	  Array.prototype.slice.call(arguments).forEach(function (text) {
-	    clog('%c' + text, 'color: red');
-	  });
-	};
+/***/ "iIaI":
+/***/ function(module, exports) {
 
-	var util = {
-	  $: function $(selector) {
-	    return document.querySelector(selector);
-	  },
-	  $all: function $all(selector) {
-	    return document.querySelectorAll(selector);
-	  },
-	  onceLoaded: function onceLoaded(onLoad) {
-	    return new Promise(function (resolve) {
-	      window.addEventListener("DOMContentLoaded", function () {
-	        resolve(onLoad());
-	      });
-	    });
-	  },
-	  getCurrentTab: function getCurrentTab() {
-	    return new Promise(function (resolve) {
-	      chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-	        var tab = tabs[0];
-	        resolve(tab);
-	      });
-	    });
-	  },
-	  /**
-	   * undefined, null, void 0, [], {}, ''
-	   * with .length === 0 is empty,
-	   * object without a own enumerable property is empty
-	   * @return Boolean
-	   * @param {Object} obj
-	   */
-	  isEmpty: function isEmpty(obj) {
-	    if (obj == null) return true;
-	    if (obj.length !== undefined) return obj.length === 0;
-	    return Object.keys(obj).length === 0;
-	  },
+	'use strict';
 
-	  /**
-	   * Returns a function, that, as long as it continues to be invoked, will not
-	   * be triggered. The function will be called after it stops being called for
-	   * `delay` milliseconds. If `atBegin` is passed, trigger the function on the
-	   * leading edge, instead of the trailing.
-	   * */
-	  debounce: function debounce(fn, delay, atBegin) {
-	    var timeout;
-	    return function () {
-	      var that = this,
-	          args = arguments;
-	      clearTimeout(timeout);
-	      timeout = setTimeout(function () {
-	        timeout = null;
-	        if (!atBegin) fn.apply(that, args);
-	      }, delay);
-	      if (atBegin && !timeout) {
-	        fn.apply(that, args);
-	      }
-	    };
-	  },
-	  getMouseButton: function getMouseButton(evt) {
-	    // Handle different event models
-	    var e = evt || window.event;
-	    var btnCode = {
-	      0: 'left',
-	      1: 'middle',
-	      2: 'right'
-	    };
-
-	    if ('object' !== typeof e) {
-	      throw Error('evt must be an object');
-	    } else if (typeof e.button === 'undefined') {
-	      throw Error("evt must hasOwnProperty 'button'");
-	    }
-
-	    return btnCode[e.button] ? btnCode[e.button] : '';
-	  }
-	};
-
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	/**
+	 * Created by ray7551@gmail.com on 12.06 006.
+	 */
+	/**
+	 * @return {moduleErr}
+	 * */
 	function minErr(module) {
-	  return function () {
-	    var code = arguments[0],
-	        prefix = '[' + (module ? module + ':' : '') + code + '] ',
-	        template = arguments[1],
+	  /**
+	   * @function
+	   * @name moduleErr
+	   * @inner
+	   * @param {String} code
+	   * @param {String} template
+	   * @return {Error}
+	   * */
+	  function moduleErr(code, template) {
+	    var prefix = '[' + (module ? module + ':' : '') + code + '] ',
 	        templateArgs = arguments,
 	        message;
 
@@ -755,12 +816,54 @@ webpackJsonp([4,5],{
 	    });
 
 	    return new Error(message);
-	  };
+	  }
+	  return moduleErr;
 	}
 
-	exports.util = util;
-	exports.clog = clog;
-	exports.minErr = minErr;
+	exports.default = minErr;
+
+/***/ },
+
+/***/ "3JzL":
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _config = __webpack_require__("wYMm");
+
+	var _config2 = _interopRequireDefault(_config);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var clog = function clog() {
+	  if (_config2.default.devMode) {
+	    console.log.apply(this, arguments);
+	  }
+	}; /**
+	    * Created by ray7551@gmail.com on 12.06 006.
+	    */
+
+	clog.info = function () {
+	  Array.prototype.slice.call(arguments).forEach(function (text) {
+	    clog('%c' + text, 'color: blue');
+	  });
+	};
+	clog.warn = function () {
+	  Array.prototype.slice.call(arguments).forEach(function (text) {
+	    clog('%c' + text, 'color: yellow');
+	  });
+	};
+	clog.err = function () {
+	  Array.prototype.slice.call(arguments).forEach(function (text) {
+	    clog('%c' + text, 'color: red');
+	  });
+	};
+
+	exports.default = clog;
 
 /***/ },
 
@@ -1494,25 +1597,6 @@ webpackJsonp([4,5],{
 
 /***/ },
 
-/***/ "qio6":
-/***/ function(module, exports, __webpack_require__) {
-
-	var dP       = __webpack_require__("evD5")
-	  , anObject = __webpack_require__("77Pl")
-	  , getKeys  = __webpack_require__("lktj");
-
-	module.exports = __webpack_require__("+E39") ? Object.defineProperties : function defineProperties(O, Properties){
-	  anObject(O);
-	  var keys   = getKeys(Properties)
-	    , length = keys.length
-	    , i = 0
-	    , P;
-	  while(length > i)dP.f(O, P = keys[i++], Properties[P]);
-	  return O;
-	};
-
-/***/ },
-
 /***/ "W2nU":
 /***/ function(module, exports) {
 
@@ -1697,6 +1781,19 @@ webpackJsonp([4,5],{
 	};
 	process.umask = function() { return 0; };
 
+
+/***/ },
+
+/***/ "lktj":
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.2.14 / 15.2.3.14 Object.keys(O)
+	var $keys       = __webpack_require__("Ibhu")
+	  , enumBugKeys = __webpack_require__("xnc9");
+
+	module.exports = Object.keys || function keys(O){
+	  return $keys(O, enumBugKeys);
+	};
 
 /***/ },
 
@@ -2748,15 +2845,21 @@ webpackJsonp([4,5],{
 
 /***/ },
 
-/***/ "lktj":
+/***/ "qio6":
 /***/ function(module, exports, __webpack_require__) {
 
-	// 19.1.2.14 / 15.2.3.14 Object.keys(O)
-	var $keys       = __webpack_require__("Ibhu")
-	  , enumBugKeys = __webpack_require__("xnc9");
+	var dP       = __webpack_require__("evD5")
+	  , anObject = __webpack_require__("77Pl")
+	  , getKeys  = __webpack_require__("lktj");
 
-	module.exports = Object.keys || function keys(O){
-	  return $keys(O, enumBugKeys);
+	module.exports = __webpack_require__("+E39") ? Object.defineProperties : function defineProperties(O, Properties){
+	  anObject(O);
+	  var keys   = getKeys(Properties)
+	    , length = keys.length
+	    , i = 0
+	    , P;
+	  while(length > i)dP.f(O, P = keys[i++], Properties[P]);
+	  return O;
 	};
 
 /***/ }

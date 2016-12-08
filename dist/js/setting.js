@@ -28,6 +28,10 @@ webpackJsonp([2,5],{
 
 	'use strict';
 
+	var _lodash = __webpack_require__("y7q8");
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
 	var _base = __webpack_require__("5a/Z");
 
 	var _Setting = __webpack_require__("mzR8");
@@ -71,7 +75,7 @@ webpackJsonp([2,5],{
 	  };
 	}();
 
-	window.addEventListener("DOMContentLoaded", function () {
+	window.addEventListener('DOMContentLoaded', function () {
 	  _base.util.$('.about').innerHTML += '&nbsp;v' + chrome.runtime.getManifest().version;
 
 	  option.restore();

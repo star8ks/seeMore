@@ -28,6 +28,10 @@ webpackJsonp([1,5],{
 
 	'use strict';
 
+	var _lodash = __webpack_require__("y7q8");
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
 	var _translation = __webpack_require__("RkCM");
 
 	var _translation2 = _interopRequireDefault(_translation);
@@ -42,10 +46,6 @@ webpackJsonp([1,5],{
 
 	var _Url2 = _interopRequireDefault(_Url);
 
-	var _Engine = __webpack_require__("gLfi");
-
-	var _Engine2 = _interopRequireDefault(_Engine);
-
 	var _Render = __webpack_require__("qpDX");
 
 	var _Render2 = _interopRequireDefault(_Render);
@@ -53,6 +53,10 @@ webpackJsonp([1,5],{
 	var _Mason = __webpack_require__("74xW");
 
 	var _Mason2 = _interopRequireDefault(_Mason);
+
+	var _keyword = __webpack_require__("MjTT");
+
+	var _keyword2 = _interopRequireDefault(_keyword);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -80,7 +84,7 @@ webpackJsonp([1,5],{
 	    $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
 
 	    $link.onclick = function (evt) {
-	      var button = _base.util.getMouseButton(evt);
+	      var button = (0, _base.getMouseButton)(evt);
 	      switch (button) {
 	        case 'left':
 	          chrome.tabs.update(tabId, { url: this.href });
@@ -95,38 +99,48 @@ webpackJsonp([1,5],{
 	    };
 	  });
 	};
-
 	Links.prototype.updateHref = function (searchWord) {
-	  if (!searchWord) return new popupErr('invalid param', 'updateLinkHref with empty string');
+	  if (!searchWord) return popupErr('invalid param', 'updateLinkHref with empty string');
 	  this.$links.forEach(function ($link) {
 	    $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
 	  });
 	};
 
-	_base.util.onceLoaded(_base.util.getCurrentTab).then(function onLoad(tab) {
+	(0, _base.onceLoaded)(_base.getCurrentTab).then(function onLoad(tab) {
 	  var tabUrl = new _Url2.default(tab.url);
-	  var $keyword = _base.util.$('#keyword');
-	  var $translation = _base.util.$('.translation');
+	  var $keyword = (0, _base.$)('#keyword');
+	  var $translation = (0, _base.$)('.translation');
 	  var links;
-	  var engineListTpl = _base.util.$('#tpl-engines').innerHTML.trim();
-	  var $enginesSection = _base.util.$('.engines');
+	  var engineListTpl = (0, _base.$)('#tpl-engines').innerHTML.trim();
+	  var $enginesSection = (0, _base.$)('.engines');
+
+	  $keyword.focus();
+	  $keyword.onkeypress = _lodash2.default.debounce(function (e) {
+	    //if press enter, search word using first enabled engine
+	    if (e.key === 'Enter') {
+	      (0, _base.$)('.se:not(.disable)').dispatchEvent(new MouseEvent('click', { button: 0 }));
+	    }
+	    onKeywordUpdate(this.value);
+	  }, 500);
 
 	  _Render2.default.openEngines(engineListTpl).then(function (rendered) {
 	    $enginesSection.innerHTML = rendered;
-	    links = new Links(_base.util.$all('.engines .icon-link'));
+	    links = new Links((0, _base.$all)('.engines .icon-link'));
 	  }).then(function () {
-	    new _Mason2.default(_base.util.$('.engines'), {
+	    new _Mason2.default((0, _base.$)('.engines'), {
 	      itemSelector: '.pin',
 	      columnNum: 2
 	    });
 	    links.init(tab.id, $keyword.value);
 	  }).catch(errorHandler);
 
-	  getSearchString().then(function (searchString) {
-	    searchString = searchString.trim();
-	    (0, _base.clog)('get searchString: ', searchString);
-	    setKeywordInput(searchString);
-	    if (searchString && links) links.updateHref(searchString);
+	  (0, _keyword2.default)(tabUrl).then(function (keywords) {
+	    (0, _base.clog)('get keywords: ', JSON.stringify(keywords));
+	    var displayStr = keywords[0].word.trim();
+	    // @TODO if input is not empty, cancel getKeyWord and don't change input and link
+	    // @TODO add all keywords to auto-complete suggestion list
+	    onKeywordUpdate(displayStr);
+	    if (displayStr && links) links.updateHref(displayStr);
 	    return null;
 	  }).catch(errorHandler);
 
@@ -147,88 +161,28 @@ webpackJsonp([1,5],{
 	      api: _config2.default.devMode ? 'GoogleCN' : navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
 	      text: str,
 	      to: lang === 'zh' ? navigator.language : lang
-	    }).then(function (resultObj, err) {
-	      (0, _base.clog)(resultObj, err);
+	    }).then(function (resultObj) {
 	      if (resultObj.error) return null;
 	      return resultObj.detailed || resultObj.result;
 	    }).then(function (translated) {
-	      return _base.util.isEmpty(translated) ? '' : translated.filter(function (line) {
+	      return _lodash2.default.isEmpty((0, _base.filterEmptyStr)(translated)) ? '' : translated.filter(function (line) {
 	        return line.toLowerCase() !== str.toLowerCase();
 	      }).reduce(function (html, line) {
-	        html += line + '<br>';
+	        html += line + '\n';
 	        return html;
 	      }, '');
 	    });
 	  }
 
-	  function getSearchString() {
-	    // get search string from selected text
-	    var getSelectionP = new Promise(function (resolve, reject) {
-	      if (tabUrl.url.match(/^chrome/)) {
-	        // chrome.tabs.executeScript not support chrome pages
-	        resolve('');
-	        return;
-	      }
-
-	      // @TODO move it to contentScript.js
-	      // @TODO don't block popup here
-	      chrome.tabs.executeScript({
-	        code: "window.getSelection().toString();"
-	      }, function (selection) {
-	        if (chrome.runtime.lastError) {
-	          reject(new popupErr(chrome.runtime.lastError.message));
-	          return;
-	        }
-	        if (!_base.util.isEmpty(selection) && selection[0].length <= _config2.default.selectionMaxLength) {
-	          resolve(selection[0].trim());
-	          return;
-	        }
-	        resolve('');
-	      });
-	    });
-
-	    // get search string from url param
-	    return getSelectionP.then(function (str) {
-	      return str ? str : getQueryString(tabUrl);
-	    });
-
-	    function getQueryString(tabUrl) {
-	      if (_Url2.default.googleFailedUrlPattern.test(tabUrl.url)) {
-	        tabUrl = new _Url2.default(decodeURIComponent(tabUrl.getQueryVal('continue')));
-	      }
-	      return _Engine2.default.searchKeys(tabUrl.host).then(function (keys) {
-	        if (keys.length <= 0) {
-	          return '';
-	        }
-	        return _Engine2.default.get(keys[0]).then(function (engine) {
-	          var searchKey = new _Url2.default(engine.url).searchKey;
-	          var searchString = tabUrl.getQueryVal(searchKey);
-	          searchString = searchString ? searchString : '';
-	          return decodeURIComponent(searchString || '');
-	        });
-	      });
-	    }
-	  }
-
-	  function setKeywordInput(searchString) {
+	  function onKeywordUpdate(searchString) {
 	    if (searchString) {
 	      $keyword.value = searchString;
 	      (0, _base.clog)('trans', $keyword.value);
 	      translate($keyword.value).then(function (html) {
-	        $translation.innerHTML = html;
+	        $translation.innerText = html;
 	      });
 	    }
-
-	    $keyword.oninput = _base.util.debounce(function (e) {
-	      //if press enter, search word using first enabled engine
-	      e.key === 'Enter' && _base.util.$('.se:not(.disable)').dispatchEvent(new MouseEvent('click', { button: 0 }));
-
-	      links && links.updateHref(this.value);
-	      translate(this.value).then(function (html) {
-	        $translation.innerHTML = html;
-	      });
-	    }, 500);
-	    $keyword.focus();
+	    links && links.updateHref(searchString);
 	  }
 	});
 
@@ -2707,6 +2661,266 @@ webpackJsonp([1,5],{
 		);
 	});
 	;
+
+/***/ },
+
+/***/ "MjTT":
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _lodash = __webpack_require__("y7q8");
+
+	var _lodash2 = _interopRequireDefault(_lodash);
+
+	var _config = __webpack_require__("wYMm");
+
+	var _config2 = _interopRequireDefault(_config);
+
+	var _base = __webpack_require__("5a/Z");
+
+	var _Engine = __webpack_require__("gLfi");
+
+	var _Engine2 = _interopRequireDefault(_Engine);
+
+	var _Url = __webpack_require__("tDBr");
+
+	var _Url2 = _interopRequireDefault(_Url);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	let keywordErr = (0, _base.minErr)('keyword');
+
+	const CONFIDENCE = 1;
+	const EMPTY_KEYWORDS = [{
+	  word: '',
+	  confidence: 0
+	}];
+
+	const PUNCTUATIONS = ["`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "-", "=", ",", ".", "/", "<", ">", "?", "[", "]", "\\", "{", "}", "|", ";", "'", ":", "\"", "·", "！", "￥", "…", "（", "）", "—", "【", "】", "；", "‘", "’", "：", "“", "”", "，", "。", "《", "》", "？"];
+
+	/**
+	 * keyword blacklist
+	 * @notice all in lower case
+	 * @see https://en.wikibooks.org/wiki/English_in_Use/Prepositions,_Conjunctions,_and_Interjections
+	 */
+	const KEYWORD_BLACKLIST = [...PUNCTUATIONS, "i", "me", "you", "he", "she", "they", "anybody", "it", "one", "there", "that", "this", "other", "my", "your", "his", "her", "there", "own", "the", "a", "my", "more", "much", "either", "while", "meanwhile", "is", "am", "are", "have", "got", "do", "no", "not", "nor", "what", "when", "who", "how", "why",
+	// https://en.wikipedia.org/wiki/List_of_English_prepositions
+	"about", "above", "across", "after", "against", "along", "amid", "among", "around", "at", "by", "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "during", "except", "for", "from", "in", "into", "of", "off", "on", "over", "past", "through", "to", "toward", "towards", "under", "underneath", "until", "with", "without",
+	// Conjunctions
+	"and", "as", "both", "because", "even", "for", "if", "that", "then", "since", "seeing", "so", "or", "nor", "either", "neither", "than", "though", "although", "yet", "but", "except", "whether", "lest", "unless", "save", "provided", "notwithstanding", "whereas"];
+
+	// get keyword from selected text
+	function getSelection(tabUrl) {
+	  if (!tabUrl.isNormal) {
+	    return Promise.resolve(EMPTY_KEYWORDS);
+	  }
+	  return new Promise((resolve, reject) => {
+	    // @TODO move it to contentScript.js, and execute when select change
+	    // @TODO don't block popup here
+	    chrome.tabs.executeScript({
+	      code: "window.getSelection().toString();",
+	      allFrames: true
+	    }, selection => {
+	      if (chrome.runtime.lastError) {
+	        reject(keywordErr('executeScriptErr', chrome.runtime.lastError.message));
+	        return;
+	      }
+	      selection = (0, _base.filterEmptyStr)(selection);
+	      if (!_lodash2.default.isEmpty(selection) && selection[0].length <= _config2.default.selectionMaxLength) {
+	        resolve([{
+	          word: selection[0],
+	          confidence: CONFIDENCE
+	        }]);
+	        return;
+	      }
+	      resolve(EMPTY_KEYWORDS);
+	    });
+	  });
+	}
+
+	// get keyword from tab url
+	function getQueryString(tabUrl) {
+	  if (tabUrl.isGoogleFail) {
+	    tabUrl = new _Url2.default(decodeURIComponent(tabUrl.getQueryVal('continue')));
+	  }
+	  return _Engine2.default.searchKeys(tabUrl.host).then(keys => {
+	    if (keys.length <= 0) {
+	      return EMPTY_KEYWORDS;
+	    }
+	    return _Engine2.default.get(keys[0]).then(engine => {
+	      let searchKey = new _Url2.default(engine.url).searchKey;
+	      let searchString = tabUrl.getQueryVal(searchKey);
+	      return searchString ? [{
+	        word: decodeURIComponent(searchString),
+	        confidence: CONFIDENCE
+	      }] : EMPTY_KEYWORDS;
+	    });
+	  });
+	}
+
+	class priorityMap {
+	  constructor() {
+	    this.map = new Map();
+	  }
+	  get orderedArray() {
+	    return [...this.map].sort((a, b) => b[1] - a[1]).map(item => ({
+	      word: item[0],
+	      confidence: item[1]
+	    }));
+	  }
+	  clear() {
+	    this.map.clear();
+	  }
+	  increaseConfidence(key, increment = 1) {
+	    key = key.toLowerCase();
+	    if (KEYWORD_BLACKLIST.includes(key)) return;
+	    this.map.has(key) ? this.map.set(key, this.map.get(key) + increment) : this.map.set(key, 1);
+	  }
+	}
+
+	/**
+	 * get keyword of current tab
+	 * @return {Promise} resolve an Array order by string frequency
+	 * */
+	function smartKeyword(tabUrl) {
+	  if (!tabUrl.isNormal) {
+	    return Promise.resolve(EMPTY_KEYWORDS);
+	  }
+	  return new Promise((resolve, reject) => {
+	    chrome.tabs.executeScript({
+	      file: __webpack_require__("Kyhl")
+	    }, result => {
+	      if (chrome.runtime.lastError) {
+	        reject(keywordErr('executeScriptErr', chrome.runtime.lastError.message));
+	        return;
+	      }
+
+	      (0, _base.clog)('content script result: ', result);
+	      let unfiltered = result[0];
+	      let keywords = {};
+	      Object.keys(unfiltered).forEach(key => {
+	        keywords[key] = (0, _base.filterEmptyStr)(unfiltered[key]);
+	      });
+
+	      // 1. see if keywords.meta[i] appeared in title or head, use meta as keyword array
+	      let candidateWords = new priorityMap();
+
+	      // TODO: move it to function matchKeyword
+	      var _iteratorNormalCompletion = true;
+	      var _didIteratorError = false;
+	      var _iteratorError = undefined;
+
+	      try {
+	        for (var _iterator = keywords.meta[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	          let metaKeyword = _step.value;
+
+	          if (keywords.h1.includeString(metaKeyword)) {
+	            candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
+	          }
+	          if (keywords.title.includeString(metaKeyword)) {
+	            candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
+	          }
+	          if (tabUrl.url.includeString(metaKeyword)) {
+	            candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
+	          }
+	          tabUrl.queryPairs.map(pair => {
+	            if (pair.val.includeString(metaKeyword)) {
+	              candidateWords.increaseConfidence(metaKeyword, .01 * CONFIDENCE);
+	            }
+	          });
+	          keywords.h2.forEach(function (h2) {
+	            if (h2.includeString(metaKeyword)) {
+	              candidateWords.increaseConfidence(metaKeyword, .01 * CONFIDENCE);
+	            }
+	          });
+	        }
+	      } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion && _iterator.return) {
+	            _iterator.return();
+	          }
+	        } finally {
+	          if (_didIteratorError) {
+	            throw _iteratorError;
+	          }
+	        }
+	      }
+
+	      (0, _base.clog)(candidateWords);
+
+	      if (!_lodash2.default.isEmpty(candidateWords.orderedArray)) {
+	        (0, _base.clog)('use meta keywords');
+	        resolve(candidateWords.orderedArray);
+	        return;
+	      }
+
+	      // 2. get the top n frequently appeared strings as keyword array
+	      candidateWords.clear();
+	      const punctuationsStr = PUNCTUATIONS.reduce((str, current) => {
+	        str += current;
+	        return str;
+	      }, '');
+	      // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
+	      const temp = '[' + _lodash2.default.escapeRegExp(punctuationsStr) + '\\s+]';
+	      (0, _base.clog)('escaped after lodash: ', temp);
+	      const escapedRegExp = temp.replace(/(^.*[^\\]?\[.*)(-)(.*\])/g, function replacer(match, p1, p2, p3) {
+	        // lodash.escapeRegExp did not escape '-', so escape the '-' inside the []
+	        // matched string is 'p1-p3'
+	        return [p1, '\\' + p2, p3].join('');
+	      });
+	      const SEPARATE_REGEX = new RegExp(escapedRegExp, 'g');
+	      (0, _base.clog)(SEPARATE_REGEX);
+
+	      keywords.title && (0, _base.filterEmptyStr)(keywords.title.split(SEPARATE_REGEX)).forEach(word => {
+	        (0, _base.clog)(word);
+	        candidateWords.increaseConfidence(word, .1 * CONFIDENCE);
+	      });
+	      keywords.h1 && (0, _base.filterEmptyStr)(keywords.h1.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, .1 * CONFIDENCE));
+	      !_lodash2.default.isEmpty(keywords.h2) && keywords.h2.forEach(h2 => {
+	        (0, _base.filterEmptyStr)(h2.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, 0.01 * CONFIDENCE));
+	      });
+
+	      // TODO: run matchKeyword(dividedWords) here
+	      if (!_lodash2.default.isEmpty(candidateWords.orderedArray)) {
+	        (0, _base.clog)('use divided keywords');
+	        resolve(candidateWords.orderedArray);
+	        return;
+	      }
+
+	      (0, _base.clog)('failed to get smartKeyword');
+	      resolve(EMPTY_KEYWORDS);
+	    });
+	  });
+	}
+
+	/**
+	 * @param {Url} tabUrl
+	 * @return {Promise} resolve {{word: String, confidence: Number}[]}
+	 * */
+	function getKeyword(tabUrl) {
+	  return getSelection(tabUrl).then(keywords => {
+	    return !_lodash2.default.isEqual(keywords, EMPTY_KEYWORDS) ? keywords : getQueryString(tabUrl);
+	  }).then(keywords => {
+	    return !_lodash2.default.isEqual(keywords, EMPTY_KEYWORDS) ? keywords : smartKeyword(tabUrl);
+	  });
+	}
+
+	exports.default = getKeyword;
+
+/***/ },
+
+/***/ "Kyhl":
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "js/contentScript.js";
 
 /***/ }
 
