@@ -71,13 +71,38 @@ var Url = (function () {
           return !match ? '' : match[1];
         },
         enumerable: true
+      },
+      queryPairs: {
+        get: function () {
+          var pairs = this.url.match(/([^#?&]+)=([^&]*)/g);
+          return pairs ? pairs.map(function (pair) {
+            var group = pair.split('=');
+            return {
+              key: group[0],
+              val: decodeURIComponent(group[1])
+            }
+          }) : [];
+        },
+        enumerable: true
+      },
+      isNormal: {
+        get: function () {
+          return Url.NORMAL_REGEX.test(this.url);
+        },
+        enumerable: true
+      },
+      isGoogleFail: {
+        get: function () {
+          return Url.GOOGLE_FAILED_REGEX.test(this.url);
+        },
+        enumerable: true
       }
     });
   };
+  Url.NORMAL_REGEX = /^https?:\/\//i;
   Url.FAVICON_URL_REGEX = /\.ico$/i;
-  Url.googleFailedUrlPattern = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
+  Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
   Url.prototype = {
-    //@TODO add case sensitive option, and set insensitive default
     includes: function (search) {
       return this.url.includeString(search);
     },
