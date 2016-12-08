@@ -10,6 +10,15 @@
       "js/background.js"
     ]
   },
+  "content_security_policy": "script-src 'self'; form-action 'self'; object-src 'self'",
+  "browser_action": {
+    "default_icon": {
+      "19": "img/icon-19.png",
+      "38": "img/icon-38.png"
+    },
+    "default_title": "SeeMore",
+    "default_popup": "popup.html"
+  },
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
@@ -19,15 +28,6 @@
         "linux": "Ctrl+Shift+S"
       }
     }
-  },
-  "content_security_policy": "script-src 'self'; form-action 'self'; object-src 'self'",
-  "browser_action": {
-    "default_icon": {
-      "19": "img/icon-19.png",
-      "38": "img/icon-38.png"
-    },
-    "default_title": "SeeMore",
-    "default_popup": "popup.html"
   },
   "permissions": [
     "tabs",

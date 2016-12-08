@@ -1,4 +1,5 @@
-import {clog, util} from "../common/base.js";
+import _ from 'lodash';
+import {clog, util} from '../common/base.js';
 import Setting from '../common/db/Setting';
 import Render from '../common/Render';
 import Mason from '../common/Mason';
@@ -33,7 +34,7 @@ var option = (function (){
   };
 })();
 
-window.addEventListener("DOMContentLoaded", function () {
+window.addEventListener('DOMContentLoaded', function () {
   util.$('.about').innerHTML += '&nbsp;v' + chrome.runtime.getManifest().version;
 
   option.restore();

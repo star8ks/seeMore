@@ -5,7 +5,8 @@
 2. Select keywords on any webpage, then click `SeeMore` button to see more at other websites or search engines.
 3. Translate keywords as soon as you click `SeeMore` button. 
 3. Add custom search engines and engine groups, list all engines by group.
-4. Skip Google redirect url, directly send you to destination.
+4. Skip Google redirect url, directly lead you to real destination.
+5. Ctrl + Shift + S popup the search panel.
 
 
 ## 搜索+
@@ -16,6 +17,7 @@
 3. 点击`搜索+`图标就可以翻译关键词.
 3. 添加*自定义*搜索引擎及分组，分组列出搜索引擎。
 4. 支持略过 Google 跳转页直接访问目标页面。
+5. 快捷键 Ctrl + Shift + S 弹出搜索界面。
 
 ## Install 安装
 Currently under development, you can load it manually.
@@ -27,13 +29,14 @@ Currently under development, you can load it manually.
 
 ## TODO
 
-- Shortcut for SeeMore.
-- Intelligently get any page's keywords as search words.
-- Preview results in popup page.
-- Search local files， open directory.
-- Customize chrome new tab search engine and style.
-- Customize popup page.
-- Search history and bookmarks.
-- Support search engines need to POST keywords.
-- Search images
-- Search audio, videos
+- [x] Shortcut for SeeMore.
+- [ ] Intelligently get any page's keywords as search words.
+- [ ] Search local files， open directory.
+- [ ] Add custom search engine.
+- [ ] Customize chrome new tab search engine and style.
+- [ ] Preview results in popup page.
+- [ ] Customize popup page.
+- [ ] Search history and bookmarks.
+- [ ] Support search engines need to POST keywords.
+- [ ] Search images
+- [ ] Search audio, videos

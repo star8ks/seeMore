@@ -27,6 +27,7 @@ function getBaseConfig(distDirectory) {
         localforage: path.resolve('./node_modules/localforage/dist/localforage.nopromises.js'),
         bluebird: path.resolve('./node_modules/bluebird/js/browser/bluebird.js'),
         mustache: path.resolve('./node_modules/mustache/mustache.js'),
+        lodash: path.resolve('./node_modules/lodash/lodash.js')
       }
     },
     module: {
