@@ -7,6 +7,7 @@
 3. Add custom search engines and engine groups, list all engines by group.
 4. Skip Google redirect url, directly lead you to real destination.
 5. Ctrl + Shift + S popup the search panel.
+6. Intelligently get any page's keywords as search words, no need of typing.
 
 
 ## 搜索+
@@ -18,6 +19,7 @@
 3. 添加*自定义*搜索引擎及分组，分组列出搜索引擎。
 4. 支持略过 Google 跳转页直接访问目标页面。
 5. 快捷键 Ctrl + Shift + S 弹出搜索界面。
+5. 智能获取页面关键词，无需输入即可搜索。
 
 ## Install 安装
 Currently under development, you can load it manually.
@@ -30,7 +32,7 @@ Currently under development, you can load it manually.
 ## TODO
 
 - [x] Shortcut for SeeMore.
-- [ ] Intelligently get any page's keywords as search words.
+- [x] Intelligently get any page's keywords as search words.
 - [ ] Search local files， open directory.
 - [ ] Add custom search engine.
 - [ ] Customize chrome new tab search engine and style.
