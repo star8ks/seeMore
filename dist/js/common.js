@@ -576,7 +576,7 @@ webpackJsonp([4,5],{
 	    taobao: {
 	      order: 3000,
 	      typeId: 106,
-	      defaultTypeId: 6,
+	      defaultTypeId: 5,
 	      displayName: '淘宝',
 	      open: true,
 	      hosts: ['s.taobao.com'],

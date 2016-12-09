@@ -31,11 +31,11 @@ Currently under development, you can load it manually.
 
 ## TODO
 
-- [x] Auto translation.
-- [x] Shortcut for SeeMore.
-- [x] Intelligently get any page's keywords as search words.
+- [x] :man_with_turban: Auto translation.
+- [x] :metal: Shortcut for SeeMore.
+- [x] :rocket: Intelligently get any page's keywords as search words.
 - [ ] Search local files， open directory.
-- [ ] Add custom search engine.
+- [ ] :ghost: Add custom search engine.
 - [ ] Customize chrome new tab search engine and style.
 - [ ] Preview results in popup page.
 - [ ] Customize popup page.

@@ -2673,6 +2673,180 @@ webpackJsonp([1,5],{
 	  value: true
 	});
 
+	// get keyword from selected text
+	let getSelection = (() => {
+	  var _ref = _asyncToGenerator(function* (tabUrl) {
+	    if (!tabUrl.isNormal) {
+	      return EMPTY_KEYWORDS;
+	    }
+	    // @TODO move it to contentScript.js, and execute while select change
+	    // @TODO don't block popup here
+	    var selection = yield chromeTabsProxy.executeScript({
+	      code: "window.getSelection().toString();",
+	      allFrames: true
+	    });
+	    selection = (0, _base.filterEmptyStr)(selection);
+	    if (!_lodash2.default.isEmpty(selection) && selection[0].length <= _config2.default.selectionMaxLength) {
+	      return [{
+	        word: selection[0],
+	        confidence: CONFIDENCE
+	      }];
+	    }
+	    return EMPTY_KEYWORDS;
+	  });
+
+	  return function getSelection(_x) {
+	    return _ref.apply(this, arguments);
+	  };
+	})();
+
+	// get keyword from tab url
+
+
+	/**
+	 * get keyword of current tab
+	 * @return {{word:String, confidence: Number}[]} a Promise resolve an Array order by string frequency
+	 * */
+	let smartKeyword = (() => {
+	  var _ref2 = _asyncToGenerator(function* (tabUrl) {
+	    if (!tabUrl.isNormal) {
+	      return EMPTY_KEYWORDS;
+	    }
+	    let result = yield chromeTabsProxy.executeScript({
+	      file: __webpack_require__("Kyhl")
+	    });
+
+	    (0, _base.clog)('content script result: ', result);
+	    let unfiltered = result[0];
+	    let keywords = {};
+	    Object.keys(unfiltered).forEach(function (key) {
+	      keywords[key] = (0, _base.filterEmptyStr)(unfiltered[key]);
+	    });
+
+	    // 0. see if title and h1 has common string
+
+	    // 1. see if keywords.meta[i] appeared in title or head, use meta as keyword array
+	    let candidateWords = new priorityMap();
+
+	    // TODO: move it to function matchKeyword
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
+
+	    try {
+	      for (var _iterator = keywords.meta[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	        let metaKeyword = _step.value;
+
+	        if (keywords.h1.includeString(metaKeyword)) {
+	          candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
+	        }
+	        if (keywords.title.includeString(metaKeyword)) {
+	          candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
+	        }
+	        if (tabUrl.url.includeString(metaKeyword)) {
+	          candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
+	        }
+	        tabUrl.queryPairs.map(function (pair) {
+	          if (pair.val.includeString(metaKeyword)) {
+	            candidateWords.increaseConfidence(metaKeyword, .01 * CONFIDENCE);
+	          }
+	        });
+	        keywords.h2.forEach(function (h2) {
+	          if (h2.includeString(metaKeyword)) {
+	            candidateWords.increaseConfidence(metaKeyword, .01 * CONFIDENCE);
+	          }
+	        });
+	      }
+	    } catch (err) {
+	      _didIteratorError = true;
+	      _iteratorError = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion && _iterator.return) {
+	          _iterator.return();
+	        }
+	      } finally {
+	        if (_didIteratorError) {
+	          throw _iteratorError;
+	        }
+	      }
+	    }
+
+	    (0, _base.clog)(candidateWords);
+
+	    if (!_lodash2.default.isEmpty(candidateWords.orderedArray)) {
+	      (0, _base.clog)('use meta keywords');
+	      return candidateWords.orderedArray;
+	    }
+
+	    // 2. get the top n frequently appeared strings as keyword array
+	    candidateWords.clear();
+	    const punctuationsStr = PUNCTUATIONS.reduce(function (str, current) {
+	      str += current;
+	      return str;
+	    }, '');
+	    // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
+	    const temp = '[' + _lodash2.default.escapeRegExp(punctuationsStr) + '\\s+]|\\b';
+	    (0, _base.clog)('escaped after lodash: ', temp);
+	    const escapedRegExp = temp.replace(/(^.*[^\\]?\[.*)(-)(.*\])/g, function replacer(match, p1, p2, p3) {
+	      // lodash.escapeRegExp did not escape '-', so escape the '-' inside the []
+	      // matched string is 'p1-p3'
+	      return [p1, '\\' + p2, p3].join('');
+	    });
+	    const SEPARATE_REGEX = new RegExp(escapedRegExp, 'g');
+	    (0, _base.clog)(SEPARATE_REGEX);
+
+	    keywords.title && (0, _base.filterEmptyStr)(keywords.title.split(SEPARATE_REGEX)).forEach(function (word) {
+	      (0, _base.clog)(word);
+	      candidateWords.increaseConfidence(word, 0.1 * CONFIDENCE);
+	    });
+	    keywords.h1 && (0, _base.filterEmptyStr)(keywords.h1.split(SEPARATE_REGEX)).forEach(function (word) {
+	      return candidateWords.increaseConfidence(word, 0.1 * CONFIDENCE);
+	    });
+	    !_lodash2.default.isEmpty(keywords.h2) && keywords.h2.forEach(function (h2) {
+	      (0, _base.filterEmptyStr)(h2.split(SEPARATE_REGEX)).forEach(function (word) {
+	        return candidateWords.increaseConfidence(word, 0.01 * CONFIDENCE);
+	      });
+	    });
+
+	    // TODO: run matchKeyword(dividedWords) here
+	    if (!_lodash2.default.isEmpty(candidateWords.orderedArray)) {
+	      (0, _base.clog)('use divided keywords');
+	      return candidateWords.orderedArray;
+	    }
+
+	    (0, _base.clog)('failed to get smartKeyword');
+	    return EMPTY_KEYWORDS;
+	  });
+
+	  return function smartKeyword(_x2) {
+	    return _ref2.apply(this, arguments);
+	  };
+	})();
+
+	/**
+	 * @param {Url} tabUrl
+	 * @return {Promise} resolve {{word: String, confidence: Number}[]}
+	 * */
+
+
+	let getKeyword = (() => {
+	  var _ref3 = _asyncToGenerator(function* (tabUrl) {
+	    let keywords = yield getSelection(tabUrl);
+	    if (!_lodash2.default.isEqual(keywords, EMPTY_KEYWORDS)) return keywords;
+
+	    keywords = yield getQueryString(tabUrl);
+	    if (!_lodash2.default.isEqual(keywords, EMPTY_KEYWORDS)) return keywords;
+
+	    keywords = yield smartKeyword(tabUrl);
+	    return keywords;
+	  });
+
+	  return function getKeyword(_x3) {
+	    return _ref3.apply(this, arguments);
+	  };
+	})();
+
 	var _lodash = __webpack_require__("y7q8");
 
 	var _lodash2 = _interopRequireDefault(_lodash);
@@ -2691,18 +2865,24 @@ webpackJsonp([1,5],{
 
 	var _Url2 = _interopRequireDefault(_Url);
 
+	var _ChromeAsync = __webpack_require__("cY+b");
+
+	var _ChromeAsync2 = _interopRequireDefault(_ChromeAsync);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 	let keywordErr = (0, _base.minErr)('keyword');
+	let chromeAsync = new _ChromeAsync2.default(chrome);
+	let chromeTabsProxy = chromeAsync.proxy(chrome.tabs);
 
 	const CONFIDENCE = 1;
 	const EMPTY_KEYWORDS = [{
 	  word: '',
 	  confidence: 0
 	}];
-
 	const PUNCTUATIONS = ["`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "-", "=", ",", ".", "/", "<", ">", "?", "[", "]", "\\", "{", "}", "|", ";", "'", ":", "\"", "·", "！", "￥", "…", "（", "）", "—", "【", "】", "；", "‘", "’", "：", "“", "”", "，", "。", "《", "》", "？"];
-
 	/**
 	 * keyword blacklist
 	 * @notice all in lower case
@@ -2712,39 +2892,7 @@ webpackJsonp([1,5],{
 	// https://en.wikipedia.org/wiki/List_of_English_prepositions
 	"about", "above", "across", "after", "against", "along", "amid", "among", "around", "at", "by", "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "during", "except", "for", "from", "in", "into", "of", "off", "on", "over", "past", "through", "to", "toward", "towards", "under", "underneath", "until", "with", "without",
 	// Conjunctions
-	"and", "as", "both", "because", "even", "for", "if", "that", "then", "since", "seeing", "so", "or", "nor", "either", "neither", "than", "though", "although", "yet", "but", "except", "whether", "lest", "unless", "save", "provided", "notwithstanding", "whereas"];
-
-	// get keyword from selected text
-	function getSelection(tabUrl) {
-	  if (!tabUrl.isNormal) {
-	    return Promise.resolve(EMPTY_KEYWORDS);
-	  }
-	  return new Promise((resolve, reject) => {
-	    // @TODO move it to contentScript.js, and execute when select change
-	    // @TODO don't block popup here
-	    chrome.tabs.executeScript({
-	      code: "window.getSelection().toString();",
-	      allFrames: true
-	    }, selection => {
-	      if (chrome.runtime.lastError) {
-	        reject(keywordErr('executeScriptErr', chrome.runtime.lastError.message));
-	        return;
-	      }
-	      selection = (0, _base.filterEmptyStr)(selection);
-	      if (!_lodash2.default.isEmpty(selection) && selection[0].length <= _config2.default.selectionMaxLength) {
-	        resolve([{
-	          word: selection[0],
-	          confidence: CONFIDENCE
-	        }]);
-	        return;
-	      }
-	      resolve(EMPTY_KEYWORDS);
-	    });
-	  });
-	}
-
-	// get keyword from tab url
-	function getQueryString(tabUrl) {
+	"and", "as", "both", "because", "even", "for", "if", "that", "then", "since", "seeing", "so", "or", "nor", "either", "neither", "than", "though", "although", "yet", "but", "except", "whether", "lest", "unless", "save", "provided", "notwithstanding", "whereas"];function getQueryString(tabUrl) {
 	  if (tabUrl.isGoogleFail) {
 	    tabUrl = new _Url2.default(decodeURIComponent(tabUrl.getQueryVal('continue')));
 	  }
@@ -2767,153 +2915,24 @@ webpackJsonp([1,5],{
 	  constructor() {
 	    this.map = new Map();
 	  }
+
 	  get orderedArray() {
 	    return [...this.map].sort((a, b) => b[1] - a[1]).map(item => ({
 	      word: item[0],
 	      confidence: item[1]
 	    }));
 	  }
+
 	  clear() {
 	    this.map.clear();
 	  }
+
 	  increaseConfidence(key, increment = 1) {
 	    key = key.toLowerCase();
-	    if (KEYWORD_BLACKLIST.includes(key)) return;
+	    if (KEYWORD_BLACKLIST.includes(key) || /^\d+$/.test(key)) return;
 	    this.map.has(key) ? this.map.set(key, this.map.get(key) + increment) : this.map.set(key, 1);
 	  }
-	}
-
-	/**
-	 * get keyword of current tab
-	 * @return {Promise} resolve an Array order by string frequency
-	 * */
-	function smartKeyword(tabUrl) {
-	  if (!tabUrl.isNormal) {
-	    return Promise.resolve(EMPTY_KEYWORDS);
-	  }
-	  return new Promise((resolve, reject) => {
-	    chrome.tabs.executeScript({
-	      file: __webpack_require__("Kyhl")
-	    }, result => {
-	      if (chrome.runtime.lastError) {
-	        reject(keywordErr('executeScriptErr', chrome.runtime.lastError.message));
-	        return;
-	      }
-
-	      (0, _base.clog)('content script result: ', result);
-	      let unfiltered = result[0];
-	      let keywords = {};
-	      Object.keys(unfiltered).forEach(key => {
-	        keywords[key] = (0, _base.filterEmptyStr)(unfiltered[key]);
-	      });
-
-	      // 1. see if keywords.meta[i] appeared in title or head, use meta as keyword array
-	      let candidateWords = new priorityMap();
-
-	      // TODO: move it to function matchKeyword
-	      var _iteratorNormalCompletion = true;
-	      var _didIteratorError = false;
-	      var _iteratorError = undefined;
-
-	      try {
-	        for (var _iterator = keywords.meta[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	          let metaKeyword = _step.value;
-
-	          if (keywords.h1.includeString(metaKeyword)) {
-	            candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
-	          }
-	          if (keywords.title.includeString(metaKeyword)) {
-	            candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
-	          }
-	          if (tabUrl.url.includeString(metaKeyword)) {
-	            candidateWords.increaseConfidence(metaKeyword, CONFIDENCE);
-	          }
-	          tabUrl.queryPairs.map(pair => {
-	            if (pair.val.includeString(metaKeyword)) {
-	              candidateWords.increaseConfidence(metaKeyword, .01 * CONFIDENCE);
-	            }
-	          });
-	          keywords.h2.forEach(function (h2) {
-	            if (h2.includeString(metaKeyword)) {
-	              candidateWords.increaseConfidence(metaKeyword, .01 * CONFIDENCE);
-	            }
-	          });
-	        }
-	      } catch (err) {
-	        _didIteratorError = true;
-	        _iteratorError = err;
-	      } finally {
-	        try {
-	          if (!_iteratorNormalCompletion && _iterator.return) {
-	            _iterator.return();
-	          }
-	        } finally {
-	          if (_didIteratorError) {
-	            throw _iteratorError;
-	          }
-	        }
-	      }
-
-	      (0, _base.clog)(candidateWords);
-
-	      if (!_lodash2.default.isEmpty(candidateWords.orderedArray)) {
-	        (0, _base.clog)('use meta keywords');
-	        resolve(candidateWords.orderedArray);
-	        return;
-	      }
-
-	      // 2. get the top n frequently appeared strings as keyword array
-	      candidateWords.clear();
-	      const punctuationsStr = PUNCTUATIONS.reduce((str, current) => {
-	        str += current;
-	        return str;
-	      }, '');
-	      // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
-	      const temp = '[' + _lodash2.default.escapeRegExp(punctuationsStr) + '\\s+]';
-	      (0, _base.clog)('escaped after lodash: ', temp);
-	      const escapedRegExp = temp.replace(/(^.*[^\\]?\[.*)(-)(.*\])/g, function replacer(match, p1, p2, p3) {
-	        // lodash.escapeRegExp did not escape '-', so escape the '-' inside the []
-	        // matched string is 'p1-p3'
-	        return [p1, '\\' + p2, p3].join('');
-	      });
-	      const SEPARATE_REGEX = new RegExp(escapedRegExp, 'g');
-	      (0, _base.clog)(SEPARATE_REGEX);
-
-	      keywords.title && (0, _base.filterEmptyStr)(keywords.title.split(SEPARATE_REGEX)).forEach(word => {
-	        (0, _base.clog)(word);
-	        candidateWords.increaseConfidence(word, .1 * CONFIDENCE);
-	      });
-	      keywords.h1 && (0, _base.filterEmptyStr)(keywords.h1.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, .1 * CONFIDENCE));
-	      !_lodash2.default.isEmpty(keywords.h2) && keywords.h2.forEach(h2 => {
-	        (0, _base.filterEmptyStr)(h2.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, 0.01 * CONFIDENCE));
-	      });
-
-	      // TODO: run matchKeyword(dividedWords) here
-	      if (!_lodash2.default.isEmpty(candidateWords.orderedArray)) {
-	        (0, _base.clog)('use divided keywords');
-	        resolve(candidateWords.orderedArray);
-	        return;
-	      }
-
-	      (0, _base.clog)('failed to get smartKeyword');
-	      resolve(EMPTY_KEYWORDS);
-	    });
-	  });
-	}
-
-	/**
-	 * @param {Url} tabUrl
-	 * @return {Promise} resolve {{word: String, confidence: Number}[]}
-	 * */
-	function getKeyword(tabUrl) {
-	  return getSelection(tabUrl).then(keywords => {
-	    return !_lodash2.default.isEqual(keywords, EMPTY_KEYWORDS) ? keywords : getQueryString(tabUrl);
-	  }).then(keywords => {
-	    return !_lodash2.default.isEqual(keywords, EMPTY_KEYWORDS) ? keywords : smartKeyword(tabUrl);
-	  });
-	}
-
-	exports.default = getKeyword;
+	}exports.default = getKeyword;
 
 /***/ },
 
@@ -2921,6 +2940,65 @@ webpackJsonp([1,5],{
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = __webpack_require__.p + "js/contentScript.js";
+
+/***/ },
+
+/***/ "cY+b":
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _base = __webpack_require__("5a/Z");
+
+	class ChromeAsync {
+	  constructor(chrome) {
+	    this.chrome = chrome;
+	    this.cache = {};
+	  }
+	  proxy(target) {
+	    let that = this;
+	    return new Proxy(target, {
+	      get: function get(target, key) {
+	        (0, _base.clog)(`getting key: `, key);
+	        (0, _base.clog)(`chromeProxy cache:`, that.cache);
+	        if (that.cache[key]) {
+	          (0, _base.clog)('use chromeTabsCache');
+	          return that.cache[key];
+	        }
+	        if (!(key in target)) {
+	          throw new Error(`chromeAsync proxyErr: no property name ${ key }`);
+	        }
+	        if (['boolean', 'number', 'string'].includes(typeof target[key])) {
+	          return that.cache[key] = target[key];
+	        }
+	        if (typeof target[key] !== 'function') {
+	          return undefined;
+	        }
+
+	        // @TODO make it support proxy(chrome) and proxy(chrome.tabs)
+	        // @TODO make chrome as a outer dependency
+	        return that.cache[key] = function (...args) {
+	          return new Promise((resolve, reject) => {
+	            target[key](...args, function proxyCallback() {
+	              (0, _base.clog)('chromeTabProxy callback executing: ', ...arguments);
+	              if (that.chrome.runtime.lastError) {
+	                return reject(new Error(key + 'Err' + that.chrome.runtime.lastError.message));
+	              }
+	              return resolve(...arguments);
+	            });
+	          });
+	        };
+	      }
+	    });
+	  }
+	} /**
+	   * Created by ray7551@gmail.com on 12.10 010.
+	   */
+	exports.default = ChromeAsync;
 
 /***/ }
 
