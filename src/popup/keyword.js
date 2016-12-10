@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import CONFIG from '../common/config';
-import {clog, minErr, filterEmptyStr} from "../common/base.js";
+import {clog, filterEmptyStr} from "../common/base.js";
 import Engine from '../common/db/Engine';
 import Url from '../common/Url';
 import ChromeAsync from '../common/ChromeAsync';
 
-let keywordErr = minErr('keyword');
 let chromeAsync = new ChromeAsync(chrome);
 let chromeTabsProxy = chromeAsync.proxy(chrome.tabs);
 
@@ -14,7 +13,7 @@ const EMPTY_KEYWORDS = [{
   word: '',
   confidence: 0
 }];
-const PUNCTUATIONS = ["`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "-", "=", ",", ".", "/", "<", ">", "?", "[", "]", "\\", "{", "}", "|", ";", "'", ":", "\"", "·", "！", "￥", "…", "（", "）", "—", "【", "】", "；", "‘", "’", "：", "“", "”", "，", "。", "《", "》", "？"];
+const PUNCTUATIONS = ["`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "–", "-", "=", ",", ".", "/", "<", ">", "?", "[", "]", "\\", "{", "}", "|", ";", "'", ":", "\"", "·", "！", "￥", "…", "（", "）", "—", "【", "】", "；", "‘", "’", "：", "“", "”", "，", "。", "《", "》", "？"];
 /**
  * keyword blacklist
  * @notice all in lower case
@@ -29,6 +28,8 @@ const KEYWORD_BLACKLIST = [
   "is", "am", "are", "have", "got", "do",
   "no", "not", "nor",
   "what", "when", "who", "how", "why",
+  "very", "so", "most", "least", "all", "only", "just", "but",
+  "do", "did", "does",
   // https://en.wikipedia.org/wiki/List_of_English_prepositions
   "about", "above", "across", "after", "against", "along", "amid", "among", "around", "at", "by", "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "during", "except", "for", "from", "in", "into", "of", "off", "on", "over", "past", "through", "to", "toward", "towards", "under", "underneath", "until", "with", "without",
   // Conjunctions
@@ -99,7 +100,7 @@ class priorityMap {
     if (KEYWORD_BLACKLIST.includes(key) || /^\d+$/.test(key)) return;
     this.map.has(key)
       ? this.map.set(key, this.map.get(key) + increment)
-      : this.map.set(key, 1);
+      : this.map.set(key, increment);
   }
 }
 
@@ -140,7 +141,7 @@ async function smartKeyword(tabUrl) {
     }
     tabUrl.queryPairs.map(pair => {
       if (pair.val.includeString(metaKeyword)) {
-        candidateWords.increaseConfidence(metaKeyword, .01 * CONFIDENCE);
+        candidateWords.increaseConfidence(metaKeyword, .1 * CONFIDENCE);
       }
     });
     keywords.h2.forEach(function (h2) {
@@ -149,7 +150,7 @@ async function smartKeyword(tabUrl) {
       }
     });
   }
-  clog(candidateWords)
+  // clog(candidateWords)
 
   if (!_.isEmpty(candidateWords.orderedArray)) {
     clog('use meta keywords')
@@ -164,25 +165,24 @@ async function smartKeyword(tabUrl) {
   }, '');
   // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
   const temp = '[' + _.escapeRegExp(punctuationsStr) + '\\s+]|\\b';
-  clog('escaped after lodash: ', temp)
   const escapedRegExp = temp.replace(/(^.*[^\\]?\[.*)(-)(.*\])/g, function replacer(match, p1, p2, p3) {
     // lodash.escapeRegExp did not escape '-', so escape the '-' inside the []
     // matched string is 'p1-p3'
     return [p1, '\\' + p2, p3].join('');
   });
   const SEPARATE_REGEX = new RegExp(escapedRegExp, 'g');
-  clog(SEPARATE_REGEX)
+  // clog(SEPARATE_REGEX)
 
   keywords.title && filterEmptyStr(keywords.title.split(SEPARATE_REGEX)).forEach(word => {
-    clog(word)
-    candidateWords.increaseConfidence(word, 0.1 * CONFIDENCE)
+    candidateWords.increaseConfidence(word, .1 * CONFIDENCE)
   });
   keywords.h1 && filterEmptyStr(keywords.h1.split(SEPARATE_REGEX)).forEach(word =>
-    candidateWords.increaseConfidence(word, 0.1 * CONFIDENCE)
+    candidateWords.increaseConfidence(word, .1 * CONFIDENCE)
   );
   !_.isEmpty(keywords.h2) && keywords.h2.forEach(h2 => {
+    clog(h2.split(SEPARATE_REGEX))
     filterEmptyStr(h2.split(SEPARATE_REGEX)).forEach(word =>
-      candidateWords.increaseConfidence(word, 0.01 * CONFIDENCE)
+      candidateWords.increaseConfidence(word, .01 * CONFIDENCE)
     );
   });
 
