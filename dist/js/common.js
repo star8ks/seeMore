@@ -751,6 +751,9 @@ webpackJsonp([4,5],{
 	 */
 	/**
 	 * case insensitive version of String.prototype.includes
+	 * @param {String} search
+	 * @param {Number} [start=0]
+	 * @param {Boolean} [caseSensitive=false]
 	 * */
 	String.prototype.includeString = function (search, start, caseSensitive) {
 	  'use strict';
@@ -762,7 +765,9 @@ webpackJsonp([4,5],{
 	  if (typeof start !== 'number') {
 	    start = 0;
 	  }
-	  return start + search.length > this.length ? false : this.toLowerCase().indexOf(search.toLowerCase(), start) !== -1;
+	  if (start + search.length > this.length) return false;
+
+	  return this.toLowerCase().indexOf(search.toLowerCase(), start) !== -1;
 	};
 
 	exports.default = String.prototype.includeString;
