@@ -103,7 +103,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
     // @TODO not translate some language, from user config
     // if(chrome.i18n.detect)
     if (str.length > CONFIG.translateMaxLength) {
-      return Promise.reject('[Translation]trans string too long');
+      return Promise.reject(popupErr('Translation', 'String too long: ' + str));
     }
 
     var lang = navigator.language.split('-', 1)[0];
@@ -132,7 +132,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
       clog('trans', $keyword.value);
       translate($keyword.value).then(function (html) {
         $translation.innerText = html;
-      });
+      }).catch(errorHandler);
     }
     links && links.updateHref(searchString);
   }
