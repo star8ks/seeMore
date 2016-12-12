@@ -60,14 +60,20 @@ webpackJsonp([0,5],{
 	        return;
 	      }
 
-	      var originUrl = tabUrl.getQueryVal('url');
-	      var originImgUrl = tabUrl.getQueryVal('imgrefurl');
-	      if (originUrl) {
-	        _base.clog.info('█████Remove redirection: ', tab.url, ' to ', decodeURIComponent(originUrl));
-	        chrome.tabs.update(tab.id, { url: decodeURIComponent(originUrl) });
-	      } else if (originImgUrl) {
-	        _base.clog.info('█████Remove redirection: ', tab.url, ' to ', decodeURIComponent(originImgUrl));
-	        chrome.tabs.update(tab.id, { url: decodeURIComponent(originImgUrl) });
+	      var originUrl = decodeURIComponent(tabUrl.getQueryVal('url'));
+	      var originImgUrl = decodeURIComponent(tabUrl.getQueryVal('imgrefurl'));
+	      // google's interstitial page will warn people 'This site may harm your computer'
+	      // so keep it as it is
+	      // if(/^\/interstitial\?url=/.test(originUrl)) {
+	      //   let tempUrl = new Url('http://google.com' + originUrl);
+	      //   originUrl = decodeURIComponent(tempUrl.getQueryVal('url'));
+	      // }
+	      if (_Url2.default.isNormal(originUrl)) {
+	        _base.clog.info('█████Remove redirection: ', tab.url, ' to ', originUrl);
+	        chrome.tabs.update(tab.id, { url: originUrl });
+	      } else if (_Url2.default.isNormal(originImgUrl)) {
+	        _base.clog.info('█████Remove redirection: ', tab.url, ' to ', originImgUrl);
+	        chrome.tabs.update(tab.id, { url: originImgUrl });
 	      }
 	    }).catch(function (error) {
 	      throw new Error('Error in remove redirect: ' + error);

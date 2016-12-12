@@ -147,6 +147,9 @@ webpackJsonp([4,5],{
 	      }
 	    });
 	  };
+	  Url.isNormal = function (url) {
+	    return Url.NORMAL_REGEX.test(url);
+	  };
 	  Url.NORMAL_REGEX = /^https?:\/\//i;
 	  Url.FAVICON_URL_REGEX = /\.ico$/i;
 	  Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
