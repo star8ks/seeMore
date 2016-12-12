@@ -5,14 +5,14 @@ function run() {
   var $meta = document.querySelector('meta[name=keywords]');
   var metaKeywords = $meta ? $meta.content.split(',') : [];
   var $title = document.querySelector('title');
-  var titleKeywords = $title ? $title.innerText : '';
+  var titleKeywords = $title ? $title.innerText.trim() : '';
   var $h1 = Array.prototype.slice.apply(document.querySelectorAll('h1'));
   var h1Keywords = $h1.filter(function(h1) {
-    return h1.innerText;
+    return h1.innerText.trim();
   });
   var $h2 = Array.prototype.slice.apply(document.querySelectorAll('h2'));
   var h2Keywords = $h2.map(function (h2) {
-    return h2.innerText || '';
+    return h2.innerText.trim() || '';
   }).filter(function (h2) {
     return h2;
   });
@@ -20,7 +20,7 @@ function run() {
   return {
     meta: metaKeywords,
     title: titleKeywords,
-    h1: h1Keywords[0] ? h1Keywords[0].innerText : '',
+    h1: h1Keywords[0] ? h1Keywords[0].innerText.trim() : '',
     h2: h2Keywords
   };
 }
