@@ -62,7 +62,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
   var $enginesSection = $('.engines');
 
   $keyword.focus();
-  $keyword.onkeypress = _.debounce(function (e) {
+  $keyword.oninput = _.debounce(function (e) {
     //if press enter, search word using first enabled engine
     if(e.key === 'Enter') {
       $('.se:not(.disable)').dispatchEvent(new MouseEvent(
@@ -127,9 +127,9 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
   }
 
   function onKeywordUpdate(searchString) {
+    $keyword.value = searchString;
+    clog('translate ', $keyword.value);
     if (searchString) {
-      $keyword.value = searchString;
-      clog('trans', $keyword.value);
       translate($keyword.value).then(function (html) {
         $translation.innerText = html;
       }).catch(errorHandler);
