@@ -115,7 +115,7 @@ webpackJsonp([1,5],{
 	  var $enginesSection = (0, _base.$)('.engines');
 
 	  $keyword.focus();
-	  $keyword.onkeypress = _lodash2.default.debounce(function (e) {
+	  $keyword.oninput = _lodash2.default.debounce(function (e) {
 	    //if press enter, search word using first enabled engine
 	    if (e.key === 'Enter') {
 	      (0, _base.$)('.se:not(.disable)').dispatchEvent(new MouseEvent('click', { button: 0 }));
@@ -175,9 +175,9 @@ webpackJsonp([1,5],{
 	  }
 
 	  function onKeywordUpdate(searchString) {
+	    $keyword.value = searchString;
+	    (0, _base.clog)('translate ', $keyword.value);
 	    if (searchString) {
-	      $keyword.value = searchString;
-	      (0, _base.clog)('trans', $keyword.value);
 	      translate($keyword.value).then(function (html) {
 	        $translation.innerText = html;
 	      }).catch(errorHandler);
@@ -3095,10 +3095,7 @@ webpackJsonp([1,5],{
 
 	  // 3. divide title with common separator
 	  candidateWords.clear();
-	  const divider = [...PUNCTUATION.dash, ...PUNCTUATION.verticalBar, ...PUNCTUATION.colon, ...PUNCTUATION.brackets, ...PUNCTUATION.interpunct, ...PUNCTUATION.comma, ...PUNCTUATION.question].reduce((str, current) => {
-	    str += current;
-	    return str;
-	  }, '');
+	  const divider = (0, _lodash2.default)([...PUNCTUATION.dash, ...PUNCTUATION.verticalBar, ...PUNCTUATION.colon, ...PUNCTUATION.brackets, ...PUNCTUATION.interpunct, ...PUNCTUATION.comma, ...PUNCTUATION.question]).reduce(_lodash2.default.add);
 	  const dividerStr = '[' + _lodash2.default.escapeRegExp(divider) + ']+|-{2,}';
 	  const TITLE_DIVIDE_REGEXP = _getDividerRegex(dividerStr);
 	  (0, _base.clog)(TITLE_DIVIDE_REGEXP);
