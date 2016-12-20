@@ -62,7 +62,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
   var $enginesSection = $('.engines');
 
   $keyword.focus();
-  $keyword.oninput = _.debounce(function (e) {
+  $keyword.addEventListener('input', _.debounce(function (e) {
     //if press enter, search word using first enabled engine
     if(e.key === 'Enter') {
       $('.se:not(.disable)').dispatchEvent(new MouseEvent(
@@ -71,7 +71,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
       ));
     }
     onKeywordUpdate(this.value);
-  }, 500);
+  }, 500));
 
   Render.openEngines(engineListTpl).then(function (rendered) {
     $enginesSection.innerHTML = rendered;
@@ -89,6 +89,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
     var displayStr = keywords[0].word.trim();
     // @TODO if input is not empty, cancel getKeyWord and don't change input and link
     // @TODO add all keywords to auto-complete suggestion list
+    $keyword.value = displayStr;
     onKeywordUpdate(displayStr);
     if (displayStr && links) links.updateHref(displayStr);
     return null;
@@ -127,10 +128,9 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
   }
 
   function onKeywordUpdate(searchString) {
-    $keyword.value = searchString;
-    clog('translate ', $keyword.value);
+    clog('translate ', searchString);
     if (searchString) {
-      translate($keyword.value).then(function (html) {
+      translate(searchString).then(function (html) {
         $translation.innerText = html;
       }).catch(errorHandler);
     }
