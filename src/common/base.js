@@ -38,13 +38,14 @@ function getCurrentTab() {
  */
 function isEmpty(obj, emptyStrIsEmpty = false, zeroIsEmpty = false) {
   if (obj == null) return true;
-  if (obj === '') return emptyStrIsEmpty;
+  if (obj === '') return !!emptyStrIsEmpty;
   if (obj === 0) return !!zeroIsEmpty;
+  if (['string', 'number', 'boolean'].includes(typeof obj)) return false;
 
   if (Array.isArray(obj)) {
-    const filtered = obj.filter(item =>
-      !isEmpty(item)
-    );
+    var filtered = obj.filter(function (item) {
+      return !isEmpty(item, emptyStrIsEmpty, zeroIsEmpty);
+    });
     return filtered.length === 0;
   }
   if (obj.length !== undefined) return obj.length === 0;
@@ -60,9 +61,11 @@ function filterEmptyStr(arr) {
     return arr.trim();
   }
   return Array.isArray(arr)
-    ? arr.map(str =>
-        filterEmptyStr(str)
-      ).filter(str => str)
+    ? arr.map(function (str) {
+        return filterEmptyStr(str);
+    }).filter(function (str) {
+      return str;
+    })
     : [];
 }
 
@@ -105,6 +108,51 @@ function getMouseButton(evt) {
   return btnCode[e.button] ? btnCode[e.button] : '';
 }
 
+function _getValues(obj) {
+  if(Object.keys) {
+    return Object.keys(obj).map(function (enumerableKey) {
+      return obj[enumerableKey];
+    })
+  }
+  var values = [];
+  for(var k in obj) {
+    if(obj.hasOwnProperty(k) && obj.propertyIsEnumerable(k)) {
+      values.push(obj[k]);
+    }
+  }
+}
+
+function getValueDeep(obj) {
+  if(obj === null || ['undefined', 'boolean', 'number', 'string'].includes(typeof obj)) {
+    return obj;
+  }
+  var firstLevelVal = Array.isArray(obj) ? obj : _getValues(obj);
+  return firstLevelVal.reduce(function (result, current) {
+    return result.concat(getValueDeep(current));
+  }, []);
+}
+
+/**
+ * @param {String} str
+ * @param {RegExp} regex
+ * */
+function match(str, regex) {
+  var origLastIndex = regex.lastIndex, result, tempResult;
+  regex.lastIndex = 0;
+
+  if(!regex.global) {
+    result = regex.exec(str);
+  } else {
+    result = [];
+    while (tempResult = regex.exec(str)) {
+      result.push(tempResult);
+    }
+  }
+
+  regex.lastIndex = origLastIndex;  // restore
+  return result;
+}
+
 var util = {
   $: $,
   $all: $all,
@@ -113,12 +161,13 @@ var util = {
   isEmpty: isEmpty,
   filterEmptyStr: filterEmptyStr,
   debounce: debounce,
-  getMouseButton: getMouseButton
+  getMouseButton: getMouseButton,
+  matchAll: match
 };
 
 export default util;
 export {
   $, $all, onceLoaded, getCurrentTab,
-  isEmpty, filterEmptyStr, debounce, getMouseButton,
+  isEmpty, filterEmptyStr, debounce, getMouseButton, getValueDeep, match,
   includeString, clog, minErr
 };
