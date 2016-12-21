@@ -4,16 +4,12 @@ import {clog, filterEmptyStr} from "../common/base.js";
 import Engine from '../common/db/Engine';
 import Url from '../common/Url';
 import ChromeAsync from '../common/ChromeAsync';
-import smart from './smartKeyword';
+import {CONFIDENCE, MIN_CONFIDENCE, EMPTY_KEYWORDS} from './smartKeyword/const';
+import smart from './smartKeyword/smartKeyword';
 
 let chromeAsync = new ChromeAsync(chrome);
 let chromeTabsProxy = chromeAsync.proxy(chrome.tabs);
 
-const CONFIDENCE = 1;
-const EMPTY_KEYWORDS = [{
-  word: '',
-  confidence: 0
-}];
 
 // get keyword from selected text
 async function getSelection(tabUrl) {
@@ -26,8 +22,12 @@ async function getSelection(tabUrl) {
     code: "window.getSelection().toString();",
     allFrames: true
   });
-  selection = filterEmptyStr(selection);
-  if (!_.isEmpty(selection) && selection[0].length <= CONFIG.selectionMaxLength) {
+
+  selection = filterEmptyStr(selection).filter(selectStr => {
+    return selectStr.length <= CONFIG.selectionMaxLength;
+  });
+  // @TODO add all selection to auto-complete suggestion list
+  if (!_.isEmpty(selection)) {
     return [{
       word: selection[0],
       confidence: CONFIDENCE
@@ -95,4 +95,3 @@ async function getKeyword(tabUrl) {
 }
 
 export default getKeyword;
-export {CONFIDENCE, EMPTY_KEYWORDS};
