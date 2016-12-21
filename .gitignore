@@ -4,3 +4,4 @@ bower_components/
 node_modules/
 dist-dev/
 coverage/
+.nyc_output/

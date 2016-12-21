@@ -66,7 +66,7 @@ var Listener = (function () {
 
       var oUrl = new Url(tab.url);
       if(tab.favIconUrl) {
-        clog('on updated favicon', tab.favIconUrl);
+        clog('update favicon', oUrl.host, tab.favIconUrl);
         Icon.set(oUrl.host, tab.favIconUrl);
       }
 
