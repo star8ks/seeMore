@@ -23,6 +23,8 @@ function getBaseConfig(distDirectory) {
       path: path.resolve('./' + distDirectory)
     },
     resolve: {
+      root: path.resolve('./src'),
+      modulesDirectories: ['node_modules'],
       alias: {
         localforage: path.resolve('./node_modules/localforage/dist/localforage.nopromises.js'),
         bluebird: path.resolve('./node_modules/bluebird/js/browser/bluebird.js'),
@@ -31,9 +33,15 @@ function getBaseConfig(distDirectory) {
       }
     },
     module: {
+      noParse: [
+        /node_modules[\/\\]localforage[\/\\]dist[\/\\]localforage\.(nopromises\.)?(min\.)?js$/,
+        /node_modules[\/\\]bluebird[\/\\]js[\/\\]browser[\/\\]bluebird.(min\.)?js$/,
+        /node_modules[\/\\]mustache[\/\\]mustache.(min\.)?js$/,
+        /node_modules[\/\\]lodash[\/\\]lodash.(min\.)?js$/
+      ],
       loaders: [{
         test: /\.js$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/],
         loader: 'babel-loader?cacheDirectory'// will use .babelrc config by default
       }, {
         test: /\.css$/, loader: ExtractTextPlugin.extract('style-loader', 'css-loader?sourceMap!postcss-loader')
