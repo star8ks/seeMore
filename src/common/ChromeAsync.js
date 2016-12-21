@@ -4,29 +4,28 @@
  * let tabsProxy = chromeAsync.proxy(chrome.tabs);
  * Created by ray7551@gmail.com on 12.10 010.
  */
-import {clog} from './base';
 
 class ChromeAsync {
   constructor(chrome) {
     this.chrome = chrome;
     this.cache = {};
   }
+
   proxy(target) {
     let that = this;
     return new Proxy(target, {
       get: function (target, key) {
-        clog(`getting key: `, key);
         if (that.cache[key]) {
-          clog('use chromeTabsCache');
           return that.cache[key];
         }
         if (!(key in target)) {
           throw new Error(`chromeAsync proxyErr: no property name ${key}`);
         }
-        if (['boolean', 'number', 'string'].includes(typeof target[key])) {
+        let type = typeof target[key];
+        if (target[key] === null || ['undefined', 'boolean', 'number', 'string'].includes(type)) {
           return that.cache[key] = target[key];
         }
-        if (typeof target[key] !== 'function') {
+        if (type !== 'function') {
           return undefined;
         }
 
