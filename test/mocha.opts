@@ -1,0 +1,5 @@
+--require babel-polyfill
+--require mock-local-storage
+--compilers js:babel-core/register
+--check-leaks
+--ui bdd
