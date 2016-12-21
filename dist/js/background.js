@@ -5,7 +5,6 @@ webpackJsonp([0,5],{
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
-	// require('babel-runtime/core-js/promise').default = require('bluebird');
 	global.Promise = __webpack_require__("qgje");
 
 	__webpack_require__("/FMp");
@@ -101,7 +100,7 @@ webpackJsonp([0,5],{
 
 	      var oUrl = new _Url2.default(tab.url);
 	      if (tab.favIconUrl) {
-	        (0, _base.clog)('on updated favicon', tab.favIconUrl);
+	        (0, _base.clog)('update favicon', oUrl.host, tab.favIconUrl);
 	        _Icon2.default.set(oUrl.host, tab.favIconUrl);
 	      }
 
@@ -132,7 +131,7 @@ webpackJsonp([0,5],{
 	      if (!_config2.default.devMode) {
 	        chrome.tabs.create({ url: 'chrome://extensions/?options=' + chrome.runtime.id });
 	      } else {
-	        chrome.tabs.create({ url: 'chrome-extension://' + chrome.runtime.id + '/setting.html' });
+	        chrome.tabs.create({ url: 'chrome-extension://' + chrome.runtime.id + '/popup.html' });
 	      }
 	    }
 	  };

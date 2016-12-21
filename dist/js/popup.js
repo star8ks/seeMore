@@ -5,7 +5,6 @@ webpackJsonp([1,5],{
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
-	// require('babel-runtime/core-js/promise').default = require('bluebird');
 	global.Promise = __webpack_require__("qgje");
 
 	__webpack_require__("zj96");
@@ -16,10 +15,104 @@ webpackJsonp([1,5],{
 
 /***/ },
 
-/***/ "28sW":
-/***/ function(module, exports) {
+/***/ "tEcJ":
+/***/ function(module, exports, __webpack_require__) {
 
-	// removed by extract-text-webpack-plugin
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _const = __webpack_require__("+9hk");
+
+	/**
+	 * @author ray7551@gmail.com
+	 */
+	class PriorityMap {
+	  /**
+	   * @param {Url} url
+	   * @param {Number} [baseConfidence=1]
+	   * */
+	  constructor(url, baseConfidence = 1) {
+	    Object.keys(PriorityMap.confidence).forEach(function (key) {
+	      PriorityMap.confidence[key] = baseConfidence * PriorityMap.confidence[key];
+	    });
+	    this.map = new Map();
+	    this.siteKeywords = new Map();
+	    this._setSiteKeywords(url);
+	    this.vipWords = new Map();
+	  }
+
+	  /**
+	   * @param {String} word
+	   * @return {Boolean}
+	   * */
+	  static _inBlackList(word) {
+	    return _const.KEYWORD_BLACKLIST.includes(word) || /^\d+$/.test(word) || word.length <= 0 || word.length === 1 && new RegExp(`[${ _const.PRINTABLE_ASCII }À-ÿ]`).test(word);
+	  }
+
+	  /**
+	   * @param {String} word
+	   * @return {String}
+	   * */
+	  static _preProcess(word) {
+	    // @TODO remove head and tail punctuations(common ending punct) here? consider: ect... .Net <header>
+	    return word.toLowerCase().trim();
+	  }
+
+	  /**
+	   * @param {Url} url
+	   * */
+	  _setSiteKeywords(url) {
+	    let siteWords = url.host.split('.').slice(0, -1);
+	    siteWords.forEach(word => {
+	      word = PriorityMap._preProcess(word);
+	      if (PriorityMap._inBlackList(word) || /(www)/i.test(word)) {
+	        return;
+	      }
+	      this.siteKeywords.set(word, PriorityMap.confidence.site);
+	    });
+	  }
+
+	  addVipWords(word, confidence = PriorityMap.confidence.vip) {
+	    word = PriorityMap._preProcess(word);
+	    console.log(this.siteKeywords.has(word));
+	    if (PriorityMap._inBlackList(word) || this.siteKeywords.has(word)) return;
+
+	    this.vipWords.set(word, this.vipWords.has(word) ? this.vipWords.get(word) + confidence : confidence);
+	  }
+
+	  static toOrderedArray(map) {
+	    return [...map].sort((a, b) => b[1] - a[1]).map(item => ({
+	      word: item[0],
+	      confidence: item[1]
+	    }));
+	  }
+
+	  get vipArray() {
+	    return PriorityMap.toOrderedArray(this.vipWords);
+	  }
+
+	  get orderedArray() {
+	    return PriorityMap.toOrderedArray(this.map);
+	  }
+
+	  clear() {
+	    this.map.clear();
+	  }
+
+	  increaseConfidence(key, increment = PriorityMap.confidence.base) {
+	    key = PriorityMap._preProcess(key);
+	    if (PriorityMap._inBlackList(key)) return;
+
+	    if (this.siteKeywords.has(key)) increment = this.siteKeywords.get(key);
+	    this.map.has(key) ? this.map.set(key, this.map.get(key) + increment) : this.map.set(key, this.vipWords.has(key) ? this.vipWords.get(key) + increment : increment);
+	  }
+	}
+	PriorityMap.confidence = { base: 1, site: .1, vip: .5 };
+
+	exports.default = PriorityMap;
 
 /***/ },
 
@@ -115,13 +208,13 @@ webpackJsonp([1,5],{
 	  var $enginesSection = (0, _base.$)('.engines');
 
 	  $keyword.focus();
-	  $keyword.oninput = _lodash2.default.debounce(function (e) {
+	  $keyword.addEventListener('input', _lodash2.default.debounce(function (e) {
 	    //if press enter, search word using first enabled engine
 	    if (e.key === 'Enter') {
 	      (0, _base.$)('.se:not(.disable)').dispatchEvent(new MouseEvent('click', { button: 0 }));
 	    }
 	    onKeywordUpdate(this.value);
-	  }, 500);
+	  }, 500));
 
 	  _Render2.default.openEngines(engineListTpl).then(function (rendered) {
 	    $enginesSection.innerHTML = rendered;
@@ -139,6 +232,7 @@ webpackJsonp([1,5],{
 	    var displayStr = keywords[0].word.trim();
 	    // @TODO if input is not empty, cancel getKeyWord and don't change input and link
 	    // @TODO add all keywords to auto-complete suggestion list
+	    $keyword.value = displayStr;
 	    onKeywordUpdate(displayStr);
 	    if (displayStr && links) links.updateHref(displayStr);
 	    return null;
@@ -175,10 +269,9 @@ webpackJsonp([1,5],{
 	  }
 
 	  function onKeywordUpdate(searchString) {
-	    $keyword.value = searchString;
-	    (0, _base.clog)('translate ', $keyword.value);
+	    (0, _base.clog)('translate ', searchString);
 	    if (searchString) {
-	      translate($keyword.value).then(function (html) {
+	      translate(searchString).then(function (html) {
 	        $translation.innerText = html;
 	      }).catch(errorHandler);
 	    }
@@ -2672,13 +2765,12 @@ webpackJsonp([1,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.EMPTY_KEYWORDS = exports.CONFIDENCE = undefined;
 
 	// get keyword from selected text
 	let getSelection = (() => {
 	  var _ref = _asyncToGenerator(function* (tabUrl) {
 	    if (!tabUrl.isNormal) {
-	      return EMPTY_KEYWORDS;
+	      return _const.EMPTY_KEYWORDS;
 	    }
 	    // @TODO move it to contentScript.js, and execute while select change
 	    // @TODO don't block popup here
@@ -2686,14 +2778,18 @@ webpackJsonp([1,5],{
 	      code: "window.getSelection().toString();",
 	      allFrames: true
 	    });
-	    selection = (0, _base.filterEmptyStr)(selection);
-	    if (!_lodash2.default.isEmpty(selection) && selection[0].length <= _config2.default.selectionMaxLength) {
+
+	    selection = (0, _base.filterEmptyStr)(selection).filter(function (selectStr) {
+	      return selectStr.length <= _config2.default.selectionMaxLength;
+	    });
+	    // @TODO add all selection to auto-complete suggestion list
+	    if (!_lodash2.default.isEmpty(selection)) {
 	      return [{
 	        word: selection[0],
-	        confidence: CONFIDENCE
+	        confidence: _const.CONFIDENCE
 	      }];
 	    }
-	    return EMPTY_KEYWORDS;
+	    return _const.EMPTY_KEYWORDS;
 	  });
 
 	  return function getSelection(_x) {
@@ -2712,15 +2808,15 @@ webpackJsonp([1,5],{
 
 	    let keys = yield _Engine2.default.searchKeys(tabUrl.host);
 	    if (keys.length <= 0) {
-	      return EMPTY_KEYWORDS;
+	      return _const.EMPTY_KEYWORDS;
 	    }
 	    let engine = yield _Engine2.default.get(keys[0]);
 	    let searchKey = new _Url2.default(engine.url).searchKey;
 	    let searchString = tabUrl.getQueryVal(searchKey);
 	    return searchString ? [{
 	      word: decodeURIComponent(searchString),
-	      confidence: CONFIDENCE
-	    }] : EMPTY_KEYWORDS;
+	      confidence: _const.CONFIDENCE
+	    }] : _const.EMPTY_KEYWORDS;
 	  });
 
 	  return function getQueryString(_x2) {
@@ -2737,7 +2833,7 @@ webpackJsonp([1,5],{
 	let smartKeyword = (() => {
 	  var _ref3 = _asyncToGenerator(function* (tabUrl) {
 	    if (!tabUrl.isNormal) {
-	      return EMPTY_KEYWORDS;
+	      return _const.EMPTY_KEYWORDS;
 	    }
 	    let result = yield chromeTabsProxy.executeScript({
 	      file: __webpack_require__("Kyhl")
@@ -2745,7 +2841,7 @@ webpackJsonp([1,5],{
 
 	    (0, _base.clog)('content script result: ', result);
 	    let unfiltered = result[0];
-	    if (!unfiltered) return EMPTY_KEYWORDS;
+	    if (!unfiltered) return _const.EMPTY_KEYWORDS;
 
 	    let keywords = {};
 	    Object.keys(unfiltered).forEach(function (key) {
@@ -2769,10 +2865,10 @@ webpackJsonp([1,5],{
 	let getKeyword = (() => {
 	  var _ref4 = _asyncToGenerator(function* (tabUrl) {
 	    let keywords = yield getSelection(tabUrl);
-	    if (!_lodash2.default.isEqual(keywords, EMPTY_KEYWORDS)) return keywords;
+	    if (!_lodash2.default.isEqual(keywords, _const.EMPTY_KEYWORDS)) return keywords;
 
 	    keywords = yield getQueryString(tabUrl);
-	    if (!_lodash2.default.isEqual(keywords, EMPTY_KEYWORDS)) return keywords;
+	    if (!_lodash2.default.isEqual(keywords, _const.EMPTY_KEYWORDS)) return keywords;
 
 	    keywords = yield smartKeyword(tabUrl);
 	    return keywords;
@@ -2805,7 +2901,9 @@ webpackJsonp([1,5],{
 
 	var _ChromeAsync2 = _interopRequireDefault(_ChromeAsync);
 
-	var _smartKeyword = __webpack_require__("Uu3o");
+	var _const = __webpack_require__("+9hk");
+
+	var _smartKeyword = __webpack_require__("ney3");
 
 	var _smartKeyword2 = _interopRequireDefault(_smartKeyword);
 
@@ -2814,57 +2912,53 @@ webpackJsonp([1,5],{
 	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 	let chromeAsync = new _ChromeAsync2.default(chrome);
-	let chromeTabsProxy = chromeAsync.proxy(chrome.tabs);
-
-	const CONFIDENCE = 1;
-	const EMPTY_KEYWORDS = [{
-	  word: '',
-	  confidence: 0
-	}];exports.default = getKeyword;
-	exports.CONFIDENCE = CONFIDENCE;
-	exports.EMPTY_KEYWORDS = EMPTY_KEYWORDS;
+	let chromeTabsProxy = chromeAsync.proxy(chrome.tabs);exports.default = getKeyword;
 
 /***/ },
 
-/***/ "Kyhl":
-/***/ function(module, exports, __webpack_require__) {
+/***/ "28sW":
+/***/ function(module, exports) {
 
-	module.exports = __webpack_require__.p + "js/contentScript.js";
+	// removed by extract-text-webpack-plugin
 
 /***/ },
 
 /***/ "cY+b":
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-
-	var _base = __webpack_require__("5a/Z");
+	/**
+	 * proxy chrome apis
+	 * @usage let chromeAsync = new ChromeAsync(chrome);
+	 * let tabsProxy = chromeAsync.proxy(chrome.tabs);
+	 * Created by ray7551@gmail.com on 12.10 010.
+	 */
 
 	class ChromeAsync {
 	  constructor(chrome) {
 	    this.chrome = chrome;
 	    this.cache = {};
 	  }
+
 	  proxy(target) {
 	    let that = this;
 	    return new Proxy(target, {
 	      get: function get(target, key) {
-	        (0, _base.clog)(`getting key: `, key);
 	        if (that.cache[key]) {
-	          (0, _base.clog)('use chromeTabsCache');
 	          return that.cache[key];
 	        }
 	        if (!(key in target)) {
 	          throw new Error(`chromeAsync proxyErr: no property name ${ key }`);
 	        }
-	        if (['boolean', 'number', 'string'].includes(typeof target[key])) {
+	        let type = typeof target[key];
+	        if (target[key] === null || ['undefined', 'boolean', 'number', 'string'].includes(type)) {
 	          return that.cache[key] = target[key];
 	        }
-	        if (typeof target[key] !== 'function') {
+	        if (type !== 'function') {
 	          return undefined;
 	        }
 
@@ -2882,17 +2976,117 @@ webpackJsonp([1,5],{
 	      }
 	    });
 	  }
-	} /**
-	   * proxy chrome apis
-	   * @usage let chromeAsync = new ChromeAsync(chrome);
-	   * let tabsProxy = chromeAsync.proxy(chrome.tabs);
-	   * Created by ray7551@gmail.com on 12.10 010.
-	   */
+	}
+
 	exports.default = ChromeAsync;
 
 /***/ },
 
-/***/ "Uu3o":
+/***/ "+9hk":
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.EMPTY_KEYWORDS = exports.MIN_CONFIDENCE = exports.CONFIDENCE = exports.KEYWORD_BLACKLIST = exports.PRINTABLE_ASCII = exports.CJK_PUNCT = exports.CJK = exports.PUNCT_FLATTEN = exports.SPACES = exports.PUNCT = undefined;
+
+	var _base = __webpack_require__("5a/Z");
+
+	// Punctuations, excluding spaces
+	// https://en.wikipedia.org/wiki/Punctuation_of_English
+	const PUNCT = {
+	  // punctuations
+	  apostrophe: ["’", "'"],
+	  brackets: ["[", "]", "(", ")", "{", "}", "⟨", "⟩", "（", "）", "【", "】"],
+	  colon: [":", "："],
+	  comma: [",", "،", "、", "，"],
+	  dash: ["-", "‐", "‒", "–", "—", "―"],
+	  ellipsis: ["…", "..."],
+	  exclamation: ["!", "！"],
+	  period: [".", "。"],
+	  guillemets: {
+	    left: ["‹", "«", "《", "〈", "『"],
+	    right: ["›", "»", "》", "〉", "』"]
+	  },
+	  question: ["?", "？"],
+	  quotation: ["‘", "’", "“", "”", "'", "'", "\"", "「", "」"],
+	  semicolon: [";", "；"],
+	  slash: ["/", "⁄", "\\"],
+	  math: ["`", "+", "=", "<", ">", "°"],
+	  // word dividers
+	  interpunct: ["·", "・", "･"],
+	  block: ["¶", "§"],
+
+	  // typography
+	  verticalBar: ["|", "¦", "‖", "∣"],
+	  tilde: ["~", "˜", "∼"],
+	  at: ["@"],
+	  hash: ["#"],
+	  currency: ["¤", "￥", "$", "€", "£"], // "₳", "฿", "₵", "¢", "₡", "₢", "₫", "₯", "֏", "₠", "ƒ", "₣", "₲", "₴", "₭", "₺", "ℳ", "₥", "₦", "₧", "₱", "₰", "៛", "₽", "₹", "₨", "₪", "৳", "₸", "₮", "₩"],
+	  per: ["%", "‰", "‱"],
+	  caret: ["^", "‸"],
+	  ampersand: ["&"],
+	  asterisk: ["*"],
+	  underscore: ["_"],
+	  ip: ["©", "℗", "®", "℠", "™"]
+	}; /**
+	    * Created by ray7551@gmail.com on 12.14 014.
+	    */
+
+	const SPACES = [" ", " ", " ", "	"];
+
+	let PUNCT_FLATTEN = (0, _base.getValueDeep)(PUNCT);
+	/**
+	 * keyword blacklist
+	 * @notice all in lower case
+	 * @see https://en.wikibooks.org/wiki/English_in_Use/Prepositions,_Conjunctions,_and_Interjections
+	 */
+	const KEYWORD_BLACKLIST = [...PUNCT_FLATTEN, "i", "me", "you", "he", "she", "they", "anybody", "it", "one", "there", "that", "this", "other", "my", "your", "his", "her", "there", "own", "the", "a", "my", "more", "much", "either", "while", "meanwhile", "is", "isn't", "isnt", "am", "ain't", "aint", "are", "have", "has", "get", "gets", "got", "was", "wasnt", "no", "not", "nor", "what", "when", "who", "how", "why", "very", "so", "most", "least", "all", "only", "just", "but", "do", "doing", "did", "does", "can", "cannot", "can't", 'up',
+	// https://en.wikipedia.org/wiki/List_of_English_prepositions
+	"about", "above", "across", "after", "against", "along", "amid", "among", "around", "at", "by", "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "during", "except", "for", "from", "in", "into", "of", "off", "on", "over", "past", "through", "to", "toward", "towards", "under", "underneath", "until", "with", "without",
+	// Conjunctions
+	"and", "as", "both", "because", "even", "for", "if", "that", "then", "since", "seeing", "so", "or", "nor", "either", "neither", "than", "though", "although", "yet", "but", "except", "whether", "lest", "unless", "save", "provided", "notwithstanding", "whereas"];
+
+	/**
+	 * @see http://www.unicode.org/reports/tr38/#BlockListing
+	 * #Katakana 30A0–30FF
+	 * #Hiragana 3040–309F
+	 * Hangul Jamo  1100–11FF
+	 * #CJK Unified Ideographs 4E00–9FD5
+	 * #Hangul Syllables AC00–D7AF
+	 * CJK Unified Ideographs Extension A 3400–4DB5
+	 * #: most frequently used
+	 */
+	const CJK = String.raw`\u30A0-\u30FF\u3040-\u309F\u1100-\u11FF\u4E00-\u9FD5`;
+
+	// CJK punct excluding guillemets
+	const CJK_PUNCT = '，。？！·‘’“”；：【】…（）—';
+
+	// printable ASCII excluding spaces
+	const PRINTABLE_ASCII = String.raw`\u0021-\u007E`;
+
+	const CONFIDENCE = 1;
+	const MIN_CONFIDENCE = .99;
+	const EMPTY_KEYWORDS = [{
+	  word: '',
+	  confidence: 0
+	}];
+	exports.PUNCT = PUNCT;
+	exports.SPACES = SPACES;
+	exports.PUNCT_FLATTEN = PUNCT_FLATTEN;
+	exports.CJK = CJK;
+	exports.CJK_PUNCT = CJK_PUNCT;
+	exports.PRINTABLE_ASCII = PRINTABLE_ASCII;
+	exports.KEYWORD_BLACKLIST = KEYWORD_BLACKLIST;
+	exports.CONFIDENCE = CONFIDENCE;
+	exports.MIN_CONFIDENCE = MIN_CONFIDENCE;
+	exports.EMPTY_KEYWORDS = EMPTY_KEYWORDS;
+
+/***/ },
+
+/***/ "ney3":
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2907,70 +3101,25 @@ webpackJsonp([1,5],{
 
 	var _base = __webpack_require__("5a/Z");
 
-	var _keyword = __webpack_require__("MjTT");
+	var _const = __webpack_require__("+9hk");
+
+	var _markVipKeyword = __webpack_require__("VkYu");
+
+	var _markVipKeyword2 = _interopRequireDefault(_markVipKeyword);
+
+	var _PriorityMap = __webpack_require__("tEcJ");
+
+	var _PriorityMap2 = _interopRequireDefault(_PriorityMap);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	// https://en.wikipedia.org/wiki/Punctuation_of_English
-	const PUNCTUATIONS = ["`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "–", "-", "=", ",", ".", "/", "<", ">", "?", "[", "]", "\\", "{", "}", "|", ";", "'", ":", "\"", "·", "！", "￥", "…", "（", "）", "—", "【", "】", "《", "》", "；", "‘", "’", "：", "“", "”", "，", "。", "？"]; /**
-	                                                                                                                                                                                                                                                                                                   * Intelligently get page's keyword, based on url, title, heading, keyword meta
-	                                                                                                                                                                                                                                                                                                   * Created by ray7551@gmail.com on 12.10 010.
-	                                                                                                                                                                                                                                                                                                   */
-
-	const PUNCTUATION = {
-	  // punctuations
-	  apostrophe: ["’", "'"],
-	  brackets: ["[", "]", "(", ")", "{", "}", "⟨", "⟩"],
-	  colon: [":"],
-	  comma: [",", "،", "、"],
-	  dash: ["-", "‐", "‒", "–", "—", "―"],
-	  ellipsis: ["…", "..."],
-	  exclamation: ["!"],
-	  period: ["."],
-	  guillemets: ["‹", "›", "«", "»"],
-	  question: ["?", "？"],
-	  quotation: ["‘", "’", "“", "”", "'", "'", "\""],
-	  semicolon: [";"],
-	  slash: ["/", "⁄"],
-	  // word dividers
-	  interpunct: ["·", "・", "･"],
-	  space: [" ", " ", " ", "	"],
-	  // typography
-	  verticalBar: ["|", "¦", "‖", "∣"]
+	const keywordType = {
+	  meta: Symbol(),
+	  title: Symbol(),
+	  h1: Symbol(),
+	  h2: Symbol(),
+	  url: Symbol()
 	};
-	/**
-	 * keyword blacklist
-	 * @notice all in lower case
-	 * @see https://en.wikibooks.org/wiki/English_in_Use/Prepositions,_Conjunctions,_and_Interjections
-	 */
-	const KEYWORD_BLACKLIST = [...PUNCTUATIONS, "i", "me", "you", "he", "she", "they", "anybody", "it", "one", "there", "that", "this", "other", "my", "your", "his", "her", "there", "own", "the", "a", "my", "more", "much", "either", "while", "meanwhile", "is", "isn't", "isnt", "am", "ain't", "aint", "are", "have", "has", "get", "gets", "got", "was", "wasnt", "no", "not", "nor", "what", "when", "who", "how", "why", "very", "so", "most", "least", "all", "only", "just", "but", "do", "doing", "did", "does", "can", "cannot", "can't",
-	// https://en.wikipedia.org/wiki/List_of_English_prepositions
-	"about", "above", "across", "after", "against", "along", "amid", "among", "around", "at", "by", "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "during", "except", "for", "from", "in", "into", "of", "off", "on", "over", "past", "through", "to", "toward", "towards", "under", "underneath", "until", "with", "without",
-	// Conjunctions
-	"and", "as", "both", "because", "even", "for", "if", "that", "then", "since", "seeing", "so", "or", "nor", "either", "neither", "than", "though", "although", "yet", "but", "except", "whether", "lest", "unless", "save", "provided", "notwithstanding", "whereas"];
-
-	class priorityMap {
-	  constructor() {
-	    this.map = new Map();
-	  }
-
-	  get orderedArray() {
-	    return [...this.map].sort((a, b) => b[1] - a[1]).map(item => ({
-	      word: item[0],
-	      confidence: item[1]
-	    }));
-	  }
-
-	  clear() {
-	    this.map.clear();
-	  }
-
-	  increaseConfidence(key, increment = 1) {
-	    key = key.toLowerCase();
-	    if (KEYWORD_BLACKLIST.includes(key) || /^\d+$/.test(key)) return;
-	    this.map.has(key) ? this.map.set(key, this.map.get(key) + increment) : this.map.set(key, increment);
-	  }
-	}
 
 	/**
 	 * @param {Url} tabUrl
@@ -2979,11 +3128,85 @@ webpackJsonp([1,5],{
 	 * @param {String} h1
 	 * @param {String[]} h2
 	 * */
+	/**
+	 * Intelligently get page's keyword, based on url, title, heading, keyword meta
+	 * Created by ray7551@gmail.com on 12.10 010.
+	 */
 	function smartKeyword(tabUrl, meta, title, h1, h2) {
-	  if (!h1 && h2.length === 1) {
-	    h1 = h2[0];
-	    h2 = [];
+	  let candidateWords = new _PriorityMap2.default(tabUrl, _const.CONFIDENCE);
+	  title = _fixSpaces(title);
+	  h1 = _fixSpaces(h1);
+	  let titleMarked = (0, _base.match)((0, _markVipKeyword2.default)(title), /《([^《》]+)》/g) || [];
+	  let h1Marked = (0, _base.match)((0, _markVipKeyword2.default)(h1), /《([^《》]+)》/g) || [];
+
+	  (0, _base.clog)('', (0, _markVipKeyword2.default)(title));
+	  [...titleMarked, ...h1Marked].forEach(matched => {
+	    if (matched[1]) candidateWords.addVipWords(matched[1]);
+	  });
+	  (0, _base.clog)('vipWords: ', JSON.stringify([...candidateWords.vipWords]));
+	  (0, _base.clog)('siteWords: ', JSON.stringify([...candidateWords.siteKeywords]));
+	  // clog(tabUrl.url, meta, title, h1, h2);
+
+	  // 1. without divide
+	  // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
+	  _matchKeywords(meta, keywordType.meta);
+	  // clog(candidateWords)
+	  if (_isQualified(candidateWords.orderedArray)) {
+	    (0, _base.clog)('use meta keywords');
+	    return candidateWords.orderedArray;
 	  }
+
+	  // 2. completely divide all string into words
+	  // get frequently appeared words as keyword array(ordered by priority)
+	  candidateWords.clear();
+	  const punctuations = (0, _lodash2.default)(_const.PUNCT_FLATTEN).reduce(_lodash2.default.add);
+	  // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
+	  const punctuationsRegex = '[' + _lodash2.default.escapeRegExp(punctuations) + '\\s]+|\\b';
+	  const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
+	  (0, _base.clog)('separate regex', SEPARATE_REGEX);
+
+	  let dividePreProcess = _lodash2.default.flow(_replaceUnderscore, _fixHyphen);
+	  title && (0, _base.filterEmptyStr)(dividePreProcess(title).split(SEPARATE_REGEX)).forEach(word => {
+	    candidateWords.increaseConfidence(word, .5 * _const.CONFIDENCE);
+	  });
+	  h1 && (0, _base.filterEmptyStr)(dividePreProcess(h1).split(SEPARATE_REGEX)).forEach(word => {
+	    candidateWords.increaseConfidence(word, .4 * _const.CONFIDENCE);
+	  });
+	  !_lodash2.default.isEmpty(h2) && h2.forEach(h2 => {
+	    // clog(h2.split(SEPARATE_REGEX))
+	    (0, _base.filterEmptyStr)(h2.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, .01 * _const.CONFIDENCE));
+	  });
+	  // @TODO divide tabUrl.url here
+
+	  (0, _base.clog)('most frequently appeared words: ', JSON.stringify(candidateWords.orderedArray));
+	  if (_isQualified(candidateWords.orderedArray)) {
+	    (0, _base.clog)('use divide keywords');
+	    return candidateWords.orderedArray;
+	  }
+
+	  // 3. divide title with common separator
+	  candidateWords.clear();
+	  const divider = (0, _lodash2.default)([..._const.PUNCT.dash, ..._const.PUNCT.verticalBar, ..._const.PUNCT.colon, ..._const.PUNCT.brackets, ..._const.PUNCT.comma, ..._const.PUNCT.question, ..._const.PUNCT.exclamation, ..._const.PUNCT.guillemets.left, ..._const.PUNCT.guillemets.right]).reduce(_lodash2.default.add);
+	  const dividerStr = '[' + _lodash2.default.escapeRegExp(divider) + ']+|-{2,}';
+	  const TITLE_DIVIDE_REGEXP = _getDividerRegex(dividerStr);
+	  (0, _base.clog)(TITLE_DIVIDE_REGEXP);
+	  let preProcess = _lodash2.default.flow([_replaceUnderscore, _replaceSpaces, _fixHyphen]);
+	  let titleKeywords = (0, _base.filterEmptyStr)(preProcess(title).split(TITLE_DIVIDE_REGEXP));
+	  (0, _base.clog)('titleKeywords:', titleKeywords);
+	  _matchKeywords(titleKeywords, keywordType.title);
+
+	  if (_isQualified(candidateWords.orderedArray)) {
+	    (0, _base.clog)('use title keywords');
+	    return candidateWords.orderedArray;
+	  }
+	  (0, _base.clog)('vip array', candidateWords.vipArray);
+	  if (_isQualified(candidateWords.vipArray)) {
+	    (0, _base.clog)('use vip keywords');
+	    return candidateWords.vipArray;
+	  }
+
+	  (0, _base.clog)('failed to get smartKeyword');
+	  return _const.EMPTY_KEYWORDS;
 
 	  function _matchKeywords(keywords, ignore) {
 	    var _iteratorNormalCompletion = true;
@@ -2994,23 +3217,28 @@ webpackJsonp([1,5],{
 	      for (var _iterator = keywords[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	        let keyword = _step.value;
 
-	        if (ignore !== 'h1' && h1.includeString(keyword)) {
-	          candidateWords.increaseConfidence(keyword, _keyword.CONFIDENCE);
+	        if (ignore !== keywordType.h1 && h1.includeString(keyword)) {
+	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE);
 	        }
-	        if (ignore !== 'title' && title.includeString(keyword)) {
-	          candidateWords.increaseConfidence(keyword, _keyword.CONFIDENCE);
+	        if (ignore !== keywordType.title && title.includeString(keyword)) {
+	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE);
 	        }
-	        if (ignore !== 'url' && tabUrl.url.includeString(keyword)) {
-	          candidateWords.increaseConfidence(keyword, _keyword.CONFIDENCE);
-	        }
-	        ignore !== 'url' && tabUrl.queryPairs.map(pair => {
-	          if (pair.val.includeString(keyword)) {
-	            candidateWords.increaseConfidence(keyword, .1 * _keyword.CONFIDENCE);
+	        ignore !== keywordType.meta && meta.forEach(metaKeyword => {
+	          if (metaKeyword.includeString(keyword, true)) {
+	            candidateWords.increaseConfidence(keyword, _const.CONFIDENCE);
 	          }
 	        });
-	        ignore !== 'h2' && h2.forEach(function (h2) {
+	        if (ignore !== keywordType.url && tabUrl.url.includeString(keyword)) {
+	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE);
+	        }
+	        ignore !== keywordType.url && tabUrl.queryPairs.map(pair => {
+	          if (pair.val.includeString(keyword, pair.val.length >= 2)) {
+	            candidateWords.increaseConfidence(keyword, .1 * _const.CONFIDENCE);
+	          }
+	        });
+	        ignore !== keywordType.h2 && h2.forEach(function (h2) {
 	          if (h2.includeString(keyword)) {
-	            candidateWords.increaseConfidence(keyword, .01 * _keyword.CONFIDENCE);
+	            candidateWords.increaseConfidence(keyword, .01 * _const.CONFIDENCE);
 	          }
 	        });
 	      }
@@ -3030,20 +3258,8 @@ webpackJsonp([1,5],{
 	    }
 	  }
 
-	  function _isQualified(orderedArray, minConfidence = _keyword.CONFIDENCE) {
+	  function _isQualified(orderedArray, minConfidence = _const.MIN_CONFIDENCE) {
 	    return !_lodash2.default.isEmpty(orderedArray) && orderedArray[0].confidence >= minConfidence;
-	  }
-
-	  let candidateWords = new priorityMap();
-
-	  // 1. without divide
-	  // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
-	  _matchKeywords(meta);
-	  // clog(candidateWords)
-
-	  if (_isQualified(candidateWords.orderedArray)) {
-	    (0, _base.clog)('use meta keywords');
-	    return candidateWords.orderedArray;
 	  }
 
 	  function _getDividerRegex(divider, modifier) {
@@ -3053,66 +3269,175 @@ webpackJsonp([1,5],{
 
 	  function _replaceSpaces(str, replace = '|') {
 	    replace = `$1${ replace }$2`;
-	    return str.replace(/(\W)\s+(\W)/g, replace).replace(/(\W)\s+(\w)/g, replace).replace(/(\w)\s+(\W)/g, replace);
+	    return str.replace(/(\W)\s+(\W)/g, replace).replace(/(\W)\s+([a-z])/ig, replace).replace(/([a-z])\s+(\W)/ig, replace);
 	  }
 
-	  function _replaceHyphen(str, replace = '') {
+	  function _replaceUnderscore(str, replace = '|') {
 	    replace = `$1${ replace }$2`;
-	    let hyphens = PUNCTUATION.dash.reduce((hyphens, current) => {
+	    return str.replace(/(\W)_+(\W)/g, replace).replace(/(\W)_+(\w)/g, replace).replace(/(\w)_+(\W)/g, replace);
+	  }
+
+	  /**
+	   * replace multiple spaces and return to one space
+	   * */
+	  function _fixSpaces(str) {
+	    return str.replace(/\s+/g, ' ').replace(/(\s+No\.)\s+(\d+)\b/ig, ' No.$2');
+	  }
+	  function _fixHyphen(str, replace = '') {
+	    replace = `$1${ replace }$2`;
+	    let hyphens = _const.PUNCT.dash.reduce((hyphens, current) => {
 	      hyphens += current;
 	      return hyphens;
 	    }, '');
 	    let regex = _getDividerRegex(`(\w)[${ hyphens }]+(\w)`, 'g');
 	    return str.replace(regex, replace);
 	  }
-
-	  // 2. completely divide all string into words
-	  // get frequently appeared words as keyword array(ordered by priority)
-	  candidateWords.clear();
-	  const punctuations = PUNCTUATIONS.reduce((str, current) => {
-	    str += current;
-	    return str;
-	  }, '');
-	  // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
-	  const punctuationsRegex = '[' + _lodash2.default.escapeRegExp(punctuations) + '\\s]+|\\b';
-	  const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex);
-	  (0, _base.clog)('separate regex', SEPARATE_REGEX);
-
-	  title && (0, _base.filterEmptyStr)(title.replace(/(\w)-+(\w)/g, '$1$2').split(SEPARATE_REGEX)).forEach(word => {
-	    candidateWords.increaseConfidence(word, .6 * _keyword.CONFIDENCE);
-	  });
-	  h1 && (0, _base.filterEmptyStr)(h1.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, .3 * _keyword.CONFIDENCE));
-	  !_lodash2.default.isEmpty(h2) && h2.forEach(h2 => {
-	    // clog(h2.split(SEPARATE_REGEX))
-	    (0, _base.filterEmptyStr)(h2.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, .01 * _keyword.CONFIDENCE));
-	  });
-	  // @TODO divide tabUrl.url here
-
-	  if (_isQualified(candidateWords.orderedArray)) {
-	    (0, _base.clog)('use divide keywords');
-	    return candidateWords.orderedArray;
-	  }
-
-	  // 3. divide title with common separator
-	  candidateWords.clear();
-	  const divider = (0, _lodash2.default)([...PUNCTUATION.dash, ...PUNCTUATION.verticalBar, ...PUNCTUATION.colon, ...PUNCTUATION.brackets, ...PUNCTUATION.interpunct, ...PUNCTUATION.comma, ...PUNCTUATION.question]).reduce(_lodash2.default.add);
-	  const dividerStr = '[' + _lodash2.default.escapeRegExp(divider) + ']+|-{2,}';
-	  const TITLE_DIVIDE_REGEXP = _getDividerRegex(dividerStr);
-	  (0, _base.clog)(TITLE_DIVIDE_REGEXP);
-	  let titleKeywords = (0, _base.filterEmptyStr)(_replaceHyphen(_replaceSpaces(title)).split(TITLE_DIVIDE_REGEXP));
-	  (0, _base.clog)('titleKeywords:', titleKeywords);
-	  _matchKeywords(titleKeywords, 'title');
-
-	  if (!_lodash2.default.isEmpty(candidateWords.orderedArray)) {
-	    (0, _base.clog)('use title keywords');
-	    return candidateWords.orderedArray;
-	  }
-
-	  (0, _base.clog)('failed to get smartKeyword');
-	  return _keyword.EMPTY_KEYWORDS;
 	}
 
 	exports.default = smartKeyword;
+
+/***/ },
+
+/***/ "VkYu":
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.markName = exports.markEnds = exports.markEnWord = exports.markUpperWord = exports.markVipKeyword = undefined;
+
+	var _const = __webpack_require__("+9hk");
+
+	// ASCII characters those not break word meaning
+	const ASCII_CHAR = String.raw`a-zA-Z\d~&*_+'\-`; /**
+	                                                  * mark very important keywords, which are:
+	                                                  * 1. english words(at least 2 [a-zA-Z] characters) surrounded by CJK characters
+	                                                  * 2. uppercase words(at least first 2 character are uppercase)
+	                                                  * @author ray7551@gmail.com
+	                                                  */
+
+	const ASCII_PUNCT = String.raw`/,\.<>\?\`!@#\$%\^=";\:\[\]{}\|\(\)\\`;
+	const lGuimets = _const.PUNCT.guillemets.left.reduce((all, current) => {
+	  all += current;
+	  return all;
+	}, '');
+	const rGuimets = _const.PUNCT.guillemets.right.reduce((all, current) => {
+	  all += current;
+	  return all;
+	}, '');
+
+	let markUpperWord = function markUpperWord(str) {
+	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}]|[${CJK_PUNCT}。.\s])([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)([^${CJK}A-Z${rGuimets}]|[${CJK_PUNCT}.\s]|$)`, 'g'); // ?《YEAH》。MAGIC 《LEAP》    ?《YEAH》.MAGIC 《LEAP》
+	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}]|\b)([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)([^${CJK}A-Z${rGuimets}]|\b|$)`, 'g'); // 的《MAX》是    Is 《《MAGIC》》 leap
+	  // (?<![a-zA-Z‹«《〈『])\b([A-Z]{2,}[a-zA-Z\d~@&*()_+'\-]*(?:\s+[A-Z]{2,}[a-zA-Z\d~@&*()_+'\-]*)*)\b([^A-Z›»》〉』。]|[。]|$)
+	  // console.log(upperSubstrRegex)
+	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}]|\b)\b([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)\b([^${CJK}A-Z${rGuimets}]|$)`, 'g'); // should ignore upper word surrounded by CJK characters
+	  // return str.replace(upperSubstrRegex, '$1《$2》$3');
+	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}])([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)\b`, 'g');
+	  // return str.replace(upperSubstrRegex, '$1《$2》');
+
+	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}])(\s*)([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)\b(.*)`, 'g');
+	  // return str.replace(upperSubstrRegex, (...args) => {
+	  //   let p1 = args[1], p2 = args[2] || '', p3 = args[3], p4 = args[4] || '', offset = args[5], string = args[6];
+	  //   if(p4 && new RegExp(`[${CJK}]`).test(p4)) {
+	  //     console.log(string);
+	  //     return `${p1}${p2}${p3}${p4}`;
+	  //   }
+	  //   // avoid 服TAXI MAN => 服TAXI 《MAN》
+	  //   if (/\s/.test(p1)) {
+	  //     return `${p1}${p2}${p3}${p4}`;
+	  //   }
+	  //   return `${p1}${p2}《${p3}》${p4}`;
+	  // });
+
+	  let upperSubstrRegex = new RegExp(String.raw`(^|[^${ _const.CJK }a-zA-Z${ lGuimets }])([A-Z]{2,}[${ ASCII_CHAR }]*(?:\s+[A-Z]{2,}[${ ASCII_CHAR }]*)*)\b(?![${ _const.CJK }])`, 'g'); // ((\s+(?![A-Z]))?)
+	  return str.replace(upperSubstrRegex, '$1《$2》');
+	  // return str.replace(upperSubstrRegex, (match, p1, p2, p3='') => {
+	  //   return `${p1}《${p2}》${p3}`;
+	  // });
+	};
+
+	let markEnWord = function markEnWord(str) {
+	  // let vipSubstrRegex = new RegExp(String.raw`(^|[${CJK}${CJK_PUNCT}${rGuimets}]|\s)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)([${CJK}${CJK_PUNCT}${lGuimets}]|\s)`, 'ig');
+	  let vipSubstrRegex0 = new RegExp(String.raw`(^)(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)\b(\s*)([${ _const.CJK }])`, 'ig');
+	  let vipSubstrRegex1 = new RegExp(String.raw`([${ _const.CJK }])(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)\b`, 'ig');
+	  let vipSubstrRegex2 = new RegExp(String.raw`([${ rGuimets }${ _const.CJK_PUNCT }])(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)\b([^${ ASCII_PUNCT }\s])`, 'ig');
+	  let modify = function modify(match, p1, p2, p3, p4) {
+	    return p2 ? `${ p1 }${ p2 }《${ p3 }》${ p4 }` : `${ p1 }《${ p3 }》${ p4 }`;
+	  };
+	  return str.replace(vipSubstrRegex0, (match, p1, p2 = '', p3, p4 = '', p5) => {
+	    return `${ p1 }${ p2 }《${ p3 }》${ p4 }${ p5 }`;
+	  }).replace(vipSubstrRegex1, (match, p1, p2, p3) => {
+	    return p2 ? `${ p1 }${ p2 }《${ p3 }》` : `${ p1 }《${ p3 }》`;
+	  }).replace(vipSubstrRegex2, modify);
+	};
+
+	let markEnds = function markEnds(str) {
+	  let beginRegex = new RegExp(String.raw`^([${ ASCII_CHAR }]+)》`);
+	  let tailRegex = new RegExp(String.raw`《([${ ASCII_CHAR }]+)$`);
+	  return str.replace(beginRegex, '《$1》').replace(tailRegex, '《$1》');
+	};
+
+	let markName = function markName(str) {
+	  let validCharacter = String.raw`a-zÀ-ÿ`;
+	  let name = String.raw`[A-Z][${ validCharacter }]+`;
+	  let subElement = String.raw`(?:[Nn]o.\s?\d+)|(?:${ name })`;
+	  let nameRegex = new RegExp(String.raw`(^|[^${ _const.CJK }a-zA-Z${ lGuimets }])((?:${ subElement })(?:\s+(?:${ subElement }))+)\b(?![${ _const.CJK }])`, 'g'); // ((\s+(?![A-Z]))?)
+	  return str.replace(nameRegex, (match, p1, p2) => {
+	    let dividedName = p2.split(/\s+/g);
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
+
+	    try {
+	      for (var _iterator = dividedName[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	        let name = _step.value;
+
+	        if (_const.KEYWORD_BLACKLIST.includes(name.toLowerCase())) return match;
+	      }
+	    } catch (err) {
+	      _didIteratorError = true;
+	      _iteratorError = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion && _iterator.return) {
+	          _iterator.return();
+	        }
+	      } finally {
+	        if (_didIteratorError) {
+	          throw _iteratorError;
+	        }
+	      }
+	    }
+
+	    return `${ p1 }《${ p2 }》`;
+	  });
+	};
+
+	// 《p1》\s*《p2》 -> 《p1\s?p2》
+	let concat = function concat(str) {
+	  return str.replace(/》(\s*)《/g, ' ');
+	};
+
+	let markVipKeyword = function markVipKeyword(str) {
+	  return concat(markEnWord(markName(markUpperWord(str))));
+	};
+
+	exports.default = markVipKeyword;
+	exports.markVipKeyword = markVipKeyword;
+	exports.markUpperWord = markUpperWord;
+	exports.markEnWord = markEnWord;
+	exports.markEnds = markEnds;
+	exports.markName = markName;
+
+/***/ },
+
+/***/ "Kyhl":
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__.p + "js/contentScript.js";
 
 /***/ }
 

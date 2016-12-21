@@ -5,7 +5,6 @@ webpackJsonp([2,5],{
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
-	// require('babel-runtime/core-js/promise').default = require('bluebird');
 	global.Promise = __webpack_require__("qgje");
 
 	__webpack_require__("zj96");
