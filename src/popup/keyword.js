@@ -4,7 +4,7 @@ import {clog, filterEmptyStr} from "../common/base.js";
 import Engine from '../common/db/Engine';
 import Url from '../common/Url';
 import ChromeAsync from '../common/ChromeAsync';
-import {CONFIDENCE, MIN_CONFIDENCE, EMPTY_KEYWORDS} from './smartKeyword/const';
+import {CONFIDENCE, EMPTY_KEYWORDS} from './smartKeyword/const';
 import smart from './smartKeyword/smartKeyword';
 
 let chromeAsync = new ChromeAsync(chrome);
@@ -47,8 +47,26 @@ async function getQueryString(tabUrl) {
     return EMPTY_KEYWORDS;
   }
   let engine = await Engine.get(keys[0]);
+
+  try {
+    engine.resultPageRegex = engine.resultPageRegex || _.escapeRegExp(new Url(engine.url).pathName);
+    if(engine.resultPageRegex) {
+      let resultPageRegex = new RegExp(engine.resultPageRegex);
+      clog(resultPageRegex)
+      if(!resultPageRegex.test(tabUrl.url)) {
+        clog('Matched a engine, but not a result page. resultPageRegex: ', resultPageRegex);
+        return EMPTY_KEYWORDS;
+      }
+    }
+  } catch(e) {
+    clog('Error while try to test url', e);
+  }
   let searchKey = (new Url(engine.url)).searchKey;
-  let searchString = tabUrl.getQueryVal(searchKey);
+  let searchStrings = _.filter(tabUrl.queryPairs, {key: searchKey});
+  let searchString = /google/.test(tabUrl.host) && searchStrings.length
+    ? _.last(searchStrings).val
+    : searchStrings[0].val;
+  clog('match searchString from url:', searchString);
   return searchString ? [{
     word: decodeURIComponent(searchString),
     confidence: CONFIDENCE

@@ -6,7 +6,8 @@ const CONFIG = {
       // view-source:https://www.google.com/supported_domains
       hostName: 'google',
       hosts: ['ipv4.Google.com', 'ipv6.google.com', 'ipv6.google.com.hk', 'www.gOOgle.com'],
-      url: 'https://www.google.com.hk/search?q=%s'
+      url: 'https://www.google.com.hk/search?q=%s',
+      resultPageRegex: /\/(search|webhp)/.source
     },
     baidu: {
       displayName: '百度',

@@ -224,7 +224,8 @@ const CONFIG = {
         'www.google.co.zw',
         'www.google.cat'
       ],
-      url: 'https://www.google.com.hk/search?q=%s'
+      url: 'https://www.google.com.hk/search?q=%s',
+      resultPageRegex: /\/(search|webhp)/.source // it should be a valid regex source, if not set, will use .url.pathname to match
     },
     aol: {
       order: 400,
@@ -475,7 +476,8 @@ const CONFIG = {
       displayName: 'stackoverflow',
       open: true,
       hosts: ['stackoverflow.com'],
-      url: 'https://stackoverflow.com/search?q=%s'
+      url: 'https://stackoverflow.com/search?q=%s',
+      resultPageRegex: /\/search/.source
     },
     //Shopping
     etao: {
