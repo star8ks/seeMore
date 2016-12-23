@@ -135,7 +135,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2) {
   }
 
   function _isQualified(orderedArray, minConfidence = MIN_CONFIDENCE) {
-    return !_.isEmpty(orderedArray) && orderedArray[0].confidence >= minConfidence;
+    return !_.isEmpty(orderedArray) && orderedArray[0].confidence > minConfidence;
   }
 
   function _getDividerRegex(divider, modifier) {
