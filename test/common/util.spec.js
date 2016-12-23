@@ -1,13 +1,5 @@
-/**
- * Created by ray7551@gmail.com on 12.06 006.
- */
-const chai = require('chai');
-const dirtyChai = require('dirty-chai');
+import '../dirtyShould';
 import {isEmpty, filterEmptyStr, getValueDeep, match} from '../../src/common/base';
-
-chai.config.includeStack = true;
-chai.use(dirtyChai);
-var should = chai.should();
 
 describe('util', () => {
   describe('isEmpty', () => {

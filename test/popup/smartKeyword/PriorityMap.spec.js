@@ -1,11 +1,6 @@
-const chai = require('chai');
-const dirtyChai = require('dirty-chai');
+import '../../dirtyShould';
 import Url from '../../../src/common/Url';
 import {StringMap, PriorityMap} from '../../../src/popup/smartKeyword/PriorityMap';
-
-chai.config.includeStack = true;
-chai.use(dirtyChai);
-var should = chai.should();
 
 describe('StringMap', () => {
   describe('set', () => {

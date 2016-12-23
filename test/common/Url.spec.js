@@ -1,10 +1,5 @@
-let chai = require('chai');
-let dirtyChai = require('dirty-chai');
+import '../dirtyShould';
 import Url from '../../src/common/Url';
-
-chai.config.includeStack = true;
-chai.use(dirtyChai);
-var should = chai.should();
 
 describe('Url', () => {
   describe('instance properties', () => {
