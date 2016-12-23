@@ -17,7 +17,7 @@ function run($meta, $title, $h1, $h2) {
       return $el.offsetParent;
     });
   };
-  var metaKeywords = $meta ? trimFilter($meta.content.split(',')) : [];
+  var metaKeywords = $meta ? trimFilter($meta.content.split(/[,，]+/)) : [];
   var titleKeywords = $title ? $title.innerText.trim() : '';
   var h1 = trimFilter(visibleFilter($h1).map(function(h1) {
     return h1.innerText;
