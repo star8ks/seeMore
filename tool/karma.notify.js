@@ -73,7 +73,7 @@
       console.log('All ' + __karmaResults.length + ' tests PASSED!');
     } else {
       notify(
-        __karmaResults.log.length + ' test FAILED ' + currentTime,
+        __karmaResults.log.length + ' of ' + __karmaResults.length + ' test FAILED ' + currentTime,
         __karmaResults.log.join('\n'),
         icon.fail
       );
