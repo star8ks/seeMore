@@ -1,7 +1,9 @@
+import * as chai from 'chai';
 import DB from '../../../src/common/db/DB';
 import localforage from '../../../src/common/localforage-bluebird';
 
-const expect = require('chai').expect;
+const expect = chai.expect;
+chai.config.includeStack = true;
 
 /**
  * Created by ray7551@gmail.com on 16-10-27.

@@ -1,8 +1,8 @@
+import * as chai from 'chai';
 import DB from '../../../src/common/db/DB';
 import Engine from '../../../src/common/db/Engine';
 import CONFIG from '../../../src/common/config.dev';
 
-var chai = require('chai');
 var expect = chai.expect;
 chai.config.includeStack = true;
 
