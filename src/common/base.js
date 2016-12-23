@@ -2,12 +2,51 @@ import includeString from './base/includeString';
 import minErr from './base/minErr';
 import clog from './base/clog';
 
-function $(selector) {
-  return document.querySelector(selector);
+/**
+ * document.querySelector wrapper
+ * @usage
+ * let id = 'fancy poo';
+ * $`#${id}`
+ * */
+function $(selector, ...vars) {
+  return document.querySelector(String.raw(selector, ...vars));
 }
 
-function $all(selector) {
-  return document.querySelectorAll(selector);
+/**
+ * document.querySelectorAll wrapper
+ * @usage
+ * let class = 'fancy 💩';
+ * $all`.${class}`
+ * */
+function $all(selector, ...vars) {
+  return Array.prototype.slice.call(
+    document.querySelectorAll(
+      String.raw(selector, ...vars)
+    )
+  );
+}
+
+/**
+ * Make multiline and commentable regex possible
+ * @caution it will compress all spaces
+ * @caution You should escape the str first, and don't forget:
+ * /^[.*-(]+$/.test('.*-'); // SyntaxError: Invalid regular expression: /^[.*-(]+$/: Range out of order in character class
+ * You should escape '-' within a character set, but lodash.escapeRegExp will not do this
+ * @why
+ new RegExp('\d').test('4'); // false
+ new RegExp('\\d').test('4'); // true
+ // use regexp can avoid this
+ new RegExp(regex`\d`).test('4'); // true
+ * @usage
+ regex`\s   \u000A
+   \w # comment
+   [-/]
+ `
+ which will output: \s\u000A\w[-/]
+ */
+function regex(str, ...values) {
+  // TODO should escape str here?
+  return String.raw(str, ...values).replace(/#.*$/mg, '').replace(/\s+/mg, '');
 }
 
 function onceLoaded(onLoad) {
@@ -162,12 +201,14 @@ var util = {
   filterEmptyStr: filterEmptyStr,
   debounce: debounce,
   getMouseButton: getMouseButton,
-  matchAll: match
+  matchAll: match,
+  regex: regex
 };
 
 export default util;
 export {
   $, $all, onceLoaded, getCurrentTab,
-  isEmpty, filterEmptyStr, debounce, getMouseButton, getValueDeep, match,
+  isEmpty, filterEmptyStr, debounce, getMouseButton,
+  getValueDeep, match, regex,
   includeString, clog, minErr
 };

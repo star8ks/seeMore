@@ -55,17 +55,17 @@ Links.prototype.updateHref = function (searchWord) {
 
 onceLoaded(getCurrentTab).then(function onLoad(tab) {
   var tabUrl = new Url(tab.url);
-  var $keyword = $('#keyword');
-  var $translation = $('.translation');
+  var $keyword = $`#keyword`;
+  var $translation = $`.translation`;
   var links;
-  var engineListTpl = $('#tpl-engines').innerHTML.trim();
-  var $enginesSection = $('.engines');
+  var engineListTpl = $`#tpl-engines`.innerHTML.trim();
+  var $enginesSection = $`.engines`;
 
   $keyword.focus();
   $keyword.addEventListener('input', _.debounce(function (e) {
     //if press enter, search word using first enabled engine
     if(e.key === 'Enter') {
-      $('.se:not(.disable)').dispatchEvent(new MouseEvent(
+      $`.se:not(.disable)`.dispatchEvent(new MouseEvent(
         'click',
         {button: 0}
       ));
@@ -75,9 +75,9 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
 
   Render.openEngines(engineListTpl).then(function (rendered) {
     $enginesSection.innerHTML = rendered;
-    links = new Links($all('.engines .icon-link'));
+    links = new Links($all`.engines .icon-link`);
   }).then(function () {
-    new Mason($('.engines'), {
+    new Mason($`.engines`, {
       itemSelector: '.pin',
       columnNum: 2
     });
