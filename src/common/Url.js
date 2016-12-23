@@ -74,14 +74,17 @@ var Url = (function () {
       },
       queryPairs: {
         get: function () {
-          var pairs = this.url.match(/([^#?&]+)=([^&]*)/g);
-          return pairs ? pairs.map(function (pair) {
-            var group = pair.split('=');
+          var regex = /([^#?&]+)=([^&?#]*)/g;
+          var pairs = [], tempResult;
+          while (tempResult = regex.exec(this.url)) {
+            pairs.push(tempResult);
+          }
+          return pairs.map(function (pair) {
             return {
-              key: group[0],
-              val: decodeURIComponent(group[1])
+              key: pair[1],
+              val: decodeURIComponent(pair[2] || '').replace(/\+/g, ' ')
             }
-          }) : [];
+          });
         },
         enumerable: true
       },
@@ -94,6 +97,13 @@ var Url = (function () {
       isGoogleFail: {
         get: function () {
           return Url.GOOGLE_FAILED_REGEX.test(this.url);
+        },
+        enumerable: true
+      },
+      pathName: {
+        get: function () {
+          var match = this.url.match(/https?:\/\/[^\/]*(\/[^?]+)/);
+          return match ? match[1] : '/';
         },
         enumerable: true
       }
@@ -111,7 +121,7 @@ var Url = (function () {
     },
 
     getQueryVal: function (key) {
-      var val = this.url.match(new RegExp(key + "=([^\&]*)(\&?)", 'i'));
+      var val = this.url.match(new RegExp('[#?&]' + key + "=([^#?&]*)[#?&]", 'i'));
       return val ? val[1].replace(/\+/g, ' ') : null;
     }
   };
