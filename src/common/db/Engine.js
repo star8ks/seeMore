@@ -21,8 +21,6 @@ Engine.getSortedAll = function (assoc, filter) {
       return engineA.order - engineB.order;
     });
     return assoc ? DB.assoc(engines) : engines;
-  }).catch(function (err) {
-    throw new Error('Error in engine.getAll: ' + err);
   });
 };
 /**
@@ -40,8 +38,6 @@ Engine.getOpen = function (assoc, filter) {
       return engineA.order - engineB.order;
     });
     return assoc ? DB.assoc(openEngines) : openEngines;
-  }).catch(function (err) {
-    throw new Error('Error in engine.getOpen: ' + err);
   });
 };
 
