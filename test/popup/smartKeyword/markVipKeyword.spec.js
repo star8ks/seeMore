@@ -1,10 +1,5 @@
-const chai  = require('chai');
-const dirtyChai = require('dirty-chai');
+import '../../dirtyShould';
 import {markVipKeyword, markUpperWord, markEnWord, markEnds, markName} from '../../../src/popup/smartKeyword/markVipKeyword';
-
-chai.config.includeStack = true;
-chai.use(dirtyChai);
-var should = chai.should();
 
 describe('mark functions', () => {
   describe('markUpperWord', () => {
@@ -94,7 +89,13 @@ describe('mark functions', () => {
       markEnWord('终推流， fasion服').should.equal('终推流， 《fasion》服');
     });
     it('should not match words surrounded by CJK punct and ASCII punct', () => {
-      markEnWord('骗子吗？is MAGIC LEAP a liar?').should.equal('骗子吗？is MAGIC LEAP a liar?');
+      markEnWord('骗子吗？MAGIC LEAP?').should.equal('骗子吗？MAGIC LEAP?');
+    });
+    it('should match words surrounded by CJK punct', () => {
+      markEnWord('骗子吗？MAGIC LEAP？').should.equal('骗子吗？《MAGIC LEAP》？');
+    });
+    it('should match words surrounded by low dash and CJK character', () => {
+      markEnWord('腾讯网_NBA中国数字媒体独家官方合作伙伴').should.equal('腾讯网_《NBA》中国数字媒体独家官方合作伙伴');
     });
     it('should not match whole english string', () => {
       markEnWord('is MAGIC LEAP a liar?').should.equal('is MAGIC LEAP a liar?');
@@ -107,6 +108,7 @@ describe('mark functions', () => {
       markEnWord('YEAH骗子吗').should.equal('《YEAH》骗子吗');
       markEnWord('骗子吗 LIAR').should.equal('骗子吗 《LIAR》');
       markEnWord('YEAH 骗子吗').should.equal('《YEAH》 骗子吗');
+      markEnWord('《NBA》_腾讯体育_腾讯网').should.equal('《NBA》_腾讯体育_腾讯网');
     });
   });
   describe('markEnds', () => {
@@ -122,6 +124,14 @@ describe('mark functions', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody》 full');
       markName('A Grammar of the Latin Language: For the Use of Schools and Colleges').should.equal('A Grammar of the 《Latin Language》: For the Use of Schools and Colleges');
     });
+    it('should ignore space and _- between names', () => {
+      markName('javascript - Mocha_Chai expect.to.throw not catching thrown errors').should.equal('javascript - 《Mocha_Chai》 expect.to.throw not catching thrown errors');
+      markName('javascript - Mocha-Chai expect.to.throw not catching thrown errors').should.equal('javascript - 《Mocha-Chai》 expect.to.throw not catching thrown errors');
+    });
+    it('should ignore space and / between names', () => {
+      markName('javascript - Mocha/Chai expect.to.throw not catching thrown errors').should.equal('javascript - 《Mocha》/《Chai》 expect.to.throw not catching thrown errors');
+      markName('javascript - Mocha / Chai expect.to.throw not catching thrown errors').should.equal('javascript - 《Mocha》 / 《Chai》 expect.to.throw not catching thrown errors');
+    });
     it('should mark words like No.3', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody no.3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody no.3》 full');
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody No.3').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody No.3》');
@@ -130,6 +140,9 @@ describe('mark functions', () => {
     });
     it('should not mark all upper words', () => {
       markName('is MAGIC LEAP EXT a liar').should.equal('is MAGIC LEAP EXT a liar');
+    });
+    it('should not mark single name', () => {
+      markName('is MAGIC lie').should.equal('is MAGIC lie');
     });
     it('should ignore spaces between No. and numbers', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody no. 3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody no. 3》 full');

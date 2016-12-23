@@ -1,13 +1,15 @@
 /**
  * mark very important keywords, which are:
- * 1. english words(at least 2 [a-zA-Z] characters) surrounded by CJK characters
- * 2. uppercase words(at least first 2 character are uppercase)
+ * 1. English words(at least 2 [a-zA-Z] characters) surrounded by CJK characters
+ * 2. Uppercase words(at least first 2 character are uppercase)
+ * 3. Names(at least 2 words, and every word has capitalized first letter)
  * @author ray7551@gmail.com
  */
+import {regex} from '../../common/base';
 import {CJK, CJK_PUNCT, PUNCT, KEYWORD_BLACKLIST} from './const';
 // ASCII characters those not break word meaning
-const ASCII_CHAR = String.raw`a-zA-Z\d~&*_+'\-`;
-const ASCII_PUNCT = String.raw`/,\.<>\?\`!@#\$%\^=";\:\[\]{}\|\(\)\\`;
+const ASCII_CHAR = String.raw`a-zA-Z\d~&*+'\-`;
+const ASCII_PUNCT = String.raw`/_,\.<>\?\`!@#\$%\^=";\:\[\]{}\|\(\)\\`;
 const lGuimets = PUNCT.guillemets.left.reduce((all, current) => {
   all += current;
   return all;
@@ -50,17 +52,20 @@ let markUpperWord = function (str) {
 
 let markEnWord = function (str) {
   // let vipSubstrRegex = new RegExp(String.raw`(^|[${CJK}${CJK_PUNCT}${rGuimets}]|\s)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)([${CJK}${CJK_PUNCT}${lGuimets}]|\s)`, 'ig');
-  let vipSubstrRegex0 = new RegExp(String.raw`(^)(\s*)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)\b(\s*)([${CJK}])`, 'ig');
+  let vipSubstrRegex0 = new RegExp(String.raw`(^)(\s*)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)(_*)\b(\s*|[${ASCII_PUNCT}]*)([${CJK}])`, 'ig');
   let vipSubstrRegex1 = new RegExp(String.raw`([${CJK}])(\s*)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)\b`, 'ig');
   let vipSubstrRegex2 = new RegExp(String.raw`([${rGuimets}${CJK_PUNCT}])(\s*)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)\b([^${ASCII_PUNCT}\s])`, 'ig');
+  let vipSubstrRegex3 = new RegExp(String.raw`([${ASCII_PUNCT}])(\s*)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)(_*)\b(\s*|[${ASCII_PUNCT}]*)([${CJK}])`, 'ig');
   let modify = function(match, p1, p2, p3, p4) {
     return p2 ? `${p1}${p2}《${p3}》${p4}` : `${p1}《${p3}》${p4}`;
   };
-  return str.replace(vipSubstrRegex0, (match, p1, p2='', p3, p4='', p5) => {
-    return `${p1}${p2}《${p3}》${p4}${p5}`;
+  return str.replace(vipSubstrRegex0, (match, p1, p2='', p3, p4='', p5='', p6) => {
+    return `${p1}${p2}《${p3}》${p4}${p5}${p6}`;
   }).replace(vipSubstrRegex1, (match, p1, p2, p3) => {
     return p2 ? `${p1}${p2}《${p3}》` : `${p1}《${p3}》`;
-  }).replace(vipSubstrRegex2, modify);
+  }).replace(vipSubstrRegex2, modify).replace(vipSubstrRegex3, (match, p1, p2='', p3, p4='', p5='', p6) => {
+    return `${p1}${p2}《${p3}》${p4}${p5}${p6}`;
+  });
 };
 
 let markEnds = function (str) {
@@ -72,12 +77,33 @@ let markEnds = function (str) {
 let markName = function (str) {
   let validCharacter = String.raw`a-zÀ-ÿ`;
   let name = String.raw`[A-Z][${validCharacter}]+`;
-  let subElement = String.raw`(?:[Nn]o.\s?\d+)|(?:${name})`;
-  let nameRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}])((?:${subElement})(?:\s+(?:${subElement}))+)\b(?![${CJK}])`, 'g');// ((\s+(?![A-Z]))?)
-  return str.replace(nameRegex, (match, p1, p2) => {
+  let subElement = regex`(?:[Nn]o.\s?\d+)|(?:${name})`;
+  let nameRegex1 = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}])((?:${subElement})(?:\s+(?:${subElement}))+)\b(?![${CJK}])`, 'g');// ((\s+(?![A-Z]))?)
+  // /[A-Z][a-z]+\s*[-_/]\s*[A-Z][a-z]+/.test('javascript - Mocha / Chai expect.se')
+  let nameRegex2 = new RegExp(regex`(^|[^${CJK}a-zA-Z${lGuimets}])((?:${subElement})(?:\s*[-_/]\s*(?:${subElement}))+)(?![${CJK}])`, 'g');
+  // let nameRegex2 = new RegExp(regex`
+  // (^|[-_/]|\s)
+  // ( # p2: the 《name》
+  //   (?:${subElement})
+  //   (?:
+  //     \s+(?:${subElement})
+  //   )*
+  // )
+  // (?=[-_/]|$)
+  // `, 'g');
+  return str.replace(nameRegex1, (match, p1, p2) => {
     let dividedName = p2.split(/\s+/g);
     for(let name of dividedName) {
       if(KEYWORD_BLACKLIST.includes(name.toLowerCase())) return match;
+    }
+    return `${p1}《${p2}》`;
+  }).replace(nameRegex2, (match, p1='', p2, p3='') => {
+    let dividedName = p2.split(/[-_/]+|\s+/g);
+    for(let name of dividedName) {
+      if(KEYWORD_BLACKLIST.includes(name.toLowerCase())) return match;
+    }
+    if(/\//.test(p2)) {
+      p2 = p2.replace(/(\s*)\/(\s*)/, '》$1/$2《');
     }
     return `${p1}《${p2}》`;
   });
@@ -89,7 +115,7 @@ let concat = function (str) {
 };
 
 let markVipKeyword = function (str) {
-  return concat(markEnWord(markName(markUpperWord(str))));
+  return concat(markName(markEnWord(markUpperWord(str))));
 };
 
 export default markVipKeyword;
