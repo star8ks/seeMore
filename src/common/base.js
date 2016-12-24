@@ -6,9 +6,10 @@ import clog from './base/clog';
  * document.querySelector wrapper
  * @usage
  * let id = 'fancy poo';
- * $`#${id}`
+ * $`#${id}` or $(`#${id}`)
  * */
 function $(selector, ...vars) {
+  selector = selector.raw ? selector : {raw: selector};
   return document.querySelector(String.raw(selector, ...vars));
 }
 
@@ -16,9 +17,10 @@ function $(selector, ...vars) {
  * document.querySelectorAll wrapper
  * @usage
  * let class = 'fancy 💩';
- * $all`.${class}`
+ * $all`.${class}` or $all(`.${class}`)
  * */
 function $all(selector, ...vars) {
+  selector = selector.raw ? selector : {raw: selector};
   return Array.prototype.slice.call(
     document.querySelectorAll(
       String.raw(selector, ...vars)
@@ -147,7 +149,7 @@ function getMouseButton(evt) {
   return btnCode[e.button] ? btnCode[e.button] : '';
 }
 
-function _getValues(obj) {
+function _enumOwnValues(obj) {
   if(Object.keys) {
     return Object.keys(obj).map(function (enumerableKey) {
       return obj[enumerableKey];
@@ -161,13 +163,13 @@ function _getValues(obj) {
   }
 }
 
-function getValueDeep(obj) {
+function deepValue(obj) {
   if(obj === null || ['undefined', 'boolean', 'number', 'string'].includes(typeof obj)) {
     return obj;
   }
-  var firstLevelVal = Array.isArray(obj) ? obj : _getValues(obj);
+  var firstLevelVal = Array.isArray(obj) ? obj : _enumOwnValues(obj);
   return firstLevelVal.reduce(function (result, current) {
-    return result.concat(getValueDeep(current));
+    return result.concat(deepValue(current));
   }, []);
 }
 
@@ -209,6 +211,6 @@ export default util;
 export {
   $, $all, onceLoaded, getCurrentTab,
   isEmpty, filterEmptyStr, debounce, getMouseButton,
-  getValueDeep, match, regex,
+  deepValue, match, regex,
   includeString, clog, minErr
 };
