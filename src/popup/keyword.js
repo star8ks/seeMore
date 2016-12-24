@@ -4,7 +4,7 @@ import {clog, filterEmptyStr} from "../common/base.js";
 import Engine from '../common/db/Engine';
 import Url from '../common/Url';
 import ChromeAsync from '../common/ChromeAsync';
-import {CONFIDENCE, EMPTY_KEYWORDS} from './smartKeyword/const';
+import {CONFIDENCE_PARAM, EMPTY_KEYWORDS} from './smartKeyword/const';
 import smart from './smartKeyword/smartKeyword';
 
 let chromeAsync = new ChromeAsync(chrome);
@@ -30,7 +30,7 @@ async function getSelection(tabUrl) {
   if (!_.isEmpty(selection)) {
     return [{
       word: selection[0],
-      confidence: CONFIDENCE
+      confidence: CONFIDENCE_PARAM.selection
     }];
   }
   return EMPTY_KEYWORDS;
@@ -69,7 +69,7 @@ async function getQueryString(tabUrl) {
   clog('match searchString from url:', searchString);
   return searchString ? [{
     word: decodeURIComponent(searchString),
-    confidence: CONFIDENCE
+    confidence: CONFIDENCE_PARAM.searchString
   }] : EMPTY_KEYWORDS;
 }
 
@@ -85,7 +85,6 @@ async function smartKeyword(tabUrl) {
     file: require('file-loader?name=js/[name].[ext]!./contentScript.js')
   });
 
-  clog('content script result: ', result)
   let unfiltered = result[0];
   if(!unfiltered) return EMPTY_KEYWORDS;
 
@@ -94,6 +93,7 @@ async function smartKeyword(tabUrl) {
     keywords[key] = filterEmptyStr(unfiltered[key]);
   });
 
+  clog('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2]);
   return smart(tabUrl, keywords.meta, keywords.title, keywords.h1, keywords.h2);
 }
 

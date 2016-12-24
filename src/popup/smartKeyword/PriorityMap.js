@@ -1,4 +1,4 @@
-import {PRINTABLE_ASCII, KEYWORD_BLACKLIST} from './const';
+import {PRINTABLE_ASCII, KEYWORD_BLACKLIST, CONFIDENCE_PARAM} from './const';
 /**
  * Just like normal Map, but use case insensitive string as key
  * */
@@ -42,12 +42,10 @@ class StringMap{
 class PriorityMap {
   /**
    * @param {Url} url
-   * @param {Number} [baseConfidence=1]
+   * @param {Object} [confidence]
    * */
-  constructor(url, baseConfidence = 1) {
-    Object.keys(PriorityMap.confidence).forEach(function (key) {
-      PriorityMap.confidence[key] = baseConfidence * PriorityMap.confidence[key];
-    });
+  constructor(url, confidence) {
+    this.confidence = confidence || CONFIDENCE_PARAM.map;
     this.map = new StringMap();
     this.siteKeywords = new StringMap();
     this._setSiteKeywords(url);
@@ -86,11 +84,12 @@ class PriorityMap {
       if (PriorityMap._inBlackList(word) || /(www)/i.test(word)) {
         return;
       }
-      this.siteKeywords.set(word, PriorityMap.confidence.site);
+      this.siteKeywords.set(word, this.confidence.site);
     });
   }
 
-  addVipWords(word, confidence = PriorityMap.confidence.vip) {
+  addVipWords(word, confidence) {
+    confidence = confidence === undefined ? this.confidence.vip : confidence;
     word = PriorityMap._preProcess(word);
     if (PriorityMap._inBlackList(word) || this.siteKeywords.has(word)) return;
 
@@ -121,7 +120,8 @@ class PriorityMap {
     this.map.clear();
   }
 
-  increaseConfidence(key, increment = PriorityMap.confidence.base) {
+  increaseConfidence(key, increment) {
+    increment = increment === undefined ? this.confidence.base : increment;
     key = PriorityMap._preProcess(key);
     if (PriorityMap._inBlackList(key)) return;
 
@@ -131,7 +131,6 @@ class PriorityMap {
       : this.map.set(key, this.vipWords.has(key) ? this.vipWords.get(key) + increment : increment);
   }
 }
-PriorityMap.confidence = {base: 1, site: .1, vip: .49};
 
 export default PriorityMap;
 export {StringMap, PriorityMap};

@@ -4,8 +4,8 @@
  */
 import _ from 'lodash';
 import {clog, filterEmptyStr, match as matchAll} from '../../common/base';
-import {PUNCT, PUNCT_FLATTEN, CONFIDENCE, MIN_CONFIDENCE, EMPTY_KEYWORDS} from './const';
-import markVipKeyword from './markVipKeyword';
+import {PUNCT, PUNCT_FLATTEN, CONFIDENCE_PARAM, CONFIDENCE_MIN, EMPTY_KEYWORDS} from './const';
+import {markVipKeyword} from './markVipKeyword';
 import PriorityMap from './PriorityMap';
 
 const keywordType = {
@@ -16,6 +16,7 @@ const keywordType = {
   url: Symbol()
 };
 
+
 /**
  * @param {Url} tabUrl
  * @param {String[]} meta
@@ -24,11 +25,20 @@ const keywordType = {
  * @param {String[]} h2
  * */
 function smartKeyword(tabUrl, meta, title, h1, h2) {
-  let candidateWords = new PriorityMap(tabUrl, CONFIDENCE);
+  let candidateWords = new PriorityMap(tabUrl, CONFIDENCE_PARAM.map);
+
   title = _fixSpaces(title);
   h1 = _fixSpaces(h1);
-  let titleMarked = matchAll(markVipKeyword(title), /《([^《》]+)》/g) || [];
-  let h1Marked = matchAll(markVipKeyword(h1), /《([^《》]+)》/g) || [];
+
+  let titleMarked = matchAll(title, /《([^《》]+)》/g) || [];
+  let h1Marked = matchAll(h1, /《([^《》]+)》/g) || [];
+  // add original marked words
+  [...titleMarked, ...h1Marked].forEach((matched) => {
+    if(matched[1]) candidateWords.addVipWords(matched[1], CONFIDENCE_PARAM.map.originVip);
+  });
+
+  titleMarked = matchAll(markVipKeyword(title), /《([^《》]+)》/g) || [];
+  h1Marked = matchAll(markVipKeyword(h1), /《([^《》]+)》/g) || [];
 
   clog('', markVipKeyword(title));
   [...titleMarked, ...h1Marked].forEach((matched) => {
@@ -58,15 +68,15 @@ function smartKeyword(tabUrl, meta, title, h1, h2) {
 
   let dividePreProcess = _.flow(_replaceUnderscore, _fixHyphen);
   title && filterEmptyStr(dividePreProcess(title).split(SEPARATE_REGEX)).forEach(word => {
-    candidateWords.increaseConfidence(word, .5 * CONFIDENCE);
+    candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.title);
   });
   h1 && filterEmptyStr(dividePreProcess(h1).split(SEPARATE_REGEX)).forEach(word => {
-    candidateWords.increaseConfidence(word, .4 * CONFIDENCE);
+    candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.h1);
   });
-  !_.isEmpty(h2) && h2.forEach(h2 => {
+  Array.isArray(h2) && h2.forEach(h2 => {
     // clog(h2.split(SEPARATE_REGEX))
     filterEmptyStr(h2.split(SEPARATE_REGEX)).forEach(word =>
-      candidateWords.increaseConfidence(word, .01 * CONFIDENCE)
+      candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.h2)
     );
   });
   // @TODO divide tabUrl.url here
@@ -107,34 +117,34 @@ function smartKeyword(tabUrl, meta, title, h1, h2) {
 
   function _matchKeywords(keywords, ignore) {
     for (let keyword of keywords) {
-      if (ignore !== keywordType.h1 && h1.includeString(keyword)) {
-        candidateWords.increaseConfidence(keyword, CONFIDENCE);
-      }
       if (ignore !== keywordType.title && title.includeString(keyword)) {
-        candidateWords.increaseConfidence(keyword, CONFIDENCE);
+        candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.title);
       }
-      ignore !== keywordType.meta && meta.forEach(metaKeyword => {
-        if (metaKeyword.includeString(keyword, true)) {
-          candidateWords.increaseConfidence(keyword, CONFIDENCE);
-        }
-      });
-      if (ignore !== keywordType.url && tabUrl.url.includeString(keyword)) {
-        candidateWords.increaseConfidence(keyword, CONFIDENCE);
+      if (ignore !== keywordType.url && tabUrl.pathName.includeString(keyword)) {
+        candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.url);
       }
       ignore !== keywordType.url && tabUrl.queryPairs.map(pair => {
         if (pair.val.includeString(keyword, pair.val.length >= 2)) {
-          candidateWords.increaseConfidence(keyword, .1 * CONFIDENCE);
+          candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.queryPairs);
         }
       });
+      ignore !== keywordType.meta && meta.forEach(metaKeyword => {
+        if (metaKeyword.includeString(keyword, true)) {
+          candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.meta);
+        }
+      });
+      if (ignore !== keywordType.h1 && h1.includeString(keyword)) {
+        candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.h1);
+      }
       ignore !== keywordType.h2 && h2.forEach(function (h2) {
         if (h2.includeString(keyword)) {
-          candidateWords.increaseConfidence(keyword, .01 * CONFIDENCE);
+          candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.h2);
         }
       });
     }
   }
 
-  function _isQualified(orderedArray, minConfidence = MIN_CONFIDENCE) {
+  function _isQualified(orderedArray, minConfidence = CONFIDENCE_MIN) {
     return !_.isEmpty(orderedArray) && orderedArray[0].confidence > minConfidence;
   }
 
@@ -172,4 +182,4 @@ function smartKeyword(tabUrl, meta, title, h1, h2) {
   }
 }
 
-export default smartKeyword
+export default smartKeyword;

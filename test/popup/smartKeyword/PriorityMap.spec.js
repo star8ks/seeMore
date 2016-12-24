@@ -100,7 +100,7 @@ describe('PriorityMap', () => {
         let pm = new PriorityMap(url);
         pm.map.should.be.instanceof(StringMap);
         [...pm.map].should.be.eql([]);
-        [...pm.siteKeywords].should.be.eql([['google', PriorityMap.confidence.site]]);
+        [...pm.siteKeywords].should.be.eql([['google', pm.confidence.site]]);
         [...pm.vipWords].should.be.eql([]);
       });
     });
@@ -133,11 +133,11 @@ describe('PriorityMap', () => {
     });
     it('should add to vipWords', () => {
       pm.addVipWords('test');
-      [...pm.vipWords].should.eql([['test', PriorityMap.confidence.vip]]);
+      [...pm.vipWords].should.eql([['test', pm.confidence.vip]]);
     });
     it('should accept customized priority', () => {
-      pm.addVipWords('test', 4 * PriorityMap.confidence.base);
-      [...pm.vipWords].should.eql([['test', 4 * PriorityMap.confidence.base]]);
+      pm.addVipWords('test', 4 * pm.confidence.base);
+      [...pm.vipWords].should.eql([['test', 4 * pm.confidence.base]]);
     });
     it('should be case-insensitive', () => {
       pm.addVipWords('Test');
@@ -154,7 +154,7 @@ describe('PriorityMap', () => {
     it('should increase confidence if word already exist', () => {
       pm.addVipWords('Test');
       pm.addVipWords('test');
-      [...pm.vipWords].should.eql([['test', PriorityMap.confidence.vip * 2]]);
+      [...pm.vipWords].should.eql([['test', pm.confidence.vip * 2]]);
     });
   });
   describe('vipArray', () => {
@@ -174,9 +174,9 @@ describe('PriorityMap', () => {
       pm.addVipWords('test1');
       pm.addVipWords('test2');
       pm.vipArray.should.eql([
-        {word: 'test', confidence: 3 * PriorityMap.confidence.vip},
-        {word: 'test1', confidence: 2 * PriorityMap.confidence.vip},
-        {word: 'test2', confidence: PriorityMap.confidence.vip}
+        {word: 'test', confidence: 3 * pm.confidence.vip},
+        {word: 'test1', confidence: 2 * pm.confidence.vip},
+        {word: 'test2', confidence: pm.confidence.vip}
       ]);
     });
   });
@@ -189,11 +189,11 @@ describe('PriorityMap', () => {
     });
     it('should added to map', () => {
       pm.increaseConfidence('test');
-      [...pm.map].should.eql([['test', PriorityMap.confidence.base]]);
+      [...pm.map].should.eql([['test', pm.confidence.base]]);
     });
     it('should accept customized priority', () => {
-      pm.increaseConfidence('test', 4 * PriorityMap.confidence.base);
-      [...pm.map].should.eql([['test', 4 * PriorityMap.confidence.base]]);
+      pm.increaseConfidence('test', 4 * pm.confidence.base);
+      [...pm.map].should.eql([['test', 4 * pm.confidence.base]]);
     });
     it('should be case-insensitive', () => {
       pm.increaseConfidence('Test');
@@ -205,7 +205,7 @@ describe('PriorityMap', () => {
       [...pm.map].should.eql([]);
     });
     it('should use siteWord\'s priority to increase if adding word exist in siteWords', () => {
-      let originPriority = PriorityMap.confidence.base * 8;
+      let originPriority = 8;
       pm.map.set('google', originPriority);
       pm.increaseConfidence('google');
       [...pm.map].should.eql([['google', originPriority + pm.siteKeywords.get('google')]]);
@@ -213,12 +213,12 @@ describe('PriorityMap', () => {
     it('should based on vipWord\'s priority to add if adding NEW word exist in vipWords', () => {
       pm.addVipWords('test', 5);
       pm.increaseConfidence('test');
-      [...pm.map].should.eql([['test', 5 + PriorityMap.confidence.base]]);
+      [...pm.map].should.eql([['test', 5 + pm.confidence.base]]);
     });
     it('should increase priority if adding word already exist in map', () => {
       pm.increaseConfidence('test');
       pm.increaseConfidence('test');
-      [...pm.map].should.eql([['test', PriorityMap.confidence.base * 2]]);
+      [...pm.map].should.eql([['test', pm.confidence.base * 2]]);
     });
     it('should save word as it lastest seted', () => {
       pm.increaseConfidence('TEST');
@@ -245,9 +245,9 @@ describe('PriorityMap', () => {
       pm.increaseConfidence('test1');
       pm.increaseConfidence('test2');
       pm.orderedArray.should.eql([
-        {word: 'test', confidence: 3 * PriorityMap.confidence.base},
-        {word: 'test1', confidence: 2 * PriorityMap.confidence.base},
-        {word: 'test2', confidence: PriorityMap.confidence.base}
+        {word: 'test', confidence: 3 * pm.confidence.base},
+        {word: 'test1', confidence: 2 * pm.confidence.base},
+        {word: 'test2', confidence: pm.confidence.base}
       ]);
     });
   });
