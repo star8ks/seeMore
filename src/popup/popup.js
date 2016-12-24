@@ -129,7 +129,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
 
   function onKeywordUpdate(searchString) {
     clog('translate ', searchString);
-    if (searchString) {
+    if (searchString && searchString.length <= CONFIG.translateMaxLength) {
       translate(searchString).then(function (html) {
         $translation.innerText = html;
       }).catch(errorHandler);
