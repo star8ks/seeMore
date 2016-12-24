@@ -1,7 +1,15 @@
 import '../dirtyShould';
-import {isEmpty, filterEmptyStr, getValueDeep, match} from '../../src/common/base';
+import {isEmpty, filterEmptyStr, deepValue, match} from '../../src/common/base';
 
 describe('util', () => {
+  // describe('$', () => {
+  //   it('should return one or null');
+  //   it('should support tagged template');
+  // });
+  // describe('$all', () => {
+  //   it('should support ');
+  //   it('should support tagged template');
+  // });
   describe('isEmpty', () => {
     it('should return true if empty', () => {
       isEmpty().should.be.true();
@@ -47,22 +55,22 @@ describe('util', () => {
     });
   });
 
-  describe('getValueDeep', () => {
+  describe('deepValue', () => {
     it('should get origin value of primitive value', () => {
-      (getValueDeep() === undefined).should.be.true();
-      (getValueDeep(null) === null).should.be.true();
-      getValueDeep(true).should.be.true();
-      getValueDeep(false).should.be.false();
-      getValueDeep(4).should.equal(4);
-      getValueDeep('').should.equal('');
+      (deepValue() === undefined).should.be.true();
+      (deepValue(null) === null).should.be.true();
+      deepValue(true).should.be.true();
+      deepValue(false).should.be.false();
+      deepValue(4).should.equal(4);
+      deepValue('').should.equal('');
     });
     it('should get deep value of object', () => {
       var obj = {a: [3, 4], b: [5, 6], c: {c: [43]}};
-      getValueDeep(obj).should.eql([3, 4, 5, 6, 43]);
+      deepValue(obj).should.eql([3, 4, 5, 6, 43]);
     });
     it('should get deep value of array', () => {
       var obj = [[3, 4], [[5, 6]], [43, [1, [2, 9]]]];
-      getValueDeep(obj).should.eql([3, 4, 5, 6, 43, 1, 2, 9]);
+      deepValue(obj).should.eql([3, 4, 5, 6, 43, 1, 2, 9]);
     });
   });
 

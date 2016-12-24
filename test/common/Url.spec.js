@@ -28,9 +28,9 @@ describe('Url', () => {
         u.queryPairs.should.eql([{key: 'a', val: ''}, {key: 'a', val: '3'}, {key: 'a', val: '5'}]);
       });
       it('should encodeURIComponent the val', () => {
-        let part = window.encodeURIComponent('&');
+        let part = encodeURIComponent('&');
         let u = new Url('http://t.co/?a=' + part);
-        u.queryPairs.should.eql([{key: 'a', val: window.decodeURIComponent(part)}]);
+        u.queryPairs.should.eql([{key: 'a', val: decodeURIComponent(part)}]);
       });
       it('should replace val\'s + to space', () => {
         let u = new Url('http://t.co/?a=b+c+d');
