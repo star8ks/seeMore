@@ -1,5 +1,6 @@
 "use strict";
 const path = require('path');
+const webpack = require('webpack');
 const getConfig = require('./webpack.base.config');
 
 let distDirectory = 'dist-dev';
@@ -13,6 +14,8 @@ config.resolve.alias = {
 };
 config.module.loaders = config.module.loaders.concat([{
   test: /\.(jpg|png)$/i, loader: 'url-loader?limit=900&name=img/[name].[ext]'
+}, {
+  test: require.resolve("lodash"), loader: "expose-loader?_"
 }]);
 
 module.exports = config;

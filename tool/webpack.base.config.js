@@ -37,7 +37,7 @@ function getBaseConfig(distDirectory) {
         /node_modules[\/\\]localforage[\/\\]dist[\/\\]localforage\.(nopromises\.)?(min\.)?js$/,
         /node_modules[\/\\]bluebird[\/\\]js[\/\\]browser[\/\\]bluebird.(min\.)?js$/,
         /node_modules[\/\\]mustache[\/\\]mustache.(min\.)?js$/,
-        /node_modules[\/\\]lodash[\/\\]lodash.(min\.)?js$/
+        // /node_modules[\/\\]lodash[\/\\]lodash.(min\.)?js$/
       ],
       loaders: [{
         test: /\.js$/,

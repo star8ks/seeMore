@@ -5,6 +5,7 @@ const getConfig = require('./webpack.base.config');
 let distDirectory = 'dist';
 let config = getConfig(distDirectory);
 
+config.module.noParse.push(/node_modules[\/\\]lodash[\/\\]lodash.(min\.)?js$/);
 config.resolve.alias = {
   localforage: path.resolve('./node_modules/localforage/dist/localforage.nopromises.min.js'),
   bluebird: path.resolve('./node_modules/bluebird/js/browser/bluebird.min.js'),
