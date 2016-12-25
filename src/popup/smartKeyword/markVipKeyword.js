@@ -54,7 +54,10 @@ let markName = function (str) {
   let subElement = regex`(?:[Nn]o.\s?\d+)|(?:${name})`;
   let nameRegex1 = new RegExp(regex`
     (^|[^${CJK}a-zA-Z${lGuimets}])
-    ((?:${subElement})(?:\s+(?:${subElement}))+)
+    (
+      (?:${subElement})
+      (?:\s+(?:${subElement}))+
+    )
     \b
     (?![${CJK}])
   `, 'g');// ((\s+(?![A-Z]))?)
@@ -94,5 +97,19 @@ let markVipKeyword = function (str) {
   return concat(markName(markEnWord(markUpperWord(str))));
 };
 
+let divide = function (str) {
+  // dividers, not include \s
+  let commonDivider = regex`\.,，。\<\>《》、\/`;
+  let regLeft = new RegExp(regex`
+    ([${CJK}])\s+(.)
+  `, 'g');
+  let regRight = new RegExp(regex`
+    (.)\s+([${CJK}])
+  `, 'g');
+  let require = new RegExp(regex`[${commonDivider}]+`, 'g');
+  return str.replace(regLeft, '$1|$2').replace(regRight, '$1|$2')
+    .replace(require, '|').split('|');
+};
+
 export default markVipKeyword;
-export {markVipKeyword, markUpperWord, markEnWord, markEnds, markName};
+export {markVipKeyword, markUpperWord, markEnWord, markEnds, markName, divide};

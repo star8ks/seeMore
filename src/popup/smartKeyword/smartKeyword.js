@@ -5,7 +5,7 @@
 import _ from 'lodash';
 import {clog, filterEmptyStr, match as matchAll} from '../../common/base';
 import {PUNCT, PUNCT_FLATTEN, CONFIDENCE_PARAM, CONFIDENCE_MIN, EMPTY_KEYWORDS} from './const';
-import {markVipKeyword} from './markVipKeyword';
+import {markVipKeyword, divide} from './markVipKeyword';
 import PriorityMap from './PriorityMap';
 
 const keywordType = {
@@ -15,7 +15,6 @@ const keywordType = {
   h2: Symbol(),
   url: Symbol()
 };
-
 
 /**
  * @param {Url} tabUrl
@@ -27,6 +26,7 @@ const keywordType = {
 function smartKeyword(tabUrl, meta, title, h1, h2) {
   let candidateWords = new PriorityMap(tabUrl, CONFIDENCE_PARAM.map);
 
+  meta = _.flatten(meta.map(metaStr => divide(metaStr)));
   title = _fixSpaces(title);
   h1 = _fixSpaces(h1);
 

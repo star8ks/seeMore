@@ -1,5 +1,5 @@
 import '../../dirtyShould';
-import {markVipKeyword, markUpperWord, markEnWord, markEnds, markName} from '../../../src/popup/smartKeyword/markVipKeyword';
+import {markVipKeyword, markUpperWord, markEnWord, markEnds, markName, divide} from '../../../src/popup/smartKeyword/markVipKeyword';
 
 describe('mark functions', () => {
   describe('markUpperWord', () => {
@@ -57,6 +57,7 @@ describe('mark functions', () => {
     //   markUpperWord('?YEAH。MAGIC\'LEAP is a liar').should.equal('?《YEAH》。《MAGIC\'LEAP》 is a liar');
     // });
   });
+
   describe('markEnWord', () => {
     it('should mark [a-zA-Z]{2,} surrounded by CJK characters', () => {
       markEnWord('终于揭开了P的神秘面纱').should.equal('终于揭开了P的神秘面纱');
@@ -111,6 +112,7 @@ describe('mark functions', () => {
       markEnWord('《NBA》_腾讯体育_腾讯网').should.equal('《NBA》_腾讯体育_腾讯网');
     });
   });
+
   describe('markEnds', () => {
     it('should mark beginning', () => {
       markEnds('pan》哈哈哈').should.equal('《pan》哈哈哈');
@@ -119,6 +121,7 @@ describe('mark functions', () => {
       markEnds('哈哈哈《pan').should.equal('哈哈哈《pan》');
     });
   });
+
   describe('markName', () => {
     it('should mark at least 2 capital start words', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody》 full');
@@ -149,6 +152,36 @@ describe('mark functions', () => {
     });
     it('should ignore names containing blacklist words', () => {
       markName('No It Should Not Be Marked!').should.equal('No It Should Not Be Marked!');
+    });
+  });
+
+  describe('divide', () => {
+    it('should divide by space between CJK character', () => {
+      divide('不懂 最后   自杀 高人  解惑 一下 水果硬糖 解析 解读 理解').should.eql([
+        '不懂', '最后', '自杀', '高人', '解惑', '一下', '水果硬糖', '解析', '解读', '理解'
+      ]);
+    });
+    it('should divide by space between CJK character and a non-CJK word', () => {
+      divide('不懂 最后 Jeff 自杀 高人 解惑 一下 水果硬糖 解析 解读 理解').should.eql([
+        '不懂', '最后', 'Jeff', '自杀', '高人', '解惑', '一下', '水果硬糖', '解析', '解读', '理解'
+      ]);
+      divide('最后 Jeff 解析 读 解 jh').should.eql(['最后', 'Jeff', '解析', '读', '解', 'jh']);
+    });
+    it('should divide by space between none-CJK word', () => {
+      divide('最后 Jeff jh').should.eql(['最后', 'Jeff jh']);
+    });
+    it(`should support these conventional dividers other than space(CJK words)`, () => {
+      divide('不懂，最后,自杀.解读。高人《解惑》一下、水果硬糖|解析　理解').should.eql([
+        '不懂', '最后', '自杀', '解读', '高人', '解惑', '一下', '水果硬糖', '解析', '理解'
+      ]);
+    });
+    it(`should support these conventional dividers other than space(a-zA-z words)`, () => {
+      divide(`not，lastly,suicide.explain。holy<shit>one、candy|understand`).should.eql([
+        'not', 'lastly', 'suicide', 'explain', 'holy', 'shit', 'one', 'candy', 'understand'
+      ]);
+    });
+    it(`should not divide spaces between a-zA-z words`, () => {
+      divide(`not lastly suicide`).should.eql(['not lastly suicide']);
     });
   });
 
