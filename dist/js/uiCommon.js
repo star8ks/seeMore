@@ -206,7 +206,7 @@ webpackJsonp([3,5],{
 	}
 
 	let Render = {
-	  openEngines: function openEngines(template) {
+	  openEngines: function (template) {
 	    return _EngineType2.default.getAllReal().map(function (typeObj) {
 	      var typeId = typeObj['$$key'];
 	      return _Engine2.default.getOpen(false, function (engine) {
@@ -220,7 +220,7 @@ webpackJsonp([3,5],{
 	    });
 	  },
 
-	  defaultEngines: function defaultEngines(template) {
+	  defaultEngines: function (template) {
 	    return _EngineType2.default.getAllDefault().map(function (typeObj) {
 	      var typeId = typeObj['$$key'];
 	      return _Engine2.default.getSortedAll(false, function (engine) {
@@ -293,7 +293,7 @@ webpackJsonp([3,5],{
 	}
 
 	Mason.prototype = {
-	  renderAll: function renderAll() {
+	  renderAll: function () {
 	    var length = this.$items.length;
 	    for (var i = 0; i < length; i++) {
 	      var minHeight = min(this.colHeightArr);

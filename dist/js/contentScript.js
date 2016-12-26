@@ -5,21 +5,24 @@
  */
 function run($meta, $title, $h1, $h2) {
   /**
-   * @param {String[]} strArr
+   * @param {String[]|String} strArr
    * */
-  var trimFilter = function trimFilter(strArr) {
+  var trimFilter = function (strArr) {
+    if (typeof strArr === 'string') return strArr.trim() ? [strArr.trim()] : [];
+    if (!Array.isArray(strArr)) return strArr;
     return strArr.map(function (str) {
       return str.trim();
     }).filter(function (str) {
       return str;
     });
   };
-  var visibleFilter = function visibleFilter(elements) {
+  var visibleFilter = function (elements) {
     return elements.filter(function ($el) {
       return $el.offsetParent;
     });
   };
-  var metaKeywords = $meta ? trimFilter($meta.content.split(',')) : [];
+
+  var metaKeywords = $meta ? trimFilter($meta.content) : [];
   var titleKeywords = $title ? $title.innerText.trim() : '';
   var h1 = trimFilter(visibleFilter($h1).map(function (h1) {
     return h1.innerText;

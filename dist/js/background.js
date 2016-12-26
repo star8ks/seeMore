@@ -80,7 +80,7 @@ webpackJsonp([0,5],{
 	  }
 
 	  return {
-	    onTabCreated: function onTabCreated(tabInfo) {
+	    onTabCreated: function (tabInfo) {
 	      // Since chrome.tabs.onCreated listener may not get tab.url properly,
 	      // but It seem that chrome.tabs.get listener will be called
 	      // AFTER tab.url is ready(at most of time).
@@ -93,7 +93,7 @@ webpackJsonp([0,5],{
 	      });
 	    },
 
-	    onTabUpdated: function onTabUpdated(tabId, changeInfo, tab) {
+	    onTabUpdated: function (tabId, changeInfo, tab) {
 	      if (!changeInfo.status || 'loading' != changeInfo.status || !tab.url || !/^https?/.test(tab.url)) {
 	        return;
 	      }
@@ -113,7 +113,7 @@ webpackJsonp([0,5],{
 	      });
 	    },
 
-	    onInstalled: function onInstalled() {
+	    onInstalled: function () {
 	      var manifest = chrome.runtime.getManifest();
 	      _Setting2.default.set('version', manifest.version);
 

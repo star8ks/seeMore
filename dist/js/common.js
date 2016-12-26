@@ -63,7 +63,7 @@ webpackJsonp([4,5],{
 	   * A regular expression for identifying favicon URLs.
 	   * @const {!RegExp}
 	   */
-	  var Url = function Url(urlStr) {
+	  var Url = function (urlStr) {
 	    this.url = urlStr;
 	    Object.defineProperties(this, {
 	      /**
@@ -73,7 +73,7 @@ webpackJsonp([4,5],{
 	       * @memberOf Url#
 	       */
 	      host: {
-	        get: function get() {
+	        get: function () {
 	          //noinspection JSPotentiallyInvalidUsageOfThis,JSUnresolvedVariable
 	          return getHost(this.url);
 	        },
@@ -84,7 +84,7 @@ webpackJsonp([4,5],{
 	       * eg: origin part of 'https://se.com/g?q=3#t' is 'https://se.com'
 	       * */
 	      origin: {
-	        get: function get() {
+	        get: function () {
 	          var match = this.url.match(/^((http|https|chrome|chrome\-extension):\/\/[^\/]+)\/?/);
 	          if (!match) {
 	            throw Error('Not a valid url: ' + this.url);
@@ -102,7 +102,7 @@ webpackJsonp([4,5],{
 	       * @return {string} url for the favicon.
 	       */
 	      faviconUrl: {
-	        get: function get(size, type) {
+	        get: function (size, type) {
 	          size = size || 16;
 	          type = type || 'favicon';
 
@@ -113,34 +113,45 @@ webpackJsonp([4,5],{
 	        enumerable: true
 	      },
 	      searchKey: {
-	        get: function get() {
+	        get: function () {
 	          var match = this.url.match(/([^#?&]+)=%s/i);
 	          return !match ? '' : match[1];
 	        },
 	        enumerable: true
 	      },
 	      queryPairs: {
-	        get: function get() {
-	          var pairs = this.url.match(/([^#?&]+)=([^&]*)/g);
-	          return pairs ? pairs.map(function (pair) {
-	            var group = pair.split('=');
+	        get: function () {
+	          var regex = /([^#?&]+)=([^&?#]*)/g;
+	          var pairs = [],
+	              tempResult;
+	          while (tempResult = regex.exec(this.url)) {
+	            pairs.push(tempResult);
+	          }
+	          return pairs.map(function (pair) {
 	            return {
-	              key: group[0],
-	              val: decodeURIComponent(group[1])
+	              key: pair[1],
+	              val: decodeURIComponent(pair[2] || '').replace(/\+/g, ' ')
 	            };
-	          }) : [];
+	          });
 	        },
 	        enumerable: true
 	      },
 	      isNormal: {
-	        get: function get() {
+	        get: function () {
 	          return Url.NORMAL_REGEX.test(this.url);
 	        },
 	        enumerable: true
 	      },
 	      isGoogleFail: {
-	        get: function get() {
+	        get: function () {
 	          return Url.GOOGLE_FAILED_REGEX.test(this.url);
+	        },
+	        enumerable: true
+	      },
+	      pathName: {
+	        get: function () {
+	          var match = this.url.match(/https?:\/\/[^\/]*(\/[^?]+)/);
+	          return match ? match[1] : '/';
 	        },
 	        enumerable: true
 	      }
@@ -153,12 +164,12 @@ webpackJsonp([4,5],{
 	  Url.FAVICON_URL_REGEX = /\.ico$/i;
 	  Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
 	  Url.prototype = {
-	    includes: function includes(search) {
+	    includes: function (search) {
 	      return this.url.includeString(search);
 	    },
 
-	    getQueryVal: function getQueryVal(key) {
-	      var val = this.url.match(new RegExp(key + "=([^\&]*)(\&?)", 'i'));
+	    getQueryVal: function (key) {
+	      var val = this.url.match(new RegExp('[#?&]' + key + "=([^#?&]*)[#?&]", 'i'));
 	      return val ? val[1].replace(/\+/g, ' ') : null;
 	    }
 	  };
@@ -177,7 +188,7 @@ webpackJsonp([4,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.minErr = exports.clog = exports.includeString = exports.match = exports.getValueDeep = exports.getMouseButton = exports.debounce = exports.filterEmptyStr = exports.isEmpty = exports.getCurrentTab = exports.onceLoaded = exports.$all = exports.$ = undefined;
+	exports.minErr = exports.clog = exports.includeString = exports.regex = exports.match = exports.deepValue = exports.getMouseButton = exports.debounce = exports.filterEmptyStr = exports.isEmpty = exports.getCurrentTab = exports.onceLoaded = exports.$all = exports.$ = undefined;
 
 	var _includeString = __webpack_require__("zdlF");
 
@@ -193,12 +204,49 @@ webpackJsonp([4,5],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	function $(selector) {
-	  return document.querySelector(selector);
+	/**
+	 * document.querySelector wrapper
+	 * @usage
+	 * let id = 'fancy poo';
+	 * $`#${id}` or $(`#${id}`)
+	 * */
+	function $(selector, ...vars) {
+	  selector = selector.raw ? selector : { raw: selector };
+	  return document.querySelector(String.raw(selector, ...vars));
 	}
 
-	function $all(selector) {
-	  return document.querySelectorAll(selector);
+	/**
+	 * document.querySelectorAll wrapper
+	 * @usage
+	 * let class = 'fancy 💩';
+	 * $all`.${class}` or $all(`.${class}`)
+	 * */
+	function $all(selector, ...vars) {
+	  selector = selector.raw ? selector : { raw: selector };
+	  return Array.prototype.slice.call(document.querySelectorAll(String.raw(selector, ...vars)));
+	}
+
+	/**
+	 * Make multiline and commentable regex possible
+	 * @caution it will compress all spaces
+	 * @caution You should escape the str first, and don't forget:
+	 * /^[.*-(]+$/.test('.*-'); // SyntaxError: Invalid regular expression: /^[.*-(]+$/: Range out of order in character class
+	 * You should escape '-' within a character set, but lodash.escapeRegExp will not do this
+	 * @why
+	 new RegExp('\d').test('4'); // false
+	 new RegExp('\\d').test('4'); // true
+	 // use regexp can avoid this
+	 new RegExp(regex`\d`).test('4'); // true
+	 * @usage
+	 regex`\s   \u000A
+	   \w # comment
+	   [-/]
+	 `
+	 which will output: \s\u000A\w[-/]
+	 */
+	function regex(str, ...values) {
+	  // TODO should escape str here?
+	  return String.raw(str, ...values).replace(/#.*$/mg, '').replace(/\s+/mg, '');
 	}
 
 	function onceLoaded(onLoad) {
@@ -298,7 +346,7 @@ webpackJsonp([4,5],{
 	  return btnCode[e.button] ? btnCode[e.button] : '';
 	}
 
-	function _getValues(obj) {
+	function _enumOwnValues(obj) {
 	  if (Object.keys) {
 	    return Object.keys(obj).map(function (enumerableKey) {
 	      return obj[enumerableKey];
@@ -312,13 +360,13 @@ webpackJsonp([4,5],{
 	  }
 	}
 
-	function getValueDeep(obj) {
+	function deepValue(obj) {
 	  if (obj === null || ['undefined', 'boolean', 'number', 'string'].includes(typeof obj)) {
 	    return obj;
 	  }
-	  var firstLevelVal = Array.isArray(obj) ? obj : _getValues(obj);
+	  var firstLevelVal = Array.isArray(obj) ? obj : _enumOwnValues(obj);
 	  return firstLevelVal.reduce(function (result, current) {
-	    return result.concat(getValueDeep(current));
+	    return result.concat(deepValue(current));
 	  }, []);
 	}
 
@@ -354,7 +402,8 @@ webpackJsonp([4,5],{
 	  filterEmptyStr: filterEmptyStr,
 	  debounce: debounce,
 	  getMouseButton: getMouseButton,
-	  matchAll: match
+	  matchAll: match,
+	  regex: regex
 	};
 
 	exports.default = util;
@@ -366,8 +415,9 @@ webpackJsonp([4,5],{
 	exports.filterEmptyStr = filterEmptyStr;
 	exports.debounce = debounce;
 	exports.getMouseButton = getMouseButton;
-	exports.getValueDeep = getValueDeep;
+	exports.deepValue = deepValue;
 	exports.match = match;
+	exports.regex = regex;
 	exports.includeString = _includeString2.default;
 	exports.clog = _clog2.default;
 	exports.minErr = _minErr2.default;
@@ -482,7 +532,7 @@ webpackJsonp([4,5],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var clog = function clog() {
+	var clog = function () {
 	  if (_config2.default.devMode) {
 	    console.log.apply(this, arguments);
 	  }
@@ -547,7 +597,8 @@ webpackJsonp([4,5],{
 	      open: true,
 	      // view-source:https://www.google.com/supported_domains
 	      hosts: ['ipv4.google.com', 'ipv6.google.com', 'ipv6.google.com.hk', 'www.google.com', 'www.google.ad', 'www.google.ae', 'www.google.com.af', 'www.google.com.ag', 'www.google.com.ai', 'www.google.al', 'www.google.am', 'www.google.co.ao', 'www.google.com.ar', 'www.google.as', 'www.google.at', 'www.google.com.au', 'www.google.az', 'www.google.ba', 'www.google.com.bd', 'www.google.be', 'www.google.bf', 'www.google.bg', 'www.google.com.bh', 'www.google.bi', 'www.google.bj', 'www.google.com.bn', 'www.google.com.bo', 'www.google.com.br', 'www.google.bs', 'www.google.bt', 'www.google.co.bw', 'www.google.by', 'www.google.com.bz', 'www.google.ca', 'www.google.cd', 'www.google.cf', 'www.google.cg', 'www.google.ch', 'www.google.ci', 'www.google.co.ck', 'www.google.cl', 'www.google.cm', 'www.google.cn', 'www.google.com.co', 'www.google.co.cr', 'www.google.com.cu', 'www.google.cv', 'www.google.com.cy', 'www.google.cz', 'www.google.de', 'www.google.dj', 'www.google.dk', 'www.google.dm', 'www.google.com.do', 'www.google.dz', 'www.google.com.ec', 'www.google.ee', 'www.google.com.eg', 'www.google.es', 'www.google.com.et', 'www.google.fi', 'www.google.com.fj', 'www.google.fm', 'www.google.fr', 'www.google.ga', 'www.google.ge', 'www.google.gg', 'www.google.com.gh', 'www.google.com.gi', 'www.google.gl', 'www.google.gm', 'www.google.gp', 'www.google.gr', 'www.google.com.gt', 'www.google.gy', 'www.google.com.hk', 'www.google.hn', 'www.google.hr', 'www.google.ht', 'www.google.hu', 'www.google.co.id', 'www.google.ie', 'www.google.co.il', 'www.google.im', 'www.google.co.in', 'www.google.iq', 'www.google.is', 'www.google.it', 'www.google.je', 'www.google.com.jm', 'www.google.jo', 'www.google.co.jp', 'www.google.co.ke', 'www.google.com.kh', 'www.google.ki', 'www.google.kg', 'www.google.co.kr', 'www.google.com.kw', 'www.google.kz', 'www.google.la', 'www.google.com.lb', 'www.google.li', 'www.google.lk', 'www.google.co.ls', 'www.google.lt', 'www.google.lu', 'www.google.lv', 'www.google.com.ly', 'www.google.co.ma', 'www.google.md', 'www.google.me', 'www.google.mg', 'www.google.mk', 'www.google.ml', 'www.google.com.mm', 'www.google.mn', 'www.google.ms', 'www.google.com.mt', 'www.google.mu', 'www.google.mv', 'www.google.mw', 'www.google.com.mx', 'www.google.com.my', 'www.google.co.mz', 'www.google.com.na', 'www.google.com.nf', 'www.google.com.ng', 'www.google.com.ni', 'www.google.ne', 'www.google.nl', 'www.google.no', 'www.google.com.np', 'www.google.nr', 'www.google.nu', 'www.google.co.nz', 'www.google.com.om', 'www.google.com.pa', 'www.google.com.pe', 'www.google.com.pg', 'www.google.com.ph', 'www.google.com.pk', 'www.google.pl', 'www.google.pn', 'www.google.com.pr', 'www.google.ps', 'www.google.pt', 'www.google.com.py', 'www.google.com.qa', 'www.google.ro', 'www.google.ru', 'www.google.rw', 'www.google.com.sa', 'www.google.com.sb', 'www.google.sc', 'www.google.se', 'www.google.com.sg', 'www.google.sh', 'www.google.si', 'www.google.sk', 'www.google.com.sl', 'www.google.sn', 'www.google.so', 'www.google.sm', 'www.google.sr', 'www.google.st', 'www.google.com.sv', 'www.google.td', 'www.google.tg', 'www.google.co.th', 'www.google.com.tj', 'www.google.tk', 'www.google.tl', 'www.google.tm', 'www.google.tn', 'www.google.to', 'www.google.com.tr', 'www.google.tt', 'www.google.com.tw', 'www.google.co.tz', 'www.google.com.ua', 'www.google.co.ug', 'www.google.co.uk', 'www.google.com.uy', 'www.google.co.uz', 'www.google.com.vc', 'www.google.co.ve', 'www.google.vg', 'www.google.co.vi', 'www.google.com.vn', 'www.google.vu', 'www.google.ws', 'www.google.rs', 'www.google.co.za', 'www.google.co.zm', 'www.google.co.zw', 'www.google.cat'],
-	      url: 'https://www.google.com.hk/search?q=%s'
+	      url: 'https://www.google.com.hk/search?q=%s',
+	      resultPageRegex: /\/(search|webhp)/.source // it should be a valid regex source, if not set, will use .url.pathname to match
 	    },
 	    aol: {
 	      order: 400,
@@ -646,6 +697,7 @@ webpackJsonp([4,5],{
 	      defaultTypeId: 2,
 	      displayName: 'bilibili',
 	      open: true,
+	      siteKeywords: ['哔哩哔哩', 'Bilibili', 'B站', '弹幕'],
 	      hosts: ['search.bilibili.com'],
 	      url: 'http://search.bilibili.com/all?keyword=%s'
 	    },
@@ -794,7 +846,8 @@ webpackJsonp([4,5],{
 	      displayName: 'stackoverflow',
 	      open: true,
 	      hosts: ['stackoverflow.com'],
-	      url: 'https://stackoverflow.com/search?q=%s'
+	      url: 'https://stackoverflow.com/search?q=%s',
+	      resultPageRegex: /\/search/.source
 	    },
 	    //Shopping
 	    etao: {
@@ -1093,8 +1146,6 @@ webpackJsonp([4,5],{
 	      return engineA.order - engineB.order;
 	    });
 	    return assoc ? _DB2.default.assoc(engines) : engines;
-	  }).catch(function (err) {
-	    throw new Error('Error in engine.getAll: ' + err);
 	  });
 	};
 	/**
@@ -1114,27 +1165,44 @@ webpackJsonp([4,5],{
 	      return engineA.order - engineB.order;
 	    });
 	    return assoc ? _DB2.default.assoc(openEngines) : openEngines;
-	  }).catch(function (err) {
-	    throw new Error('Error in engine.getOpen: ' + err);
 	  });
 	};
 
 	/**
 	 * @param {String} host A valid host
+	 * @param {Boolean} [includeRootDomain=false]
 	 * @return {Promise}
 	 * if not found in hosts, next then() will get false,
 	 * if found, next then() will get the engine keys
 	 * */
-	Engine.searchKeys = function (host) {
+	Engine.searchKeys = function (host, includeRootDomain = false) {
 	  host = host.toLowerCase();
+	  includeRootDomain = includeRootDomain === undefined ? false : !!includeRootDomain;
+
 	  return this.getOpen().filter(function (se) {
-	    return se.hosts.includes(host);
+	    if (se.hosts.includes(host)) {
+	      return true;
+	    }
+	    if (!includeRootDomain) {
+	      return false;
+	    }
+	    var inputRootDomain = _getRootDomain(host);
+	    var findHost = se.hosts.find(function (seHost) {
+	      var seRootDomain = _getRootDomain(seHost);
+	      return seRootDomain === host || seRootDomain === inputRootDomain;
+	    });
+	    return findHost !== undefined;
 	  }).then(function (engines) {
 	    return Object.keys(_DB2.default.assoc(engines));
-	  }).catch(function (err) {
-	    throw new Error('Error in searchEngineKeys(host = ' + host + '): ' + err);
 	  });
 	};
+
+	/**
+	 * @param {String} host a valid host
+	 * */
+	function _getRootDomain(host) {
+	  return host.replace(/^(?:[^.]+\.)*([^.]+\.[^.]+)$/, '$1');
+	}
 
 	exports.default = Engine;
 

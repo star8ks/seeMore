@@ -23,25 +23,67 @@ webpackJsonp([1,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.PriorityMap = exports.StringMap = undefined;
 
 	var _const = __webpack_require__("+9hk");
 
+	/**
+	 * Just like normal Map, but use case insensitive string as key
+	 * */
+	class StringMap {
+	  constructor() {
+	    this.map = {};
+	  }
+	  get size() {
+	    return Object.keys(this.map).length;
+	  }
+	  has(key) {
+	    if (typeof key !== 'string') throw new Error('key must be a string, but given:' + key);
+	    return Object.keys(this.map).includes(key.toLowerCase());
+	  }
+	  set(key, val) {
+	    if (typeof key !== 'string') throw new Error('key must be a string, but given:' + key);
+	    if (val === undefined) throw new Error('value cannot be undefined');
+	    this.map[key.toLowerCase()] = Object.defineProperties({}, {
+	      'val': { value: val, enumerable: true },
+	      '$originKey': { value: key }
+	    });
+	  }
+	  get(key) {
+	    if (typeof key !== 'string') throw new Error('key must be a string, but given:' + key);
+	    let valObj = this.map[key.toLowerCase()];
+	    return valObj === undefined ? undefined : valObj.val;
+	  }
+	  clear() {
+	    this.map = {};
+	  }
+	  *[Symbol.iterator]() {
+	    let keys = Object.keys(this.map);
+	    for (let key of keys) {
+	      yield [this.map[key].$originKey, this.map[key].val];
+	    }
+	  }
+	}
 	/**
 	 * @author ray7551@gmail.com
 	 */
 	class PriorityMap {
 	  /**
 	   * @param {Url} url
-	   * @param {Number} [baseConfidence=1]
+	   * @param {Object} [confidence]
+	   * @param {String[]} [siteKeywords=[]]
 	   * */
-	  constructor(url, baseConfidence = 1) {
-	    Object.keys(PriorityMap.confidence).forEach(function (key) {
-	      PriorityMap.confidence[key] = baseConfidence * PriorityMap.confidence[key];
-	    });
-	    this.map = new Map();
-	    this.siteKeywords = new Map();
-	    this._setSiteKeywords(url);
-	    this.vipWords = new Map();
+	  constructor(url, confidence, siteKeywords) {
+	    siteKeywords = siteKeywords || [];
+	    this.confidence = confidence || _const.CONFIDENCE_PARAM.map;
+	    this.map = new StringMap();
+	    this.siteKeywords = new StringMap();
+	    this.vipWords = new StringMap();
+
+	    let siteWords = siteKeywords.concat(url.host.split('.').slice(0, -1));
+	    for (let word of siteWords) {
+	      this._setSiteKeywords(word);
+	    }
 	  }
 
 	  /**
@@ -49,7 +91,8 @@ webpackJsonp([1,5],{
 	   * @return {Boolean}
 	   * */
 	  static _inBlackList(word) {
-	    return _const.KEYWORD_BLACKLIST.includes(word) || /^\d+$/.test(word) || word.length <= 0 || word.length === 1 && new RegExp(`[${ _const.PRINTABLE_ASCII }À-ÿ]`).test(word);
+	    word = word.toLowerCase();
+	    return _const.KEYWORD_BLACKLIST.includes(word) || /^\d+$/.test(word) || word.length <= 0 || word.length <= 2 && /^[a-z]+$/i.test(word) || word.length === 1 && new RegExp(`[${ _const.PRINTABLE_EXTEND }]`).test(word);
 	  }
 
 	  /**
@@ -58,26 +101,23 @@ webpackJsonp([1,5],{
 	   * */
 	  static _preProcess(word) {
 	    // @TODO remove head and tail punctuations(common ending punct) here? consider: ect... .Net <header>
-	    return word.toLowerCase().trim();
+	    return word.trim();
 	  }
 
 	  /**
-	   * @param {Url} url
+	   * @param {String} str
 	   * */
-	  _setSiteKeywords(url) {
-	    let siteWords = url.host.split('.').slice(0, -1);
-	    siteWords.forEach(word => {
-	      word = PriorityMap._preProcess(word);
-	      if (PriorityMap._inBlackList(word) || /(www)/i.test(word)) {
-	        return;
-	      }
-	      this.siteKeywords.set(word, PriorityMap.confidence.site);
-	    });
+	  _setSiteKeywords(str) {
+	    let word = PriorityMap._preProcess(str);
+	    if (PriorityMap._inBlackList(word) || /(www)/i.test(word)) {
+	      return;
+	    }
+	    this.siteKeywords.set(word, this.confidence.site);
 	  }
 
-	  addVipWords(word, confidence = PriorityMap.confidence.vip) {
+	  addVipWords(word, confidence) {
+	    confidence = confidence === undefined ? this.confidence.vip : confidence;
 	    word = PriorityMap._preProcess(word);
-	    console.log(this.siteKeywords.has(word));
 	    if (PriorityMap._inBlackList(word) || this.siteKeywords.has(word)) return;
 
 	    this.vipWords.set(word, this.vipWords.has(word) ? this.vipWords.get(word) + confidence : confidence);
@@ -102,7 +142,8 @@ webpackJsonp([1,5],{
 	    this.map.clear();
 	  }
 
-	  increaseConfidence(key, increment = PriorityMap.confidence.base) {
+	  increaseConfidence(key, increment) {
+	    increment = increment === undefined ? this.confidence.base : increment;
 	    key = PriorityMap._preProcess(key);
 	    if (PriorityMap._inBlackList(key)) return;
 
@@ -110,9 +151,10 @@ webpackJsonp([1,5],{
 	    this.map.has(key) ? this.map.set(key, this.map.get(key) + increment) : this.map.set(key, this.vipWords.has(key) ? this.vipWords.get(key) + increment : increment);
 	  }
 	}
-	PriorityMap.confidence = { base: 1, site: .1, vip: .5 };
 
 	exports.default = PriorityMap;
+	exports.StringMap = StringMap;
+	exports.PriorityMap = PriorityMap;
 
 /***/ },
 
@@ -168,7 +210,7 @@ webpackJsonp([1,5],{
 	  _base.clog.err('Error stack: ', e.stack);
 	}
 
-	var Links = function Links($links) {
+	var Links = function ($links) {
 	  this.$links = $links;
 	};
 	Links.prototype.init = function (tabId) {
@@ -201,26 +243,26 @@ webpackJsonp([1,5],{
 
 	(0, _base.onceLoaded)(_base.getCurrentTab).then(function onLoad(tab) {
 	  var tabUrl = new _Url2.default(tab.url);
-	  var $keyword = (0, _base.$)('#keyword');
-	  var $translation = (0, _base.$)('.translation');
+	  var $keyword = _base.$`#keyword`;
+	  var $translation = _base.$`.translation`;
 	  var links;
-	  var engineListTpl = (0, _base.$)('#tpl-engines').innerHTML.trim();
-	  var $enginesSection = (0, _base.$)('.engines');
+	  var engineListTpl = _base.$`#tpl-engines`.innerHTML.trim();
+	  var $enginesSection = _base.$`.engines`;
 
 	  $keyword.focus();
 	  $keyword.addEventListener('input', _lodash2.default.debounce(function (e) {
 	    //if press enter, search word using first enabled engine
 	    if (e.key === 'Enter') {
-	      (0, _base.$)('.se:not(.disable)').dispatchEvent(new MouseEvent('click', { button: 0 }));
+	      _base.$`.se:not(.disable)`.dispatchEvent(new MouseEvent('click', { button: 0 }));
 	    }
 	    onKeywordUpdate(this.value);
 	  }, 500));
 
 	  _Render2.default.openEngines(engineListTpl).then(function (rendered) {
 	    $enginesSection.innerHTML = rendered;
-	    links = new Links((0, _base.$all)('.engines .icon-link'));
+	    links = new Links(_base.$all`.engines .icon-link`);
 	  }).then(function () {
-	    new _Mason2.default((0, _base.$)('.engines'), {
+	    new _Mason2.default(_base.$`.engines`, {
 	      itemSelector: '.pin',
 	      columnNum: 2
 	    });
@@ -242,7 +284,7 @@ webpackJsonp([1,5],{
 	   * @param {String} str
 	   * */
 	  function translate(str) {
-	    str = str.trim() || '';
+	    str = str.trim().replace(/\n/, '') || '';
 	    // @TODO only translate some language, from user config
 	    // @TODO not translate some language, from user config
 	    // if(chrome.i18n.detect)
@@ -270,7 +312,7 @@ webpackJsonp([1,5],{
 
 	  function onKeywordUpdate(searchString) {
 	    (0, _base.clog)('translate ', searchString);
-	    if (searchString) {
+	    if (searchString && searchString.length <= _config2.default.translateMaxLength) {
 	      translate(searchString).then(function (html) {
 	        $translation.innerText = html;
 	      }).catch(errorHandler);
@@ -1420,7 +1462,7 @@ webpackJsonp([1,5],{
 					};
 
 					// progress
-					var handleProgress = function handleProgress(direction, e) {
+					var handleProgress = function (direction, e) {
 						if (e.total > 0) {
 							e.percent = e.loaded / e.total * 100;
 						}
@@ -2786,7 +2828,7 @@ webpackJsonp([1,5],{
 	    if (!_lodash2.default.isEmpty(selection)) {
 	      return [{
 	        word: selection[0],
-	        confidence: _const.CONFIDENCE
+	        confidence: _const.CONFIDENCE_PARAM.selection
 	      }];
 	    }
 	    return _const.EMPTY_KEYWORDS;
@@ -2810,12 +2852,29 @@ webpackJsonp([1,5],{
 	    if (keys.length <= 0) {
 	      return _const.EMPTY_KEYWORDS;
 	    }
+	    // TODO filter all engines here, only keep the matched(resultPageRegex), and if no matched, return EMPTY_KEYWORDS
 	    let engine = yield _Engine2.default.get(keys[0]);
+
+	    try {
+	      engine.resultPageRegex = engine.resultPageRegex || _lodash2.default.escapeRegExp(new _Url2.default(engine.url).pathName);
+	      if (engine.resultPageRegex) {
+	        let resultPageRegex = new RegExp(engine.resultPageRegex);
+	        (0, _base.clog)(resultPageRegex);
+	        if (!resultPageRegex.test(tabUrl.url)) {
+	          (0, _base.clog)('Matched a engine, but not a result page. resultPageRegex: ', resultPageRegex);
+	          return _const.EMPTY_KEYWORDS;
+	        }
+	      }
+	    } catch (e) {
+	      (0, _base.clog)('Error while try to test url', e);
+	    }
 	    let searchKey = new _Url2.default(engine.url).searchKey;
-	    let searchString = tabUrl.getQueryVal(searchKey);
+	    let searchStrings = _lodash2.default.filter(tabUrl.queryPairs, { key: searchKey });
+	    let searchString = /google/.test(tabUrl.host) && searchStrings.length ? _lodash2.default.last(searchStrings).val : searchStrings[0].val;
+	    (0, _base.clog)('match searchString from url:', searchString);
 	    return searchString ? [{
 	      word: decodeURIComponent(searchString),
-	      confidence: _const.CONFIDENCE
+	      confidence: _const.CONFIDENCE_PARAM.searchString
 	    }] : _const.EMPTY_KEYWORDS;
 	  });
 
@@ -2839,7 +2898,6 @@ webpackJsonp([1,5],{
 	      file: __webpack_require__("Kyhl")
 	    });
 
-	    (0, _base.clog)('content script result: ', result);
 	    let unfiltered = result[0];
 	    if (!unfiltered) return _const.EMPTY_KEYWORDS;
 
@@ -2848,7 +2906,16 @@ webpackJsonp([1,5],{
 	      keywords[key] = (0, _base.filterEmptyStr)(unfiltered[key]);
 	    });
 
-	    return (0, _smartKeyword2.default)(tabUrl, keywords.meta, keywords.title, keywords.h1, keywords.h2);
+	    let keys = yield _Engine2.default.searchKeys(tabUrl.host, true);
+	    let siteKeywords = null;
+	    if (keys.length > 0) {
+	      let engine = yield _Engine2.default.get(keys[0]);
+	      siteKeywords = engine.siteKeywords || [];
+	      (0, _base.clog)('configured siteKeywords:', siteKeywords);
+	    }
+
+	    (0, _base.clog)('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2]);
+	    return (0, _smartKeyword2.default)(tabUrl, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords);
 	  });
 
 	  return function smartKeyword(_x3) {
@@ -2947,7 +3014,7 @@ webpackJsonp([1,5],{
 	  proxy(target) {
 	    let that = this;
 	    return new Proxy(target, {
-	      get: function get(target, key) {
+	      get: function (target, key) {
 	        if (that.cache[key]) {
 	          return that.cache[key];
 	        }
@@ -2990,7 +3057,7 @@ webpackJsonp([1,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.EMPTY_KEYWORDS = exports.MIN_CONFIDENCE = exports.CONFIDENCE = exports.KEYWORD_BLACKLIST = exports.PRINTABLE_ASCII = exports.CJK_PUNCT = exports.CJK = exports.PUNCT_FLATTEN = exports.SPACES = exports.PUNCT = undefined;
+	exports.EMPTY_KEYWORDS = exports.CONFIDENCE_MIN = exports.CONFIDENCE_PARAM = exports.KEYWORD_BLACKLIST = exports.PRINTABLE_EXTEND = exports.PRINTABLE_ASCII = exports.CJK_PUNCT = exports.CJK = exports.PUNCT_FLATTEN = exports.SPACES = exports.PUNCT = undefined;
 
 	var _base = __webpack_require__("5a/Z");
 
@@ -3037,17 +3104,17 @@ webpackJsonp([1,5],{
 
 	const SPACES = [" ", " ", " ", "	"];
 
-	let PUNCT_FLATTEN = (0, _base.getValueDeep)(PUNCT);
+	let PUNCT_FLATTEN = (0, _base.deepValue)(PUNCT);
 	/**
 	 * keyword blacklist
 	 * @notice all in lower case
 	 * @see https://en.wikibooks.org/wiki/English_in_Use/Prepositions,_Conjunctions,_and_Interjections
 	 */
-	const KEYWORD_BLACKLIST = [...PUNCT_FLATTEN, "i", "me", "you", "he", "she", "they", "anybody", "it", "one", "there", "that", "this", "other", "my", "your", "his", "her", "there", "own", "the", "a", "my", "more", "much", "either", "while", "meanwhile", "is", "isn't", "isnt", "am", "ain't", "aint", "are", "have", "has", "get", "gets", "got", "was", "wasnt", "no", "not", "nor", "what", "when", "who", "how", "why", "very", "so", "most", "least", "all", "only", "just", "but", "do", "doing", "did", "does", "can", "cannot", "can't", 'up',
+	const KEYWORD_BLACKLIST = [...PUNCT_FLATTEN, "i", "me", "you", "he", "she", "they", "it", "one", "there", "that", "this", "other", "some", "someone", "something", "any", "anybody", "anything", "my", "your", "his", "her", "there", "own", "the", "a", "my", "more", "much", "either", "while", "meanwhile", "be", "is", "isn't", "isnt", "am", "ain't", "aint", "are", "have", "has", "get", "gets", "got", "was", "wasnt", "no", "not", "what", "when", "who", "how", "why", "whereas", "whether", "very", "so", "most", "least", "all", "only", "just", "but", "do", "doing", "did", "does", "can", "cannot", "can't", "up", "should", "would",
 	// https://en.wikipedia.org/wiki/List_of_English_prepositions
 	"about", "above", "across", "after", "against", "along", "amid", "among", "around", "at", "by", "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "during", "except", "for", "from", "in", "into", "of", "off", "on", "over", "past", "through", "to", "toward", "towards", "under", "underneath", "until", "with", "without",
 	// Conjunctions
-	"and", "as", "both", "because", "even", "for", "if", "that", "then", "since", "seeing", "so", "or", "nor", "either", "neither", "than", "though", "although", "yet", "but", "except", "whether", "lest", "unless", "save", "provided", "notwithstanding", "whereas"];
+	"and", "as", "both", "because", "even", "for", "if", "that", "then", "since", "seeing", "so", "or", "nor", "either", "neither", "than", "though", "although", "yet", "but", "except", "lest", "unless"];
 
 	/**
 	 * @see http://www.unicode.org/reports/tr38/#BlockListing
@@ -3059,16 +3126,26 @@ webpackJsonp([1,5],{
 	 * CJK Unified Ideographs Extension A 3400–4DB5
 	 * #: most frequently used
 	 */
-	const CJK = String.raw`\u30A0-\u30FF\u3040-\u309F\u1100-\u11FF\u4E00-\u9FD5`;
+	const CJK = _base.regex`\u30A0-\u30FF\u3040-\u309F\u1100-\u11FF\u4E00-\u9FD5`;
 
 	// CJK punct excluding guillemets
 	const CJK_PUNCT = '，。？！·‘’“”；：【】…（）—';
 
 	// printable ASCII excluding spaces
-	const PRINTABLE_ASCII = String.raw`\u0021-\u007E`;
+	const PRINTABLE_ASCII = _base.regex`\u0021-\u007E`;
+	// printable latin letters, punctuations, symbols, but excluding spaces
+	// https://en.wikipedia.org/wiki/Latin_script_in_Unicode
+	const PRINTABLE_EXTEND = _base.regex`\u0021-\u007E\u00A1–\u02FF\u1D00–\u1DBF\u1E00–\u1EFF\u2070–\u218F\u2C60–\u2C7F\uA720–\uA7FF\uAB30–\uAB6F\uFF00–\uFFEF`;
 
-	const CONFIDENCE = 1;
-	const MIN_CONFIDENCE = .99;
+	// const CONFIDENCE = 1;
+	const CONFIDENCE_PARAM = {
+	  map: { base: 1, site: .1, vip: .49, originVip: 1.5 }, // for initialize candidateWords map
+	  match: { title: 1, meta: 1, h1: 1, h2: .1, url: 1, queryPairs: .1 }, // for _matchKeyword()
+	  keyword: { title: .5, h1: .4, h2: .05 }, // for divided keywords
+	  searchString: 1, // must greater than CONFIDENCE_MIN
+	  selection: 1 // must greater than CONFIDENCE_MIN
+	};
+	const CONFIDENCE_MIN = .99;
 	const EMPTY_KEYWORDS = [{
 	  word: '',
 	  confidence: 0
@@ -3079,9 +3156,10 @@ webpackJsonp([1,5],{
 	exports.CJK = CJK;
 	exports.CJK_PUNCT = CJK_PUNCT;
 	exports.PRINTABLE_ASCII = PRINTABLE_ASCII;
+	exports.PRINTABLE_EXTEND = PRINTABLE_EXTEND;
 	exports.KEYWORD_BLACKLIST = KEYWORD_BLACKLIST;
-	exports.CONFIDENCE = CONFIDENCE;
-	exports.MIN_CONFIDENCE = MIN_CONFIDENCE;
+	exports.CONFIDENCE_PARAM = CONFIDENCE_PARAM;
+	exports.CONFIDENCE_MIN = CONFIDENCE_MIN;
 	exports.EMPTY_KEYWORDS = EMPTY_KEYWORDS;
 
 /***/ },
@@ -3103,9 +3181,7 @@ webpackJsonp([1,5],{
 
 	var _const = __webpack_require__("+9hk");
 
-	var _markVipKeyword = __webpack_require__("VkYu");
-
-	var _markVipKeyword2 = _interopRequireDefault(_markVipKeyword);
+	var _wordHelper = __webpack_require__("I2Te");
 
 	var _PriorityMap = __webpack_require__("tEcJ");
 
@@ -3127,25 +3203,40 @@ webpackJsonp([1,5],{
 	 * @param {String} title
 	 * @param {String} h1
 	 * @param {String[]} h2
+	 * @param {String[]} [siteKeywords=[]]
 	 * */
 	/**
 	 * Intelligently get page's keyword, based on url, title, heading, keyword meta
 	 * Created by ray7551@gmail.com on 12.10 010.
 	 */
-	function smartKeyword(tabUrl, meta, title, h1, h2) {
-	  let candidateWords = new _PriorityMap2.default(tabUrl, _const.CONFIDENCE);
+	function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
+	  siteKeywords = siteKeywords || [];
+	  let candidateWords = new _PriorityMap2.default(tabUrl, _const.CONFIDENCE_PARAM.map, siteKeywords);
+
+	  meta = _lodash2.default.flatten(meta.map(metaStr => (0, _wordHelper.divide)(metaStr)));
 	  title = _fixSpaces(title);
 	  h1 = _fixSpaces(h1);
-	  let titleMarked = (0, _base.match)((0, _markVipKeyword2.default)(title), /《([^《》]+)》/g) || [];
-	  let h1Marked = (0, _base.match)((0, _markVipKeyword2.default)(h1), /《([^《》]+)》/g) || [];
+	  (0, _base.clog)('divided meta:', meta);
 
-	  (0, _base.clog)('', (0, _markVipKeyword2.default)(title));
-	  [...titleMarked, ...h1Marked].forEach(matched => {
-	    if (matched[1]) candidateWords.addVipWords(matched[1]);
+	  // add original marked words to vipWords
+	  (0, _wordHelper.forEachMarked)(title + h1, marked => {
+	    candidateWords.addVipWords(marked, _const.CONFIDENCE_PARAM.map.originVip);
+	  });
+
+	  // marked words then add to vipWords
+	  let titleMarked = (0, _wordHelper.markVipKeyword)(title),
+	      h1Marked = (0, _wordHelper.markVipKeyword)(h1);
+	  (0, _wordHelper.forEachMarked)(titleMarked + h1Marked, marked => {
+	    candidateWords.addVipWords(marked, _const.CONFIDENCE_PARAM.map.vip);
 	  });
 	  (0, _base.clog)('vipWords: ', JSON.stringify([...candidateWords.vipWords]));
 	  (0, _base.clog)('siteWords: ', JSON.stringify([...candidateWords.siteKeywords]));
 	  // clog(tabUrl.url, meta, title, h1, h2);
+
+	  if (_isQualified(candidateWords.vipArray, 2 * _const.CONFIDENCE_MIN)) {
+	    (0, _base.clog)('use good vip keywords');
+	    return candidateWords.vipArray;
+	  }
 
 	  // 1. without divide
 	  // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
@@ -3159,7 +3250,7 @@ webpackJsonp([1,5],{
 	  // 2. completely divide all string into words
 	  // get frequently appeared words as keyword array(ordered by priority)
 	  candidateWords.clear();
-	  const punctuations = (0, _lodash2.default)(_const.PUNCT_FLATTEN).reduce(_lodash2.default.add);
+	  const punctuations = _lodash2.default.chain(_const.PUNCT_FLATTEN).reduce(_lodash2.default.add);
 	  // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
 	  const punctuationsRegex = '[' + _lodash2.default.escapeRegExp(punctuations) + '\\s]+|\\b';
 	  const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
@@ -3167,14 +3258,14 @@ webpackJsonp([1,5],{
 
 	  let dividePreProcess = _lodash2.default.flow(_replaceUnderscore, _fixHyphen);
 	  title && (0, _base.filterEmptyStr)(dividePreProcess(title).split(SEPARATE_REGEX)).forEach(word => {
-	    candidateWords.increaseConfidence(word, .5 * _const.CONFIDENCE);
+	    candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.title);
 	  });
 	  h1 && (0, _base.filterEmptyStr)(dividePreProcess(h1).split(SEPARATE_REGEX)).forEach(word => {
-	    candidateWords.increaseConfidence(word, .4 * _const.CONFIDENCE);
+	    candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.h1);
 	  });
-	  !_lodash2.default.isEmpty(h2) && h2.forEach(h2 => {
+	  Array.isArray(h2) && h2.forEach(h2 => {
 	    // clog(h2.split(SEPARATE_REGEX))
-	    (0, _base.filterEmptyStr)(h2.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, .01 * _const.CONFIDENCE));
+	    (0, _base.filterEmptyStr)(h2.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.h2));
 	  });
 	  // @TODO divide tabUrl.url here
 
@@ -3186,7 +3277,7 @@ webpackJsonp([1,5],{
 
 	  // 3. divide title with common separator
 	  candidateWords.clear();
-	  const divider = (0, _lodash2.default)([..._const.PUNCT.dash, ..._const.PUNCT.verticalBar, ..._const.PUNCT.colon, ..._const.PUNCT.brackets, ..._const.PUNCT.comma, ..._const.PUNCT.question, ..._const.PUNCT.exclamation, ..._const.PUNCT.guillemets.left, ..._const.PUNCT.guillemets.right]).reduce(_lodash2.default.add);
+	  const divider = _lodash2.default.chain([..._const.PUNCT.dash, ..._const.PUNCT.verticalBar, ..._const.PUNCT.colon, ..._const.PUNCT.brackets, ..._const.PUNCT.comma, ..._const.PUNCT.question, ..._const.PUNCT.exclamation, ..._const.PUNCT.guillemets.left, ..._const.PUNCT.guillemets.right]).reduce(_lodash2.default.add);
 	  const dividerStr = '[' + _lodash2.default.escapeRegExp(divider) + ']+|-{2,}';
 	  const TITLE_DIVIDE_REGEXP = _getDividerRegex(dividerStr);
 	  (0, _base.clog)(TITLE_DIVIDE_REGEXP);
@@ -3209,57 +3300,36 @@ webpackJsonp([1,5],{
 	  return _const.EMPTY_KEYWORDS;
 
 	  function _matchKeywords(keywords, ignore) {
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
-
-	    try {
-	      for (var _iterator = keywords[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	        let keyword = _step.value;
-
-	        if (ignore !== keywordType.h1 && h1.includeString(keyword)) {
-	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE);
-	        }
-	        if (ignore !== keywordType.title && title.includeString(keyword)) {
-	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE);
-	        }
-	        ignore !== keywordType.meta && meta.forEach(metaKeyword => {
-	          if (metaKeyword.includeString(keyword, true)) {
-	            candidateWords.increaseConfidence(keyword, _const.CONFIDENCE);
-	          }
-	        });
-	        if (ignore !== keywordType.url && tabUrl.url.includeString(keyword)) {
-	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE);
-	        }
-	        ignore !== keywordType.url && tabUrl.queryPairs.map(pair => {
-	          if (pair.val.includeString(keyword, pair.val.length >= 2)) {
-	            candidateWords.increaseConfidence(keyword, .1 * _const.CONFIDENCE);
-	          }
-	        });
-	        ignore !== keywordType.h2 && h2.forEach(function (h2) {
-	          if (h2.includeString(keyword)) {
-	            candidateWords.increaseConfidence(keyword, .01 * _const.CONFIDENCE);
-	          }
-	        });
+	    for (let keyword of keywords) {
+	      if (ignore !== keywordType.title && title.includeString(keyword)) {
+	        candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.title);
 	      }
-	    } catch (err) {
-	      _didIteratorError = true;
-	      _iteratorError = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion && _iterator.return) {
-	          _iterator.return();
-	        }
-	      } finally {
-	        if (_didIteratorError) {
-	          throw _iteratorError;
-	        }
+	      if (ignore !== keywordType.url && tabUrl.pathName.includeString(keyword)) {
+	        candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.url);
 	      }
+	      ignore !== keywordType.url && tabUrl.queryPairs.map(pair => {
+	        if (pair.val.includeString(keyword, pair.val.length >= 2)) {
+	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.queryPairs);
+	        }
+	      });
+	      ignore !== keywordType.meta && meta.forEach(metaKeyword => {
+	        if (metaKeyword.includeString(keyword, true)) {
+	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.meta);
+	        }
+	      });
+	      if (ignore !== keywordType.h1 && h1.includeString(keyword)) {
+	        candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.h1);
+	      }
+	      ignore !== keywordType.h2 && h2.forEach(function (h2) {
+	        if (h2.includeString(keyword)) {
+	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.h2);
+	        }
+	      });
 	    }
 	  }
 
-	  function _isQualified(orderedArray, minConfidence = _const.MIN_CONFIDENCE) {
-	    return !_lodash2.default.isEmpty(orderedArray) && orderedArray[0].confidence >= minConfidence;
+	  function _isQualified(orderedArray, minConfidence = _const.CONFIDENCE_MIN) {
+	    return !_lodash2.default.isEmpty(orderedArray) && orderedArray[0].confidence > minConfidence;
 	  }
 
 	  function _getDividerRegex(divider, modifier) {
@@ -3298,7 +3368,7 @@ webpackJsonp([1,5],{
 
 /***/ },
 
-/***/ "VkYu":
+/***/ "I2Te":
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3306,19 +3376,22 @@ webpackJsonp([1,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.markName = exports.markEnds = exports.markEnWord = exports.markUpperWord = exports.markVipKeyword = undefined;
+	exports.forEachMarked = exports.removeMarked = exports.divide = exports.markName = exports.markEnds = exports.markEnWord = exports.markUpperWord = exports.markVipKeyword = undefined;
+
+	var _base = __webpack_require__("5a/Z");
 
 	var _const = __webpack_require__("+9hk");
 
 	// ASCII characters those not break word meaning
-	const ASCII_CHAR = String.raw`a-zA-Z\d~&*_+'\-`; /**
-	                                                  * mark very important keywords, which are:
-	                                                  * 1. english words(at least 2 [a-zA-Z] characters) surrounded by CJK characters
-	                                                  * 2. uppercase words(at least first 2 character are uppercase)
-	                                                  * @author ray7551@gmail.com
-	                                                  */
-
-	const ASCII_PUNCT = String.raw`/,\.<>\?\`!@#\$%\^=";\:\[\]{}\|\(\)\\`;
+	/**
+	 * mark very important keywords, which are:
+	 * 1. English words(at least 2 [a-zA-Z] characters) surrounded by CJK characters
+	 * 2. Uppercase words(at least first 2 character are uppercase)
+	 * 3. Names(at least 2 words, and every word has capitalized first letter)
+	 * @author ray7551@gmail.com
+	 */
+	const ASCII_CHAR = _base.regex`a-zA-Z\d~&*+'\-`;
+	const ASCII_PUNCT = _base.regex`/_,\.<>\?\`!@#\$%\^=";\:\[\]{}\|\(\)\\`;
 	const lGuimets = _const.PUNCT.guillemets.left.reduce((all, current) => {
 	  all += current;
 	  return all;
@@ -3328,101 +3401,106 @@ webpackJsonp([1,5],{
 	  return all;
 	}, '');
 
-	let markUpperWord = function markUpperWord(str) {
-	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}]|[${CJK_PUNCT}。.\s])([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)([^${CJK}A-Z${rGuimets}]|[${CJK_PUNCT}.\s]|$)`, 'g'); // ?《YEAH》。MAGIC 《LEAP》    ?《YEAH》.MAGIC 《LEAP》
-	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}]|\b)([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)([^${CJK}A-Z${rGuimets}]|\b|$)`, 'g'); // 的《MAX》是    Is 《《MAGIC》》 leap
-	  // (?<![a-zA-Z‹«《〈『])\b([A-Z]{2,}[a-zA-Z\d~@&*()_+'\-]*(?:\s+[A-Z]{2,}[a-zA-Z\d~@&*()_+'\-]*)*)\b([^A-Z›»》〉』。]|[。]|$)
-	  // console.log(upperSubstrRegex)
-	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}]|\b)\b([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)\b([^${CJK}A-Z${rGuimets}]|$)`, 'g'); // should ignore upper word surrounded by CJK characters
-	  // return str.replace(upperSubstrRegex, '$1《$2》$3');
-	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}])([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)\b`, 'g');
-	  // return str.replace(upperSubstrRegex, '$1《$2》');
-
-	  // let upperSubstrRegex = new RegExp(String.raw`(^|[^${CJK}a-zA-Z${lGuimets}])(\s*)([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)\b(.*)`, 'g');
-	  // return str.replace(upperSubstrRegex, (...args) => {
-	  //   let p1 = args[1], p2 = args[2] || '', p3 = args[3], p4 = args[4] || '', offset = args[5], string = args[6];
-	  //   if(p4 && new RegExp(`[${CJK}]`).test(p4)) {
-	  //     console.log(string);
-	  //     return `${p1}${p2}${p3}${p4}`;
-	  //   }
-	  //   // avoid 服TAXI MAN => 服TAXI 《MAN》
-	  //   if (/\s/.test(p1)) {
-	  //     return `${p1}${p2}${p3}${p4}`;
-	  //   }
-	  //   return `${p1}${p2}《${p3}》${p4}`;
-	  // });
-
-	  let upperSubstrRegex = new RegExp(String.raw`(^|[^${ _const.CJK }a-zA-Z${ lGuimets }])([A-Z]{2,}[${ ASCII_CHAR }]*(?:\s+[A-Z]{2,}[${ ASCII_CHAR }]*)*)\b(?![${ _const.CJK }])`, 'g'); // ((\s+(?![A-Z]))?)
+	let markUpperWord = function (str) {
+	  let upperSubstrRegex = new RegExp(_base.regex`(^|[^${ _const.CJK }a-zA-Z${ lGuimets }])([A-Z]{2,}[${ ASCII_CHAR }]*(?:\s+[A-Z]{2,}[${ ASCII_CHAR }]*)*)\b(?![${ _const.CJK }])`, 'g'); // ((\s+(?![A-Z]))?)
 	  return str.replace(upperSubstrRegex, '$1《$2》');
-	  // return str.replace(upperSubstrRegex, (match, p1, p2, p3='') => {
-	  //   return `${p1}《${p2}》${p3}`;
-	  // });
 	};
 
-	let markEnWord = function markEnWord(str) {
-	  // let vipSubstrRegex = new RegExp(String.raw`(^|[${CJK}${CJK_PUNCT}${rGuimets}]|\s)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)([${CJK}${CJK_PUNCT}${lGuimets}]|\s)`, 'ig');
-	  let vipSubstrRegex0 = new RegExp(String.raw`(^)(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)\b(\s*)([${ _const.CJK }])`, 'ig');
-	  let vipSubstrRegex1 = new RegExp(String.raw`([${ _const.CJK }])(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)\b`, 'ig');
-	  let vipSubstrRegex2 = new RegExp(String.raw`([${ rGuimets }${ _const.CJK_PUNCT }])(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)\b([^${ ASCII_PUNCT }\s])`, 'ig');
-	  let modify = function modify(match, p1, p2, p3, p4) {
+	let markEnWord = function (str) {
+	  // let vipSubstrRegex = new RegExp(regex`(^|[${CJK}${CJK_PUNCT}${rGuimets}]|\s)([a-z]{2,}[${ASCII_CHAR}]*(?:\s+[${ASCII_CHAR}]+)*)([${CJK}${CJK_PUNCT}${lGuimets}]|\s)`, 'ig');
+	  let vipSubstrRegex0 = new RegExp(_base.regex`(^)(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)(_*)\b(\s*|[${ ASCII_PUNCT }]*)([${ _const.CJK }])`, 'ig');
+	  let vipSubstrRegex1 = new RegExp(_base.regex`([${ _const.CJK }])(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)\b`, 'ig');
+	  let vipSubstrRegex2 = new RegExp(_base.regex`([${ rGuimets }${ _const.CJK_PUNCT }])(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)\b([^${ ASCII_PUNCT }\s])`, 'ig');
+	  let vipSubstrRegex3 = new RegExp(_base.regex`([${ ASCII_PUNCT }])(\s*)([a-z]{2,}[${ ASCII_CHAR }]*(?:\s+[${ ASCII_CHAR }]+)*)(_*)\b(\s*|[${ ASCII_PUNCT }]*)([${ _const.CJK }])`, 'ig');
+	  let modify = function (match, p1, p2, p3, p4) {
 	    return p2 ? `${ p1 }${ p2 }《${ p3 }》${ p4 }` : `${ p1 }《${ p3 }》${ p4 }`;
 	  };
-	  return str.replace(vipSubstrRegex0, (match, p1, p2 = '', p3, p4 = '', p5) => {
-	    return `${ p1 }${ p2 }《${ p3 }》${ p4 }${ p5 }`;
+	  return str.replace(vipSubstrRegex0, (match, p1, p2 = '', p3, p4 = '', p5 = '', p6) => {
+	    return `${ p1 }${ p2 }《${ p3 }》${ p4 }${ p5 }${ p6 }`;
 	  }).replace(vipSubstrRegex1, (match, p1, p2, p3) => {
 	    return p2 ? `${ p1 }${ p2 }《${ p3 }》` : `${ p1 }《${ p3 }》`;
-	  }).replace(vipSubstrRegex2, modify);
+	  }).replace(vipSubstrRegex2, modify).replace(vipSubstrRegex3, (match, p1, p2 = '', p3, p4 = '', p5 = '', p6) => {
+	    return `${ p1 }${ p2 }《${ p3 }》${ p4 }${ p5 }${ p6 }`;
+	  });
 	};
 
-	let markEnds = function markEnds(str) {
-	  let beginRegex = new RegExp(String.raw`^([${ ASCII_CHAR }]+)》`);
-	  let tailRegex = new RegExp(String.raw`《([${ ASCII_CHAR }]+)$`);
+	let markEnds = function (str) {
+	  let beginRegex = new RegExp(_base.regex`^([${ ASCII_CHAR }]+)》`);
+	  let tailRegex = new RegExp(_base.regex`《([${ ASCII_CHAR }]+)$`);
 	  return str.replace(beginRegex, '《$1》').replace(tailRegex, '《$1》');
 	};
 
-	let markName = function markName(str) {
-	  let validCharacter = String.raw`a-zÀ-ÿ`;
-	  let name = String.raw`[A-Z][${ validCharacter }]+`;
-	  let subElement = String.raw`(?:[Nn]o.\s?\d+)|(?:${ name })`;
-	  let nameRegex = new RegExp(String.raw`(^|[^${ _const.CJK }a-zA-Z${ lGuimets }])((?:${ subElement })(?:\s+(?:${ subElement }))+)\b(?![${ _const.CJK }])`, 'g'); // ((\s+(?![A-Z]))?)
-	  return str.replace(nameRegex, (match, p1, p2) => {
+	let markName = function (str) {
+	  let validCharacter = _base.regex`a-zÀ-ÿ`;
+	  let name = _base.regex`[A-Z][${ validCharacter }]+`;
+	  let subElement = _base.regex`(?:[Nn]o.\s?\d+)|(?:${ name })`;
+	  let nameRegex1 = new RegExp(_base.regex`
+	    (^|[^${ _const.CJK }a-zA-Z${ lGuimets }])
+	    (
+	      (?:${ subElement })
+	      (?:\s+(?:${ subElement }))+
+	    )
+	    \b
+	    (?![${ _const.CJK }])
+	  `, 'g'); // ((\s+(?![A-Z]))?)
+	  // /[A-Z][a-z]+\s*[-_/]\s*[A-Z][a-z]+/.test('javascript - Mocha / Chai expect.se')
+	  let nameRegex2 = new RegExp(_base.regex`
+	    (^|[^${ _const.CJK }a-zA-Z${ lGuimets }])
+	    (
+	      (?:${ subElement })
+	      (?:\s*[-_/]\s*(?:${ subElement }))+
+	    )
+	    (?![${ _const.CJK }])
+	  `, 'g');
+	  return str.replace(nameRegex1, (match, p1, p2) => {
 	    let dividedName = p2.split(/\s+/g);
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
-
-	    try {
-	      for (var _iterator = dividedName[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	        let name = _step.value;
-
-	        if (_const.KEYWORD_BLACKLIST.includes(name.toLowerCase())) return match;
-	      }
-	    } catch (err) {
-	      _didIteratorError = true;
-	      _iteratorError = err;
-	    } finally {
-	      try {
-	        if (!_iteratorNormalCompletion && _iterator.return) {
-	          _iterator.return();
-	        }
-	      } finally {
-	        if (_didIteratorError) {
-	          throw _iteratorError;
-	        }
-	      }
+	    for (let name of dividedName) {
+	      if (_const.KEYWORD_BLACKLIST.includes(name.toLowerCase())) return match;
 	    }
-
+	    return `${ p1 }《${ p2 }》`;
+	  }).replace(nameRegex2, (match, p1 = '', p2) => {
+	    let dividedName = p2.split(/[-_/]+|\s+/g);
+	    for (let name of dividedName) {
+	      if (_const.KEYWORD_BLACKLIST.includes(name.toLowerCase())) return match;
+	    }
+	    if (/\//.test(p2)) {
+	      p2 = p2.replace(/(\s*)\/(\s*)/, '》$1/$2《');
+	    }
 	    return `${ p1 }《${ p2 }》`;
 	  });
 	};
 
 	// 《p1》\s*《p2》 -> 《p1\s?p2》
-	let concat = function concat(str) {
+	let concat = function (str) {
 	  return str.replace(/》(\s*)《/g, ' ');
 	};
 
-	let markVipKeyword = function markVipKeyword(str) {
-	  return concat(markEnWord(markName(markUpperWord(str))));
+	let markVipKeyword = function (str) {
+	  return concat(markName(markEnWord(markUpperWord(str))));
+	};
+
+	let divide = function (str) {
+	  // dividers, not include \s
+	  let commonDivider = _base.regex`\.,，。\<\>《》、\/`;
+	  let regLeft = new RegExp(_base.regex`
+	    ([${ _const.CJK }])\s+(.)
+	  `, 'g');
+	  let regRight = new RegExp(_base.regex`
+	    (.)\s+([${ _const.CJK }])
+	  `, 'g');
+	  let require = new RegExp(_base.regex`[${ commonDivider }]+`, 'g');
+	  return str.replace(regLeft, '$1|$2').replace(regRight, '$1|$2').replace(require, '|').split('|');
+	};
+
+	let removeMarked = function (str) {
+	  return str.replace(/《[^》]*》/g, ' ');
+	};
+
+	let forEachMarked = function (str, fn) {
+	  let matched = (0, _base.match)(str, /《([^《》]+)》/g) || [];
+	  matched.forEach(match => {
+	    fn(match[1]);
+	  });
 	};
 
 	exports.default = markVipKeyword;
@@ -3431,6 +3509,9 @@ webpackJsonp([1,5],{
 	exports.markEnWord = markEnWord;
 	exports.markEnds = markEnds;
 	exports.markName = markName;
+	exports.divide = divide;
+	exports.removeMarked = removeMarked;
+	exports.forEachMarked = forEachMarked;
 
 /***/ },
 
