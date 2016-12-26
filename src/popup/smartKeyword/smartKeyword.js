@@ -47,6 +47,11 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   clog('siteWords: ', JSON.stringify([...candidateWords.siteKeywords]))
   // clog(tabUrl.url, meta, title, h1, h2);
 
+  if (_isQualified(candidateWords.vipArray, 2 * CONFIDENCE_MIN)) {
+    clog('use good vip keywords')
+    return candidateWords.vipArray;
+  }
+
   // 1. without divide
   // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
   _matchKeywords(meta, keywordType.meta);
