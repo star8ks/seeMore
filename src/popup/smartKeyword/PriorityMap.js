@@ -52,7 +52,7 @@ class PriorityMap {
     this.siteKeywords = new StringMap();
     this.vipWords = new StringMap();
 
-    let siteWords = siteKeywords.concat(url.host.split('.').slice(0, -1));
+    let siteWords = siteKeywords.concat(url.host.split('.').slice(0, -1)).reverse();
     for(let word of siteWords) {
       this._setSiteKeywords(word);
     }
