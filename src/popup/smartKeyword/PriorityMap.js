@@ -1,4 +1,4 @@
-import {PRINTABLE_ASCII, KEYWORD_BLACKLIST, CONFIDENCE_PARAM} from './const';
+import {PRINTABLE_EXTEND, KEYWORD_BLACKLIST, CONFIDENCE_PARAM} from './const';
 /**
  * Just like normal Map, but use case insensitive string as key
  * */
@@ -67,8 +67,8 @@ class PriorityMap {
     return KEYWORD_BLACKLIST.includes(word)
       || /^\d+$/.test(word)
       || word.length <= 0
-      || (word.length <= 2 && word === word.toLowerCase())
-      || (word.length ===1 && new RegExp(`[${PRINTABLE_ASCII}À-ÿ]`).test(word));
+      || (word.length <= 2 && /^[a-z]+$/i.test(word))
+      || (word.length === 1 && new RegExp(`[${PRINTABLE_EXTEND}]`).test(word));
   }
 
   /**

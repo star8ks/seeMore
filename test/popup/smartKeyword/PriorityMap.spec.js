@@ -110,6 +110,11 @@ describe('PriorityMap', () => {
         let pm = new PriorityMap(url);
         [...pm.siteKeywords].map((item) => item[0]).should.not.include('com');
       });
+      it('should add site keywords with priority', () => {
+        let url = new Url('http://www.baidu.com/video/345/');
+        let pm = new PriorityMap(url, undefined, ['Baidu', 'B度', '百度']);
+        [...pm.siteKeywords].map((item) => item[0]).should.eql(['baidu', 'B度', '百度']);
+      });
       it('should not add blacklist words', () => {
         let url = new Url('https://www.not.vs.google.com');
         let pm = new PriorityMap(url);

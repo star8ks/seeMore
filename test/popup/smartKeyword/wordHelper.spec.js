@@ -126,6 +126,7 @@ describe('mark functions', () => {
     it('should mark at least 2 capital start words', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody》 full');
       markName('A Grammar of the Latin Language: For the Use of Schools and Colleges').should.equal('A Grammar of the 《Latin Language》: For the Use of Schools and Colleges');
+      markName('Lodash Documentation').should.equal('《Lodash Documentation》');
     });
     it('should ignore space and _- between names', () => {
       markName('javascript - Mocha_Chai expect.to.throw not catching thrown errors').should.equal('javascript - 《Mocha_Chai》 expect.to.throw not catching thrown errors');
@@ -185,6 +186,15 @@ describe('mark functions', () => {
     });
   });
 
+  describe('removeMarked', () => {
+    it('should remove marked word, and replace it with single space', () => {
+      removeMarked('再陷危机的《Magic Leap》真的是骗子吗').should.equal('再陷危机的 真的是骗子吗');
+    });
+    it('should remove all marked word, and replace it with single space', () => {
+      removeMarked('再陷危机的《Magic Leap》真的是《骗子》吗').should.equal('再陷危机的 真的是 吗');
+    })
+  });
+
   describe('markVipKeyword', () => {
     it('should work on this case', () => {
       let str = 'Pandora'
@@ -204,12 +214,4 @@ describe('mark functions', () => {
     });
   });
 
-  describe('removeMarked', () => {
-    it('should remove marked word, and replace it with single space', () => {
-      removeMarked('再陷危机的《Magic Leap》真的是骗子吗').should.equal('再陷危机的 真的是骗子吗');
-    });
-    it('should remove all marked word, and replace it with single space', () => {
-      removeMarked('再陷危机的《Magic Leap》真的是《骗子》吗').should.equal('再陷危机的 真的是 吗');
-    })
-  })
 });

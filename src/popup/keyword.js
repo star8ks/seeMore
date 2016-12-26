@@ -97,10 +97,9 @@ async function smartKeyword(tabUrl) {
   let keys = await Engine.searchKeys(tabUrl.host, true);
   let siteKeywords = null;
   if (keys.length > 0) {
-    clog('found engines:', keys)
     let engine = await Engine.get(keys[0]);
     siteKeywords = engine.siteKeywords || [];
-    clog('siteKeywords:', siteKeywords)
+    clog('configured siteKeywords:', siteKeywords)
   }
 
   clog('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2]);

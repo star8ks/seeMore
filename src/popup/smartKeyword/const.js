@@ -1,7 +1,7 @@
 /**
  * Created by ray7551@gmail.com on 12.14 014.
  */
-import {deepValue} from '../../common/base';
+import {deepValue, regex} from '../../common/base';
 
 // Punctuations, excluding spaces
 // https://en.wikipedia.org/wiki/Punctuation_of_English
@@ -78,13 +78,16 @@ const KEYWORD_BLACKLIST = [
  * CJK Unified Ideographs Extension A 3400–4DB5
  * #: most frequently used
  */
-const CJK = String.raw`\u30A0-\u30FF\u3040-\u309F\u1100-\u11FF\u4E00-\u9FD5`;
+const CJK = regex`\u30A0-\u30FF\u3040-\u309F\u1100-\u11FF\u4E00-\u9FD5`;
 
 // CJK punct excluding guillemets
 const CJK_PUNCT = '，。？！·‘’“”；：【】…（）—';
 
 // printable ASCII excluding spaces
-const PRINTABLE_ASCII = String.raw`\u0021-\u007E`;
+const PRINTABLE_ASCII = regex`\u0021-\u007E`;
+// printable latin letters, punctuations, symbols, but excluding spaces
+// https://en.wikipedia.org/wiki/Latin_script_in_Unicode
+const PRINTABLE_EXTEND = regex`\u0021-\u007E\u00A1–\u02FF\u1D00–\u1DBF\u1E00–\u1EFF\u2070–\u218F\u2C60–\u2C7F\uA720–\uA7FF\uAB30–\uAB6F\uFF00–\uFFEF`;
 
 // const CONFIDENCE = 1;
 const CONFIDENCE_PARAM = {
@@ -99,6 +102,6 @@ const EMPTY_KEYWORDS = [{
   word: '',
   confidence: 0
 }];
-export {PUNCT, SPACES, PUNCT_FLATTEN, CJK, CJK_PUNCT, PRINTABLE_ASCII,
+export {PUNCT, SPACES, PUNCT_FLATTEN, CJK, CJK_PUNCT, PRINTABLE_ASCII, PRINTABLE_EXTEND,
   KEYWORD_BLACKLIST, CONFIDENCE_PARAM, CONFIDENCE_MIN, EMPTY_KEYWORDS
 };

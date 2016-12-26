@@ -99,7 +99,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
    * @param {String} str
    * */
   function translate(str) {
-    str = str.trim() || '';
+    str = str.trim().replace(/\n/, '') || '';
     // @TODO only translate some language, from user config
     // @TODO not translate some language, from user config
     // if(chrome.i18n.detect)

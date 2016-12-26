@@ -3,7 +3,7 @@
  * Created by ray7551@gmail.com on 12.10 010.
  */
 import _ from 'lodash';
-import {clog, filterEmptyStr, match as matchAll} from '../../common/base';
+import {clog, filterEmptyStr} from '../../common/base';
 import {PUNCT, PUNCT_FLATTEN, CONFIDENCE_PARAM, CONFIDENCE_MIN, EMPTY_KEYWORDS} from './const';
 import {markVipKeyword, divide, forEachMarked} from './wordHelper';
 import PriorityMap from './PriorityMap';
@@ -33,19 +33,15 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   h1 = _fixSpaces(h1);
   clog('divided meta:', meta)
 
-  let titleMarked = matchAll(title, /《([^《》]+)》/g) || [];
-  let h1Marked = matchAll(h1, /《([^《》]+)》/g) || [];
-  // add original marked words
-  [...titleMarked, ...h1Marked].forEach((matched) => {
-    if(matched[1]) candidateWords.addVipWords(matched[1], CONFIDENCE_PARAM.map.originVip);
+  // add original marked words to vipWords
+  forEachMarked(title + h1, marked => {
+    candidateWords.addVipWords(marked, CONFIDENCE_PARAM.map.originVip);
   });
 
-  titleMarked = matchAll(markVipKeyword(title), /《([^《》]+)》/g) || [];
-  h1Marked = matchAll(markVipKeyword(h1), /《([^《》]+)》/g) || [];
-
-  clog('', markVipKeyword(title));
-  [...titleMarked, ...h1Marked].forEach((matched) => {
-    if(matched[1]) candidateWords.addVipWords(matched[1]);
+  // marked words then add to vipWords
+  let titleMarked = markVipKeyword(title), h1Marked = markVipKeyword(h1);
+  forEachMarked(titleMarked + h1Marked, marked => {
+    candidateWords.addVipWords(marked, CONFIDENCE_PARAM.map.vip);
   });
   clog('vipWords: ', JSON.stringify([...candidateWords.vipWords]))
   clog('siteWords: ', JSON.stringify([...candidateWords.siteKeywords]))

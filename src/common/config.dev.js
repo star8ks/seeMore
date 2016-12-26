@@ -18,12 +18,22 @@ const CONFIG = {
       hosts: ['rarbg.to'],
       url: 'https://rarbg.to/torrents.php?search=%s'
     },
+    bilibili: {
+      order: 1200,
+      typeId: 102,
+      defaultTypeId: 2,
+      displayName: 'bilibili',
+      open: true,
+      siteKeywords: ['哔哩哔哩', 'Bilibili', 'B站', '弹幕'],
+      hosts: ['search.bilibili.com'],
+      url: 'http://search.bilibili.com/all?keyword=%s'
+    },
     baidu: {
       displayName: '百度',
       open: true,
       hostName: 'baidu',
       hosts: ['www.baidu.com'],
-      siteKeywords: ['baidu', '百度'],
+      siteKeywords: ['Baidu', 'B度', '百度'],
       url: 'https://www.baidu.com/s?wd=%s'
     },
     360: {
