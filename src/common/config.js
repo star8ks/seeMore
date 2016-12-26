@@ -328,6 +328,7 @@ const CONFIG = {
       defaultTypeId: 2,
       displayName: 'bilibili',
       open: true,
+      siteKeywords: ['哔哩哔哩', 'Bilibili', 'B站', '弹幕'],
       hosts: ['search.bilibili.com'],
       url: 'http://search.bilibili.com/all?keyword=%s'
     },

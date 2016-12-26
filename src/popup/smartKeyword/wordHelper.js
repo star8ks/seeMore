@@ -5,7 +5,7 @@
  * 3. Names(at least 2 words, and every word has capitalized first letter)
  * @author ray7551@gmail.com
  */
-import {regex} from '../../common/base';
+import {regex, match as matchAll} from '../../common/base';
 import {CJK, CJK_PUNCT, PUNCT, KEYWORD_BLACKLIST} from './const';
 // ASCII characters those not break word meaning
 const ASCII_CHAR = regex`a-zA-Z\d~&*+'\-`;
@@ -111,5 +111,16 @@ let divide = function (str) {
     .replace(require, '|').split('|');
 };
 
+let removeMarked = function(str) {
+  return str.replace(/《[^》]*》/g, ' ');
+};
+
+let forEachMarked = function (str, fn) {
+  let matched = matchAll(str, /《([^《》]+)》/g) || [];
+  matched.forEach(match => {
+    fn(match[1]);
+  })
+};
+
 export default markVipKeyword;
-export {markVipKeyword, markUpperWord, markEnWord, markEnds, markName, divide};
+export {markVipKeyword, markUpperWord, markEnWord, markEnds, markName, divide, removeMarked, forEachMarked};

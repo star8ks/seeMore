@@ -43,13 +43,19 @@ class PriorityMap {
   /**
    * @param {Url} url
    * @param {Object} [confidence]
+   * @param {String[]} [siteKeywords=[]]
    * */
-  constructor(url, confidence) {
+  constructor(url, confidence, siteKeywords) {
+    siteKeywords = siteKeywords || [];
     this.confidence = confidence || CONFIDENCE_PARAM.map;
     this.map = new StringMap();
     this.siteKeywords = new StringMap();
-    this._setSiteKeywords(url);
     this.vipWords = new StringMap();
+
+    let siteWords = siteKeywords.concat(url.host.split('.').slice(0, -1));
+    for(let word of siteWords) {
+      this._setSiteKeywords(word);
+    }
   }
 
   /**
@@ -75,17 +81,14 @@ class PriorityMap {
   }
 
   /**
-   * @param {Url} url
+   * @param {String} str
    * */
-  _setSiteKeywords(url) {
-    let siteWords = url.host.split('.').slice(0, -1);
-    siteWords.forEach((word) => {
-      word = PriorityMap._preProcess(word);
-      if (PriorityMap._inBlackList(word) || /(www)/i.test(word)) {
-        return;
-      }
-      this.siteKeywords.set(word, this.confidence.site);
-    });
+  _setSiteKeywords(str) {
+    let word = PriorityMap._preProcess(str);
+    if (PriorityMap._inBlackList(word) || /(www)/i.test(word)) {
+      return;
+    }
+    this.siteKeywords.set(word, this.confidence.site);
   }
 
   addVipWords(word, confidence) {

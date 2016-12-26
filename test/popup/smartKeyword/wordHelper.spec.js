@@ -1,5 +1,5 @@
 import '../../dirtyShould';
-import {markVipKeyword, markUpperWord, markEnWord, markEnds, markName, divide} from '../../../src/popup/smartKeyword/markVipKeyword';
+import {markVipKeyword, markUpperWord, markEnWord, markEnds, markName, divide, removeMarked} from '../../../src/popup/smartKeyword/wordHelper';
 
 describe('mark functions', () => {
   describe('markUpperWord', () => {
@@ -204,4 +204,12 @@ describe('mark functions', () => {
     });
   });
 
+  describe('removeMarked', () => {
+    it('should remove marked word, and replace it with single space', () => {
+      removeMarked('再陷危机的《Magic Leap》真的是骗子吗').should.equal('再陷危机的 真的是骗子吗');
+    });
+    it('should remove all marked word, and replace it with single space', () => {
+      removeMarked('再陷危机的《Magic Leap》真的是《骗子》吗').should.equal('再陷危机的 真的是 吗');
+    })
+  })
 });

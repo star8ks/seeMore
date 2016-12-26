@@ -46,6 +46,7 @@ async function getQueryString(tabUrl) {
   if (keys.length <= 0) {
     return EMPTY_KEYWORDS;
   }
+  // TODO filter all engines here, only keep the matched(resultPageRegex), and if no matched, return EMPTY_KEYWORDS
   let engine = await Engine.get(keys[0]);
 
   try {
@@ -93,8 +94,17 @@ async function smartKeyword(tabUrl) {
     keywords[key] = filterEmptyStr(unfiltered[key]);
   });
 
+  let keys = await Engine.searchKeys(tabUrl.host, true);
+  let siteKeywords = null;
+  if (keys.length > 0) {
+    clog('found engines:', keys)
+    let engine = await Engine.get(keys[0]);
+    siteKeywords = engine.siteKeywords || [];
+    clog('siteKeywords:', siteKeywords)
+  }
+
   clog('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2]);
-  return smart(tabUrl, keywords.meta, keywords.title, keywords.h1, keywords.h2);
+  return smart(tabUrl, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords);
 }
 
 /**

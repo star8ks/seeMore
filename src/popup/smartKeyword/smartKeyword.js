@@ -5,7 +5,7 @@
 import _ from 'lodash';
 import {clog, filterEmptyStr, match as matchAll} from '../../common/base';
 import {PUNCT, PUNCT_FLATTEN, CONFIDENCE_PARAM, CONFIDENCE_MIN, EMPTY_KEYWORDS} from './const';
-import {markVipKeyword, divide} from './markVipKeyword';
+import {markVipKeyword, divide, forEachMarked} from './wordHelper';
 import PriorityMap from './PriorityMap';
 
 const keywordType = {
@@ -22,13 +22,16 @@ const keywordType = {
  * @param {String} title
  * @param {String} h1
  * @param {String[]} h2
+ * @param {String[]} [siteKeywords=[]]
  * */
-function smartKeyword(tabUrl, meta, title, h1, h2) {
-  let candidateWords = new PriorityMap(tabUrl, CONFIDENCE_PARAM.map);
+function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
+  siteKeywords = siteKeywords || [];
+  let candidateWords = new PriorityMap(tabUrl, CONFIDENCE_PARAM.map, siteKeywords);
 
   meta = _.flatten(meta.map(metaStr => divide(metaStr)));
   title = _fixSpaces(title);
   h1 = _fixSpaces(h1);
+  clog('divided meta:', meta)
 
   let titleMarked = matchAll(title, /《([^《》]+)》/g) || [];
   let h1Marked = matchAll(h1, /《([^《》]+)》/g) || [];
@@ -60,7 +63,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2) {
   // 2. completely divide all string into words
   // get frequently appeared words as keyword array(ordered by priority)
   candidateWords.clear();
-  const punctuations = _(PUNCT_FLATTEN).reduce(_.add);
+  const punctuations = _.chain(PUNCT_FLATTEN).reduce(_.add);
   // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
   const punctuationsRegex = '[' + _.escapeRegExp(punctuations) + '\\s]+|\\b';
   const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
@@ -89,7 +92,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2) {
 
   // 3. divide title with common separator
   candidateWords.clear();
-  const divider = _([
+  const divider = _.chain([
     ...PUNCT.dash, ...PUNCT.verticalBar, ...PUNCT.colon, ...PUNCT.brackets,
     ...PUNCT.comma, ...PUNCT.question, ...PUNCT.exclamation,
     ...PUNCT.guillemets.left, ...PUNCT.guillemets.right
