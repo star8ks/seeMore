@@ -52,7 +52,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
     return candidateWords.vipArray;
   }
 
-  // 1. without divide
+  // 1. without any divide, use meta keyword
   // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
   _matchKeywords(meta, keywordType.meta);
   // clog(candidateWords)
@@ -61,7 +61,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
     return candidateWords.orderedArray;
   }
 
-  // 2. completely divide all string into words
+  // 2. completely divide all string into words(excluding meta keyword)
   // get frequently appeared words as keyword array(ordered by priority)
   candidateWords.clear();
   const punctuations = _.chain(PUNCT_FLATTEN).reduce(_.add);
@@ -70,20 +70,24 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
   clog('separate regex', SEPARATE_REGEX)
 
-  let dividePreProcess = _.flow(_replaceUnderscore, _fixHyphen);
-  title && filterEmptyStr(dividePreProcess(title).split(SEPARATE_REGEX)).forEach(word => {
+  let urlDividePreProcess = _.flow(_replaceUnderscore, str => str.split(SEPARATE_REGEX), filterEmptyStr);
+  urlDividePreProcess(tabUrl.pathName).forEach(pathWord => {
+    clog('pathWord', pathWord);
+    candidateWords.increaseConfidence(pathWord, CONFIDENCE_PARAM.keyword.pathName);
+  });
+  let dividePreProcess = _.flow(_replaceUnderscore, _fixHyphen, str => str.split(SEPARATE_REGEX), filterEmptyStr);
+  title && dividePreProcess(title).forEach(word => {
     candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.title);
   });
-  h1 && filterEmptyStr(dividePreProcess(h1).split(SEPARATE_REGEX)).forEach(word => {
+  h1 && dividePreProcess(h1).forEach(word => {
     candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.h1);
   });
   Array.isArray(h2) && h2.forEach(h2 => {
-    // clog(h2.split(SEPARATE_REGEX))
-    filterEmptyStr(h2.split(SEPARATE_REGEX)).forEach(word =>
+    dividePreProcess(h2).forEach(word =>
       candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.h2)
     );
   });
-  // @TODO divide tabUrl.url here
+  // @TODO divide tabUrl.queryPairs here
 
   clog('most frequently appeared words: ', JSON.stringify(candidateWords.orderedArray))
   if (_isQualified(candidateWords.orderedArray)) {
@@ -124,14 +128,16 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
       if (ignore !== keywordType.title && title.includeString(keyword)) {
         candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.title);
       }
-      if (ignore !== keywordType.url && tabUrl.pathName.includeString(keyword)) {
-        candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.url);
-      }
-      ignore !== keywordType.url && tabUrl.queryPairs.map(pair => {
-        if (pair.val.includeString(keyword, pair.val.length >= 2)) {
-          candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.queryPairs);
+      if (ignore !== keywordType.url) {
+        if(tabUrl.pathName.includeString(keyword)){
+          candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.pathName);
         }
-      });
+        tabUrl.queryPairs.map(pair => {
+          if (pair.val.includeString(keyword, pair.val.length >= 2)) {
+            candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.queryPairs);
+          }
+        })
+      }
       ignore !== keywordType.meta && meta.forEach(metaKeyword => {
         if (metaKeyword.includeString(keyword, true)) {
           candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.meta);

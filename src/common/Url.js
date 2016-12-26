@@ -112,6 +112,26 @@ var Url = (function () {
   Url.isNormal = function(url) {
     return Url.NORMAL_REGEX.test(url);
   };
+  /**
+   * Get root domain(not strictly) of a host.
+   * @see Url.spec.js for detail usage
+   * @param {String} host a valid host
+   * */
+  Url.getRootDomain = function(host) {
+    var temp = host.replace(/^[^.]+\./, "");
+    var firstPart = temp.match(/^([^.]+)\./);
+    var commonDomainSuffix = ['com', 'net', 'edu', 'gov', 'org'];
+    if(firstPart === null) {
+      return host;
+    }
+    if(temp.split('.').length >= 3) {
+      return Url.getRootDomain(temp);
+    }
+    if(commonDomainSuffix.includes(firstPart[1].toLowerCase())) {
+      return host;
+    }
+    return temp;
+  };
   Url.NORMAL_REGEX = /^https?:\/\//i;
   Url.FAVICON_URL_REGEX = /\.ico$/i;
   Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
@@ -125,6 +145,7 @@ var Url = (function () {
       return val ? val[1].replace(/\+/g, ' ') : null;
     }
   };
+
   return Url;
 })();
 

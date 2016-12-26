@@ -113,7 +113,11 @@ describe('PriorityMap', () => {
       it('should add site keywords with priority', () => {
         let url = new Url('http://www.baidu.com/video/345/');
         let pm = new PriorityMap(url, undefined, ['Baidu', 'B度', '百度']);
-        [...pm.siteKeywords].map((item) => item[0]).should.eql(['baidu', 'B度', '百度']);
+        [...pm.siteKeywords].should.have.deep.same.members([
+          ['Baidu', pm.confidence.site],
+          ['B度', pm.confidence.site],
+          ['百度', pm.confidence.site]
+        ]);
       });
       it('should not add blacklist words', () => {
         let url = new Url('https://www.not.vs.google.com');

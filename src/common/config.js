@@ -243,6 +243,7 @@ const CONFIG = {
       displayName: 'Baidu',
       open: true,
       hosts: ['www.baidu.com'],
+      siteKeywords: ['Baidu', '百度'],
       url: 'https://www.baidu.com/s?wd=%s'
     },
     bing: {

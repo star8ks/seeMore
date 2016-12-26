@@ -92,8 +92,8 @@ const PRINTABLE_EXTEND = regex`\u0021-\u007E\u00A1–\u02FF\u1D00–\u1DBF\u1E00
 // const CONFIDENCE = 1;
 const CONFIDENCE_PARAM = {
   map: {base: 1, site: .1, vip: .49, originVip: 1.5}, // for initialize candidateWords map
-  match: {title: 1, meta: 1, h1: 1, h2: .1, url: 1, queryPairs: .1}, // for _matchKeyword()
-  keyword: {title: .5, h1: .4, h2: .05}, // for divided keywords
+  match: {title: 1, meta: 1, h1: 1, h2: .1, pathName: 1, queryPairs: .1}, // for _matchKeyword()
+  keyword: {title: .35, h1: .4, h2: .05, pathName: .2, queryPairs: .1}, // for divided keywords
   searchString: 1, // must greater than CONFIDENCE_MIN
   selection: 1 // must greater than CONFIDENCE_MIN
 };

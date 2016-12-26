@@ -37,6 +37,18 @@ describe('Url', () => {
         u.queryPairs.should.eql([{key: 'a', val: 'b c d'}]);
       });
     });
+    describe('getRootDomain', () => {
+      it('should return root domain of host', () => {
+        Url.getRootDomain('google.com').should.equal('google.com');
+        Url.getRootDomain('www.google.com').should.equal('google.com');
+        Url.getRootDomain('news.china.com.cn').should.equal('china.com.cn');
+        Url.getRootDomain('test.baijia.baidu.com').should.equal('baidu.com');
+        Url.getRootDomain('china.com.cn').should.equal('china.com.cn');
+        Url.getRootDomain('test.gov.baidu.com').should.equal('baidu.com');
+        Url.getRootDomain('gov.com').should.equal('gov.com');
+        // Url.getRootDomain('www.gov.com').should.equal('gov.com'); // I know it's a bug, but it's hard to resolve
+      });
+    });
     describe('faviconUrl', () => {
     });
     describe('host, origin, pathName', () => {

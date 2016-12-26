@@ -102,7 +102,7 @@ async function smartKeyword(tabUrl) {
     clog('configured siteKeywords:', siteKeywords)
   }
 
-  clog('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2]);
+  clog('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords]);
   return smart(tabUrl, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords);
 }
 

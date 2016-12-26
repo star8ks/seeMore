@@ -1,5 +1,6 @@
 import DB from './DB';
 import localforage from '../localforage-bluebird';
+import Url from '../../common/Url';
 
 let Engine = new DB(localforage, 'engine');
 Engine.set = function (key, engine) {
@@ -48,7 +49,7 @@ Engine.getOpen = function (assoc, filter) {
  * if not found in hosts, next then() will get false,
  * if found, next then() will get the engine keys
  * */
-Engine.searchKeys = function(host, includeRootDomain=false) {
+Engine.searchKeys = function(host, includeRootDomain) {
   host = host.toLowerCase();
   includeRootDomain = includeRootDomain === undefined ? false : !!includeRootDomain;
 
@@ -59,9 +60,9 @@ Engine.searchKeys = function(host, includeRootDomain=false) {
     if(!includeRootDomain) {
       return false;
     }
-    var inputRootDomain = _getRootDomain(host);
+    var inputRootDomain = Url.getRootDomain(host);
     var findHost = se.hosts.find(function (seHost) {
-      var seRootDomain = _getRootDomain(seHost);
+      var seRootDomain = Url.getRootDomain(seHost);
       return seRootDomain === host || seRootDomain === inputRootDomain;
     });
     return findHost !== undefined;
@@ -69,12 +70,5 @@ Engine.searchKeys = function(host, includeRootDomain=false) {
     return Object.keys(DB.assoc(engines));
   });
 };
-
-/**
- * @param {String} host a valid host
- * */
-function _getRootDomain(host) {
-  return host.replace(/^(?:[^.]+\.)*([^.]+\.[^.]+)$/, '$1');
-}
 
 export default Engine;
