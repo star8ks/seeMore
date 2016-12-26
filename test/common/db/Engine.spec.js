@@ -75,5 +75,10 @@ describe('Engine', function () {
         expect(keys).to.eql([]);
       });
     });
+    it('can find in root domains', () => {
+      return Engine.searchKeys('baidu.com', true).then(keys => {
+        expect(keys).to.eql(['baidu']);
+      });
+    });
   });
 });

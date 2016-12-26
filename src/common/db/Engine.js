@@ -43,19 +43,38 @@ Engine.getOpen = function (assoc, filter) {
 
 /**
  * @param {String} host A valid host
+ * @param {Boolean} [includeRootDomain=false]
  * @return {Promise}
  * if not found in hosts, next then() will get false,
  * if found, next then() will get the engine keys
  * */
-Engine.searchKeys = function(host) {
+Engine.searchKeys = function(host, includeRootDomain=false) {
   host = host.toLowerCase();
+  includeRootDomain = includeRootDomain === undefined ? false : !!includeRootDomain;
+
   return this.getOpen().filter(function (se) {
-    return se.hosts.includes(host);
+    if(se.hosts.includes(host)) {
+      return true;
+    }
+    if(!includeRootDomain) {
+      return false;
+    }
+    var inputRootDomain = _getRootDomain(host);
+    var findHost = se.hosts.find(function (seHost) {
+      var seRootDomain = _getRootDomain(seHost);
+      return seRootDomain === host || seRootDomain === inputRootDomain;
+    });
+    return findHost !== undefined;
   }).then(function (engines) {
     return Object.keys(DB.assoc(engines));
-  }).catch(function (err) {
-    throw new Error('Error in searchEngineKeys(host = ' + host + '): ' + err);
   });
 };
+
+/**
+ * @param {String} host a valid host
+ * */
+function _getRootDomain(host) {
+  return host.replace(/^(?:[^.]+\.)*([^.]+\.[^.]+)$/, '$1');
+}
 
 export default Engine;
