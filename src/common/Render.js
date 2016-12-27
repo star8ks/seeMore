@@ -8,6 +8,7 @@ function setProperties(engines) {
   return Promise.map(engines, function (se) {
     var oUrl = new Url(se.url);
     se.index = se['$$key'];
+    se.href = se.url.replace(/%s/g, '');
     return Icon.get(oUrl.host).then(function (url) {
       se.favicon = url || oUrl.faviconUrl;
       return se;
