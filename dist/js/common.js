@@ -37,146 +37,27 @@ webpackJsonp([4,5],{
 
 /***/ },
 
-/***/ "tDBr":
-/***/ function(module, exports) {
+/***/ "sInu":
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	var Url = function () {
 
-	  function getHost(url) {
-	    if (url.match(/^chrome/)) {
-	      return 'chrome';
-	    }
+	var _DB = __webpack_require__("U2e7");
 
-	    var match = url.match(/^https?:\/\/([^\/]+)\/?/);
-	    if (!match) {
-	      throw Error('Not a valid url: ' + url);
-	    } else {
-	      return match[1].toLowerCase();
-	    }
-	  }
-	  /**
-	   * A regular expression for identifying favicon URLs.
-	   * @const {!RegExp}
-	   */
-	  var Url = function (urlStr) {
-	    this.url = urlStr;
-	    Object.defineProperties(this, {
-	      /**
-	       * host of url
-	       * eg: host part of 'https://www.se.com/g?q=3#t' is 'www.se.com'
-	       * @member {String} host
-	       * @memberOf Url#
-	       */
-	      host: {
-	        get: function () {
-	          //noinspection JSPotentiallyInvalidUsageOfThis,JSUnresolvedVariable
-	          return getHost(this.url);
-	        },
-	        enumerable: true
-	      },
-	      /**
-	       * origin of url
-	       * eg: origin part of 'https://se.com/g?q=3#t' is 'https://se.com'
-	       * */
-	      origin: {
-	        get: function () {
-	          var match = this.url.match(/^((http|https|chrome|chrome\-extension):\/\/[^\/]+)\/?/);
-	          if (!match) {
-	            throw Error('Not a valid url: ' + this.url);
-	          } else {
-	            return match[1].toLowerCase();
-	          }
-	        },
-	        enumerable: true
-	      },
-	      /**
-	       * Creates a favicon url depend on given url.
-	       * @param {number=} size Optional preferred size of the favicon.
-	       * @param {string=} type Optional type of favicon to request. Valid values
-	       *     are 'favicon' and 'touch-icon'. Default is 'favicon'.
-	       * @return {string} url for the favicon.
-	       */
-	      faviconUrl: {
-	        get: function (size, type) {
-	          size = size || 16;
-	          type = type || 'favicon';
+	var _DB2 = _interopRequireDefault(_DB);
 
-	          return 'chrome://' + type + '/size/' + size + '@1x/' + (
-	          // Note: Literal 'iconurl' must match FAVICON_URL_REGEX
-	          Url.FAVICON_URL_REGEX.test(this.url) ? 'iconurl/' + this.url : this.origin);
-	        },
-	        enumerable: true
-	      },
-	      searchKey: {
-	        get: function () {
-	          var match = this.url.match(/([^#?&]+)=%s/i);
-	          return !match ? '' : match[1];
-	        },
-	        enumerable: true
-	      },
-	      queryPairs: {
-	        get: function () {
-	          var regex = /([^#?&]+)=([^&?#]*)/g;
-	          var pairs = [],
-	              tempResult;
-	          while (tempResult = regex.exec(this.url)) {
-	            pairs.push(tempResult);
-	          }
-	          return pairs.map(function (pair) {
-	            return {
-	              key: pair[1],
-	              val: decodeURIComponent(pair[2] || '').replace(/\+/g, ' ')
-	            };
-	          });
-	        },
-	        enumerable: true
-	      },
-	      isNormal: {
-	        get: function () {
-	          return Url.NORMAL_REGEX.test(this.url);
-	        },
-	        enumerable: true
-	      },
-	      isGoogleFail: {
-	        get: function () {
-	          return Url.GOOGLE_FAILED_REGEX.test(this.url);
-	        },
-	        enumerable: true
-	      },
-	      pathName: {
-	        get: function () {
-	          var match = this.url.match(/https?:\/\/[^\/]*(\/[^?]+)/);
-	          return match ? match[1] : '/';
-	        },
-	        enumerable: true
-	      }
-	    });
-	  };
-	  Url.isNormal = function (url) {
-	    return Url.NORMAL_REGEX.test(url);
-	  };
-	  Url.NORMAL_REGEX = /^https?:\/\//i;
-	  Url.FAVICON_URL_REGEX = /\.ico$/i;
-	  Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
-	  Url.prototype = {
-	    includes: function (search) {
-	      return this.url.includeString(search);
-	    },
+	var _localforageBluebird = __webpack_require__("6PVA");
 
-	    getQueryVal: function (key) {
-	      var val = this.url.match(new RegExp('[#?&]' + key + "=([^#?&]*)[#?&]", 'i'));
-	      return val ? val[1].replace(/\+/g, ' ') : null;
-	    }
-	  };
-	  return Url;
-	}();
+	var _localforageBluebird2 = _interopRequireDefault(_localforageBluebird);
 
-	exports.default = Url;
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	let Icon = new _DB2.default(_localforageBluebird2.default, 'icon');
+	exports.default = Icon;
 
 /***/ },
 
@@ -616,6 +497,7 @@ webpackJsonp([4,5],{
 	      displayName: 'Baidu',
 	      open: true,
 	      hosts: ['www.baidu.com'],
+	      siteKeywords: ['Baidu', '百度'],
 	      url: 'https://www.baidu.com/s?wd=%s'
 	    },
 	    bing: {
@@ -1040,6 +922,170 @@ webpackJsonp([4,5],{
 
 /***/ },
 
+/***/ "tDBr":
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	var Url = function () {
+
+	  function getHost(url) {
+	    if (url.match(/^chrome/)) {
+	      return 'chrome';
+	    }
+
+	    var match = url.match(/^https?:\/\/([^\/]+)\/?/);
+	    if (!match) {
+	      throw Error('Not a valid url: ' + url);
+	    } else {
+	      return match[1].toLowerCase();
+	    }
+	  }
+	  /**
+	   * A regular expression for identifying favicon URLs.
+	   * @const {!RegExp}
+	   */
+	  var Url = function (urlStr) {
+	    this.url = urlStr;
+	    Object.defineProperties(this, {
+	      /**
+	       * host of url
+	       * eg: host part of 'https://www.se.com/g?q=3#t' is 'www.se.com'
+	       * @member {String} host
+	       * @memberOf Url#
+	       */
+	      host: {
+	        get: function () {
+	          //noinspection JSPotentiallyInvalidUsageOfThis,JSUnresolvedVariable
+	          return getHost(this.url);
+	        },
+	        enumerable: true
+	      },
+	      /**
+	       * origin of url
+	       * eg: origin part of 'https://se.com/g?q=3#t' is 'https://se.com'
+	       * */
+	      origin: {
+	        get: function () {
+	          var match = this.url.match(/^((http|https|chrome|chrome\-extension):\/\/[^\/]+)\/?/);
+	          if (!match) {
+	            throw Error('Not a valid url: ' + this.url);
+	          } else {
+	            return match[1].toLowerCase();
+	          }
+	        },
+	        enumerable: true
+	      },
+	      /**
+	       * Creates a favicon url depend on given url.
+	       * @param {number=} size Optional preferred size of the favicon.
+	       * @param {string=} type Optional type of favicon to request. Valid values
+	       *     are 'favicon' and 'touch-icon'. Default is 'favicon'.
+	       * @return {string} url for the favicon.
+	       */
+	      faviconUrl: {
+	        get: function (size, type) {
+	          size = size || 16;
+	          type = type || 'favicon';
+
+	          return 'chrome://' + type + '/size/' + size + '@1x/' + (
+	          // Note: Literal 'iconurl' must match FAVICON_URL_REGEX
+	          Url.FAVICON_URL_REGEX.test(this.url) ? 'iconurl/' + this.url : this.origin);
+	        },
+	        enumerable: true
+	      },
+	      searchKey: {
+	        get: function () {
+	          var match = this.url.match(/([^#?&]+)=%s/i);
+	          return !match ? '' : match[1];
+	        },
+	        enumerable: true
+	      },
+	      queryPairs: {
+	        get: function () {
+	          var regex = /([^#?&]+)=([^&?#]*)/g;
+	          var pairs = [],
+	              tempResult;
+	          while (tempResult = regex.exec(this.url)) {
+	            pairs.push(tempResult);
+	          }
+	          return pairs.map(function (pair) {
+	            return {
+	              key: pair[1],
+	              val: decodeURIComponent(pair[2] || '').replace(/\+/g, ' ')
+	            };
+	          });
+	        },
+	        enumerable: true
+	      },
+	      isNormal: {
+	        get: function () {
+	          return Url.NORMAL_REGEX.test(this.url);
+	        },
+	        enumerable: true
+	      },
+	      isGoogleFail: {
+	        get: function () {
+	          return Url.GOOGLE_FAILED_REGEX.test(this.url);
+	        },
+	        enumerable: true
+	      },
+	      pathName: {
+	        get: function () {
+	          var match = this.url.match(/https?:\/\/[^\/]*(\/[^?]+)/);
+	          return match ? match[1] : '/';
+	        },
+	        enumerable: true
+	      }
+	    });
+	  };
+	  Url.isNormal = function (url) {
+	    return Url.NORMAL_REGEX.test(url);
+	  };
+	  /**
+	   * Get root domain(not strictly) of a host.
+	   * @see Url.spec.js for detail usage
+	   * @param {String} host a valid host
+	   * */
+	  Url.getRootDomain = function (host) {
+	    var temp = host.replace(/^[^.]+\./, "");
+	    var firstPart = temp.match(/^([^.]+)\./);
+	    var commonDomainSuffix = ['com', 'net', 'edu', 'gov', 'org'];
+	    if (firstPart === null) {
+	      return host;
+	    }
+	    if (temp.split('.').length >= 3) {
+	      return Url.getRootDomain(temp);
+	    }
+	    if (commonDomainSuffix.includes(firstPart[1].toLowerCase())) {
+	      return host;
+	    }
+	    return temp;
+	  };
+	  Url.NORMAL_REGEX = /^https?:\/\//i;
+	  Url.FAVICON_URL_REGEX = /\.ico$/i;
+	  Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
+	  Url.prototype = {
+	    includes: function (search) {
+	      return this.url.includeString(search);
+	    },
+
+	    getQueryVal: function (key) {
+	      var val = this.url.match(new RegExp('[#?&]' + key + "=([^#?&]*)[#?&]", 'i'));
+	      return val ? val[1].replace(/\+/g, ' ') : null;
+	    }
+	  };
+
+	  return Url;
+	}();
+
+	exports.default = Url;
+
+/***/ },
+
 /***/ "Tsvq":
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1083,30 +1129,6 @@ webpackJsonp([4,5],{
 
 /***/ },
 
-/***/ "sInu":
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _DB = __webpack_require__("U2e7");
-
-	var _DB2 = _interopRequireDefault(_DB);
-
-	var _localforageBluebird = __webpack_require__("6PVA");
-
-	var _localforageBluebird2 = _interopRequireDefault(_localforageBluebird);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	let Icon = new _DB2.default(_localforageBluebird2.default, 'icon');
-	exports.default = Icon;
-
-/***/ },
-
 /***/ "gLfi":
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1123,6 +1145,10 @@ webpackJsonp([4,5],{
 	var _localforageBluebird = __webpack_require__("6PVA");
 
 	var _localforageBluebird2 = _interopRequireDefault(_localforageBluebird);
+
+	var _Url = __webpack_require__("tDBr");
+
+	var _Url2 = _interopRequireDefault(_Url);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1175,7 +1201,7 @@ webpackJsonp([4,5],{
 	 * if not found in hosts, next then() will get false,
 	 * if found, next then() will get the engine keys
 	 * */
-	Engine.searchKeys = function (host, includeRootDomain = false) {
+	Engine.searchKeys = function (host, includeRootDomain) {
 	  host = host.toLowerCase();
 	  includeRootDomain = includeRootDomain === undefined ? false : !!includeRootDomain;
 
@@ -1186,9 +1212,9 @@ webpackJsonp([4,5],{
 	    if (!includeRootDomain) {
 	      return false;
 	    }
-	    var inputRootDomain = _getRootDomain(host);
+	    var inputRootDomain = _Url2.default.getRootDomain(host);
 	    var findHost = se.hosts.find(function (seHost) {
-	      var seRootDomain = _getRootDomain(seHost);
+	      var seRootDomain = _Url2.default.getRootDomain(seHost);
 	      return seRootDomain === host || seRootDomain === inputRootDomain;
 	    });
 	    return findHost !== undefined;
@@ -1196,13 +1222,6 @@ webpackJsonp([4,5],{
 	    return Object.keys(_DB2.default.assoc(engines));
 	  });
 	};
-
-	/**
-	 * @param {String} host a valid host
-	 * */
-	function _getRootDomain(host) {
-	  return host.replace(/^(?:[^.]+\.)*([^.]+\.[^.]+)$/, '$1');
-	}
 
 	exports.default = Engine;
 

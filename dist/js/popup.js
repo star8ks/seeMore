@@ -80,7 +80,7 @@ webpackJsonp([1,5],{
 	    this.siteKeywords = new StringMap();
 	    this.vipWords = new StringMap();
 
-	    let siteWords = siteKeywords.concat(url.host.split('.').slice(0, -1));
+	    let siteWords = siteKeywords.concat(url.host.split('.').slice(0, -1)).reverse();
 	    for (let word of siteWords) {
 	      this._setSiteKeywords(word);
 	    }
@@ -2914,7 +2914,7 @@ webpackJsonp([1,5],{
 	      (0, _base.clog)('configured siteKeywords:', siteKeywords);
 	    }
 
-	    (0, _base.clog)('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2]);
+	    (0, _base.clog)('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords]);
 	    return (0, _smartKeyword2.default)(tabUrl, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords);
 	  });
 
@@ -3140,8 +3140,8 @@ webpackJsonp([1,5],{
 	// const CONFIDENCE = 1;
 	const CONFIDENCE_PARAM = {
 	  map: { base: 1, site: .1, vip: .49, originVip: 1.5 }, // for initialize candidateWords map
-	  match: { title: 1, meta: 1, h1: 1, h2: .1, url: 1, queryPairs: .1 }, // for _matchKeyword()
-	  keyword: { title: .5, h1: .4, h2: .05 }, // for divided keywords
+	  match: { title: 1, meta: 1, h1: 1, h2: .1, pathName: 1, queryPairs: .1 }, // for _matchKeyword()
+	  keyword: { title: .35, h1: .4, h2: .05, pathName: .2, queryPairs: .1 }, // for divided keywords
 	  searchString: 1, // must greater than CONFIDENCE_MIN
 	  selection: 1 // must greater than CONFIDENCE_MIN
 	};
@@ -3238,7 +3238,7 @@ webpackJsonp([1,5],{
 	    return candidateWords.vipArray;
 	  }
 
-	  // 1. without divide
+	  // 1. without any divide, use meta keyword
 	  // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
 	  _matchKeywords(meta, keywordType.meta);
 	  // clog(candidateWords)
@@ -3247,7 +3247,7 @@ webpackJsonp([1,5],{
 	    return candidateWords.orderedArray;
 	  }
 
-	  // 2. completely divide all string into words
+	  // 2. completely divide all string into words(excluding meta keyword)
 	  // get frequently appeared words as keyword array(ordered by priority)
 	  candidateWords.clear();
 	  const punctuations = _lodash2.default.chain(_const.PUNCT_FLATTEN).reduce(_lodash2.default.add);
@@ -3256,18 +3256,22 @@ webpackJsonp([1,5],{
 	  const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
 	  (0, _base.clog)('separate regex', SEPARATE_REGEX);
 
-	  let dividePreProcess = _lodash2.default.flow(_replaceUnderscore, _fixHyphen);
-	  title && (0, _base.filterEmptyStr)(dividePreProcess(title).split(SEPARATE_REGEX)).forEach(word => {
+	  let urlDividePreProcess = _lodash2.default.flow(_replaceUnderscore, str => str.split(SEPARATE_REGEX), _base.filterEmptyStr);
+	  urlDividePreProcess(tabUrl.pathName).forEach(pathWord => {
+	    (0, _base.clog)('pathWord', pathWord);
+	    candidateWords.increaseConfidence(pathWord, _const.CONFIDENCE_PARAM.keyword.pathName);
+	  });
+	  let dividePreProcess = _lodash2.default.flow(_replaceUnderscore, _fixHyphen, str => str.split(SEPARATE_REGEX), _base.filterEmptyStr);
+	  title && dividePreProcess(title).forEach(word => {
 	    candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.title);
 	  });
-	  h1 && (0, _base.filterEmptyStr)(dividePreProcess(h1).split(SEPARATE_REGEX)).forEach(word => {
+	  h1 && dividePreProcess(h1).forEach(word => {
 	    candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.h1);
 	  });
 	  Array.isArray(h2) && h2.forEach(h2 => {
-	    // clog(h2.split(SEPARATE_REGEX))
-	    (0, _base.filterEmptyStr)(h2.split(SEPARATE_REGEX)).forEach(word => candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.h2));
+	    dividePreProcess(h2).forEach(word => candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.h2));
 	  });
-	  // @TODO divide tabUrl.url here
+	  // @TODO divide tabUrl.queryPairs here
 
 	  (0, _base.clog)('most frequently appeared words: ', JSON.stringify(candidateWords.orderedArray));
 	  if (_isQualified(candidateWords.orderedArray)) {
@@ -3304,14 +3308,16 @@ webpackJsonp([1,5],{
 	      if (ignore !== keywordType.title && title.includeString(keyword)) {
 	        candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.title);
 	      }
-	      if (ignore !== keywordType.url && tabUrl.pathName.includeString(keyword)) {
-	        candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.url);
-	      }
-	      ignore !== keywordType.url && tabUrl.queryPairs.map(pair => {
-	        if (pair.val.includeString(keyword, pair.val.length >= 2)) {
-	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.queryPairs);
+	      if (ignore !== keywordType.url) {
+	        if (tabUrl.pathName.includeString(keyword)) {
+	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.pathName);
 	        }
-	      });
+	        tabUrl.queryPairs.map(pair => {
+	          if (pair.val.includeString(keyword, pair.val.length >= 2)) {
+	            candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.queryPairs);
+	          }
+	        });
+	      }
 	      ignore !== keywordType.meta && meta.forEach(metaKeyword => {
 	        if (metaKeyword.includeString(keyword, true)) {
 	          candidateWords.increaseConfidence(keyword, _const.CONFIDENCE_PARAM.match.meta);
