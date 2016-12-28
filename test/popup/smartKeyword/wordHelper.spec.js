@@ -136,20 +136,23 @@ describe('mark functions', () => {
       markName('javascript - Mocha/Chai expect.to.throw not catching thrown errors').should.equal('javascript - 《Mocha》/《Chai》 expect.to.throw not catching thrown errors');
       markName('javascript - Mocha / Chai expect.to.throw not catching thrown errors').should.equal('javascript - 《Mocha》 / 《Chai》 expect.to.throw not catching thrown errors');
     });
-    it('should mark words like No.3', () => {
+    it('should mark words like No.3 and op.3', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody no.3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody no.3》 full');
+      markName('Nyiregyházi plays Liszt Hungarian Rhapsody op.3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody op.3》 full');
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody No.3').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody No.3》');
+      markName('Nyiregyházi plays Liszt Hungarian Rhapsody Op.3').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody Op.3》');
       markName('No.3 Liszt Hungarian Rhapsody the Nyiregyhazi Version').should.equal('《No.3 Liszt Hungarian Rhapsody》 the 《Nyiregyhazi Version》');
-      markName('No.3 Liszt Hungarian Rhapsody the Nyiregyházi Version').should.equal('《No.3 Liszt Hungarian Rhapsody》 the 《Nyiregyházi Version》');
+      markName('Op.3 Liszt Hungarian Rhapsody the Nyiregyhazi Version').should.equal('《Op.3 Liszt Hungarian Rhapsody》 the 《Nyiregyhazi Version》');
+    });
+    it('should ignore spaces between No./op. and numbers', () => {
+      markName('Nyiregyházi plays Liszt Hungarian Rhapsody no. 3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody no. 3》 full');
+      markName('Nyiregyházi plays Liszt Hungarian Rhapsody op. 3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody op. 3》 full');
     });
     it('should not mark all upper words', () => {
       markName('is MAGIC LEAP EXT a liar').should.equal('is MAGIC LEAP EXT a liar');
     });
     it('should not mark single name', () => {
       markName('is MAGIC lie').should.equal('is MAGIC lie');
-    });
-    it('should ignore spaces between No. and numbers', () => {
-      markName('Nyiregyházi plays Liszt Hungarian Rhapsody no. 3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody no. 3》 full');
     });
     it('should ignore names containing blacklist words', () => {
       markName('No It Should Not Be Marked!').should.equal('No It Should Not Be Marked!');
@@ -172,17 +175,21 @@ describe('mark functions', () => {
       divide('最后 Jeff jh').should.eql(['最后', 'Jeff jh']);
     });
     it(`should support these conventional dividers other than space(CJK words)`, () => {
-      divide('不懂，最后,自杀.解读。高人《解惑》一下、水果硬糖|解析　理解').should.eql([
+      divide('不懂，最后,自杀/解读。高人《解惑》一下、水果硬糖|解析　理解').should.eql([
         '不懂', '最后', '自杀', '解读', '高人', '解惑', '一下', '水果硬糖', '解析', '理解'
       ]);
     });
     it(`should support these conventional dividers other than space(a-zA-z words)`, () => {
-      divide(`not，lastly,suicide.explain。holy<shit>one、candy|understand`).should.eql([
-        'not', 'lastly', 'suicide', 'explain', 'holy', 'shit', 'one', 'candy', 'understand'
+      divide(`not，lastly,suicide/explain。holy<shit>one、candy|understand[this]`).should.eql([
+        'not', 'lastly', 'suicide', 'explain', 'holy', 'shit', 'one', 'candy', 'understand', 'this'
       ]);
     });
     it(`should not divide spaces between a-zA-z words`, () => {
       divide(`not lastly suicide`).should.eql(['not lastly suicide']);
+    });
+    it(`should trim spaces and punctuations`, () => {
+      divide(`not, lastly, [suicide]`).should.eql(['not', 'lastly', 'suicide']);
+      divide('Kalle Randal, Tallinn Chamber Orchestra, Juha Kangas, Piano Concerto No.12 In A Major (Composition), Wolfgang Amadeus Mozart (Author), Andres Siitan Artists ...').should.eql(['Kalle Randal', 'Tallinn Chamber Orchestra', 'Juha Kangas', 'Piano Concerto No.12 In A Major (Composition)', 'Wolfgang Amadeus Mozart (Author)', 'Andres Siitan Artists']);
     });
   });
 

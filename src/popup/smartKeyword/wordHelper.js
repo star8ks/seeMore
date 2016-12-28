@@ -5,7 +5,7 @@
  * 3. Names(at least 2 words, and every word has capitalized first letter)
  * @author ray7551@gmail.com
  */
-import {regex, match as matchAll} from '../../common/base';
+import {regex, match as matchAll, trim} from '../../common/base';
 import {CJK, CJK_PUNCT, PUNCT, KEYWORD_BLACKLIST} from './const';
 // ASCII characters those not break word meaning
 const ASCII_CHAR = regex`a-zA-Z\d~&*+'\-`;
@@ -51,7 +51,12 @@ let markEnds = function (str) {
 let markName = function (str) {
   let validCharacter = regex`a-zÀ-ÿ`;
   let name = regex`[A-Z][${validCharacter}]+`;
-  let subElement = regex`(?:[Nn]o.\s?\d+)|(?:${name})`;
+  let subElement = regex`
+  (?:(?:
+    [Nn]o|[oO]p # match string like 'No.3', 'op.13'
+  ).\s?\d+)
+  |(?:${name})
+  `;
   let nameRegex1 = new RegExp(regex`
     (^|[^${CJK}a-zA-Z${lGuimets}])
     (
@@ -97,9 +102,13 @@ let markVipKeyword = function (str) {
   return concat(markName(markEnWord(markUpperWord(str))));
 };
 
+/**
+ * @param {String} str
+ * @return {String[]}
+ * */
 let divide = function (str) {
   // dividers, not include \s
-  let commonDivider = regex`\.,，。\<\>《》、\/`;
+  let commonDivider = regex`\,，。\<\>《》、\/\[\]\{\}・…`;
   let regLeft = new RegExp(regex`
     ([${CJK}])\s+(.)
   `, 'g');
@@ -108,7 +117,9 @@ let divide = function (str) {
   `, 'g');
   let require = new RegExp(regex`[${commonDivider}]+`, 'g');
   return str.replace(regLeft, '$1|$2').replace(regRight, '$1|$2')
-    .replace(require, '|').split('|');
+    .replace(require, '|').split('|').map(word => {
+      return trim(word, regex`\.`);
+    }).filter(word => word);
 };
 
 let removeMarked = function(str) {

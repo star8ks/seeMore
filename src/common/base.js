@@ -194,6 +194,17 @@ function match(str, regex) {
   return result;
 }
 
+/**
+ * @param {String} str
+ * @param {String} customChars
+ * */
+function trim(str, customChars) {
+  // TODO: should escape customChars
+  customChars = customChars || '';
+  var reg = new RegExp(regex`^[\s\uFEFF\xA0${customChars}]+|[\s\uFEFF\xA0${customChars}]+$`, 'g');
+  return str.replace(reg, '');
+}
+
 var util = {
   $: $,
   $all: $all,
@@ -204,13 +215,14 @@ var util = {
   debounce: debounce,
   getMouseButton: getMouseButton,
   matchAll: match,
-  regex: regex
+  regex: regex,
+  trim: trim
 };
 
 export default util;
 export {
   $, $all, onceLoaded, getCurrentTab,
   isEmpty, filterEmptyStr, debounce, getMouseButton,
-  deepValue, match, regex,
+  deepValue, match, regex, trim,
   includeString, clog, minErr
 };
