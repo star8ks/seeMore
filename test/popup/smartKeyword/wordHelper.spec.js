@@ -12,6 +12,10 @@ describe('mark functions', () => {
     it('should not mark these words', () => {
       markUpperWord('Yeah, maGIC LEAP IS a liar').should.equal('Yeah, maGIC 《LEAP IS》 a liar');
     });
+    it('should not mark inside guillemets', () => {
+      markUpperWord('is 《MAGIC LEAP EXT》 a liar').should.equal('is 《MAGIC LEAP EXT》 a liar');
+      markUpperWord('is 《MAGIC LEAP LEAP EXT》 a liar').should.equal('is 《MAGIC LEAP LEAP EXT》 a liar');
+    });
     it('should mark multiple upper words', () => {
       markUpperWord('Is MAGIC LEAP a liar').should.equal('Is 《MAGIC LEAP》 a liar');
       markUpperWord('Is MAGIC  LEAP a liar').should.equal('Is 《MAGIC  LEAP》 a liar');
@@ -127,6 +131,7 @@ describe('mark functions', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody》 full');
       markName('A Grammar of the Latin Language: For the Use of Schools and Colleges').should.equal('A Grammar of the 《Latin Language》: For the Use of Schools and Colleges');
       markName('Lodash Documentation').should.equal('《Lodash Documentation》');
+      markName('o Sub HD and Tracy McGrady').should.equal('o 《Sub HD》 and 《Tracy McGrady》');
     });
     it('should ignore space and _- between names', () => {
       markName('javascript - Mocha_Chai expect.to.throw not catching thrown errors').should.equal('javascript - 《Mocha_Chai》 expect.to.throw not catching thrown errors');
@@ -142,16 +147,22 @@ describe('mark functions', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody No.3').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody No.3》');
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody Op.3').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody Op.3》');
       markName('No.3 Liszt Hungarian Rhapsody the Nyiregyhazi Version').should.equal('《No.3 Liszt Hungarian Rhapsody》 the 《Nyiregyhazi Version》');
+      markName('Nº 3 Liszt Hungarian Rhapsody the Nyiregyhazi Version').should.equal('《Nº 3 Liszt Hungarian Rhapsody》 the 《Nyiregyhazi Version》');
       markName('Op.3 Liszt Hungarian Rhapsody the Nyiregyhazi Version').should.equal('《Op.3 Liszt Hungarian Rhapsody》 the 《Nyiregyhazi Version》');
     });
     it('should ignore spaces between No./op. and numbers', () => {
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody no. 3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody no. 3》 full');
       markName('Nyiregyházi plays Liszt Hungarian Rhapsody op. 3 full').should.equal('Nyiregyházi plays 《Liszt Hungarian Rhapsody op. 3》 full');
     });
-    it('should not mark all upper words', () => {
-      markName('is MAGIC LEAP EXT a liar').should.equal('is MAGIC LEAP EXT a liar');
+    it('should mark upper words', () => {
+      markName('测试.Big Eyes.720P 哈 - Test CS').should.equal('测试.《Big Eyes》.720P 哈 - 《Test CS》');
+      markName('is MAGIC LEAP EXT a liar').should.equal('is 《MAGIC LEAP EXT》 a liar');
+    });
+    it('should not mark inside guillemets', () => {
+      markName('is 《MAGIC LEAP EXT》 a liar').should.equal('is 《MAGIC LEAP EXT》 a liar');
     });
     it('should not mark single name', () => {
+      markName('is Magic lie').should.equal('is Magic lie');
       markName('is MAGIC lie').should.equal('is MAGIC lie');
     });
     it('should ignore names containing blacklist words', () => {
@@ -202,7 +213,7 @@ describe('mark functions', () => {
     })
   });
 
-  describe('markVipKeyword', () => {
+  describe('all together', () => {
     it('should work on this case', () => {
       let str = 'Pandora'
         + '终推流《Fasion》服'

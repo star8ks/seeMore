@@ -20,7 +20,15 @@ const rGuimets = PUNCT.guillemets.right.reduce((all, current) => {
 }, '');
 
 let markUpperWord = function (str) {
-  let upperSubstrRegex = new RegExp(regex`(^|[^${CJK}a-zA-Z${lGuimets}])([A-Z]{2,}[${ASCII_CHAR}]*(?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*)\b(?![${CJK}])`, 'g');// ((\s+(?![A-Z]))?)
+  let upperSubstrRegex = new RegExp(regex`
+    (^|[^${CJK}a-zA-Z${lGuimets}])
+    (
+      [A-Z]{2,}[${ASCII_CHAR}]*
+      (?:\s+[A-Z]{2,}[${ASCII_CHAR}]*)*
+    )
+    \b
+    (?![${CJK}${rGuimets}]|\s+[A-Z]{2,})
+  `, 'g');// ((\s+(?![A-Z]))?)
   return str.replace(upperSubstrRegex, '$1《$2》');
 };
 
@@ -49,13 +57,14 @@ let markEnds = function (str) {
 };
 
 let markName = function (str) {
-  let validCharacter = regex`a-zÀ-ÿ`;
+  let validCharacter = regex`A-Za-zÀ-ÿ`;
   let name = regex`[A-Z][${validCharacter}]+`;
   let subElement = regex`
-  (?:(?:
-    [Nn]o|[oO]p # match string like 'No.3', 'op.13'
-  ).\s?\d+)
-  |(?:${name})
+    (?:
+      (?:[Nn][roº]|[oO]p) # match string like 'No.3', 'Nr 3', 'Nº 3', 'op.13'
+      .\s?\d+
+    )
+    |(?:${name})
   `;
   let nameRegex1 = new RegExp(regex`
     (^|[^${CJK}a-zA-Z${lGuimets}])
@@ -64,7 +73,7 @@ let markName = function (str) {
       (?:\s+(?:${subElement}))+
     )
     \b
-    (?![${CJK}])
+    (?![${CJK}${rGuimets}])
   `, 'g');// ((\s+(?![A-Z]))?)
   // /[A-Z][a-z]+\s*[-_/]\s*[A-Z][a-z]+/.test('javascript - Mocha / Chai expect.se')
   let nameRegex2 = new RegExp(regex`
@@ -73,7 +82,7 @@ let markName = function (str) {
       (?:${subElement})
       (?:\s*[-_/]\s*(?:${subElement}))+
     )
-    (?![${CJK}])
+    (?![${CJK}${rGuimets}])
   `, 'g');
   return str.replace(nameRegex1, (match, p1, p2) => {
     let dividedName = p2.split(/\s+/g);
@@ -99,7 +108,7 @@ let concat = function (str) {
 };
 
 let markVipKeyword = function (str) {
-  return concat(markName(markEnWord(markUpperWord(str))));
+  return concat(markEnWord(markUpperWord(markName(str))));
 };
 
 /**
