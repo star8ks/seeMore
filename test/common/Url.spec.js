@@ -46,6 +46,7 @@ describe('Url', () => {
         Url.getRootDomain('china.com.cn').should.equal('china.com.cn');
         Url.getRootDomain('test.gov.baidu.com').should.equal('baidu.com');
         Url.getRootDomain('gov.com').should.equal('gov.com');
+        Url.getRootDomain('me.ttt.co.cn').should.equal('ttt.co.cn');
         // Url.getRootDomain('www.gov.com').should.equal('gov.com'); // I know it's a bug, but it's hard to resolve
       });
     });

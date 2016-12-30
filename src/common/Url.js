@@ -120,7 +120,7 @@ var Url = (function () {
   Url.getRootDomain = function(host) {
     var temp = host.replace(/^[^.]+\./, "");
     var firstPart = temp.match(/^([^.]+)\./);
-    var commonDomainSuffix = ['com', 'net', 'edu', 'gov', 'org'];
+    var commonDomainSuffix = ['com', 'net', 'edu', 'gov', 'org', 'co'];
     if(firstPart === null) {
       return host;
     }
