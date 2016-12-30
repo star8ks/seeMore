@@ -356,6 +356,7 @@ const CONFIG = {
       typeId: 102,
       defaultTypeId: 7,
       displayName: 'Sub HD',
+      siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', "电影字幕", "中文字幕", "电影字幕下载", "中文字幕下载", "字幕组", "射手网", "美剧字幕下载", "英剧字幕下载", "双语字幕下载", "美剧", "电影", "美剧下载", "英剧下载", "电影下载", "美剧字幕", "英剧字幕"],
       open: true,
       hosts: ['subhd.com'],
       url: 'http://subhd.com/search/%s'
