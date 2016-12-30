@@ -64,15 +64,15 @@ var Listener = (function () {
         return;
       }
 
-      var oUrl = new Url(tab.url);
-      if(tab.favIconUrl) {
-        clog('update favicon', oUrl.host, tab.favIconUrl);
-        Icon.set(oUrl.host, tab.favIconUrl);
-      }
 
       removeRedirect(tab);
 
-      Engine.searchKeys(oUrl.host).then(function (keys) {
+      Engine.searchKeys(oUrl.host, true).then(function (keys) {
+        var oUrl = new Url(tab.url);
+        if(tab.favIconUrl) {
+          clog('update favicon', oUrl.host, tab.favIconUrl);
+          Icon.set(oUrl.host, tab.favIconUrl);
+        }
         if(keys.length > 0) {
           chrome.browserAction.setTitle({title: '点击切换搜索引擎', tabId: tabId});
         }
