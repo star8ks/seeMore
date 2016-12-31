@@ -47,7 +47,7 @@ Links.prototype.init = function (tabId) {
   });
 };
 Links.prototype.updateHref = function (searchWord) {
-  if (!searchWord) return popupErr('invalid param', 'updateLinkHref with empty string');
+  if (!searchWord) return new popupErr('invalid param: updateLinkHref with empty string');
   this.$links.forEach(function ($link) {
     $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
   });
@@ -104,7 +104,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
     // @TODO not translate some language, from user config
     // if(chrome.i18n.detect)
     if (str.length > CONFIG.translateMaxLength) {
-      return Promise.reject(popupErr('Translation', 'String too long: ' + str));
+      return Promise.reject(new popupErr('Translation: String too long: ' + str));
     }
 
     var lang = navigator.language.split('-', 1)[0];
