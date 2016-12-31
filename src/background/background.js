@@ -1,11 +1,12 @@
 import CONFIG from "../common/config.js";
-import {clog} from "../common/base.js";
+import {clog, minErr} from "../common/base.js";
 import Engine from "../common/db/Engine.js";
 import EngineType from "../common/db/EngineType.js";
 import Setting from "../common/db/Setting.js";
 import Icon from "../common/db/Icon.js";
 import Url from "../common/Url.js";
 
+var bgWarn = minErr('Background Warning');
 var Listener = (function () {
 
   function removeRedirect(tab) {
@@ -63,19 +64,29 @@ var Listener = (function () {
         || !tab.url || !/^https?/.test(tab.url)) {
         return;
       }
-
-
       removeRedirect(tab);
 
-      Engine.searchKeys(oUrl.host, true).then(function (keys) {
-        var oUrl = new Url(tab.url);
-        if(tab.favIconUrl) {
-          clog('update favicon', oUrl.host, tab.favIconUrl);
-          Icon.set(oUrl.host, tab.favIconUrl);
+      var tabUrl = new Url(tab.url);
+      Engine.searchKeys(tabUrl.host).then(function (keys) {
+        if (!keys.length) {
+          throw new bgWarn('onTabUpdated: Not found engine for host: {0}', tabUrl.host);
         }
-        if(keys.length > 0) {
-          chrome.browserAction.setTitle({title: '点击切换搜索引擎', tabId: tabId});
+        chrome.browserAction.setTitle({title: '点击切换搜索引擎', tabId: tabId});
+        if (!Url.isNormal(tab.favIconUrl) && !Url.isDataURI()) {
+          throw new bgWarn('onTabUpdated: Not found valid favIconUrl: {0}', tab.favIconUrl);
         }
+        return Icon.get(tabUrl.host);
+      }).then(function(iconUrl){
+        if (Url.isDataURI(iconUrl)) {
+          throw new bgWarn('onTabUpdated: No need to update favicon url.');
+        }
+        return Url.toDataURI(tab.favIconUrl);
+      }).then(function (dataURI) {
+        clog('Update favicon of' + tabUrl.host, dataURI);
+        return Icon.set(tabUrl.host, dataURI);
+      }).catch(bgWarn, function (e) {
+        // ignore
+        clog(e.toString());
       });
     },
 
@@ -108,5 +119,3 @@ chrome.runtime.onInstalled.addListener(Listener.onInstalled);
 chrome.tabs.onCreated.addListener(Listener.onTabCreated);
 // Listen for any changes to the URL of any tab.
 chrome.tabs.onUpdated.addListener(Listener.onTabUpdated);
-
-// @TODO 兼容旧版本数据
