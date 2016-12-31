@@ -1,4 +1,5 @@
 import '../dirtyShould';
+var fetchMock = require('fetch-mock');
 import Url from '../../src/common/Url';
 
 describe('Url', () => {
@@ -10,6 +11,7 @@ describe('Url', () => {
         u.url.should.equal(originUrl);
       });
     });
+
     describe('queryPairs', () => {
       it('should be array containing key-val pairs', () => {
         u.queryPairs.should.eql([
@@ -37,6 +39,7 @@ describe('Url', () => {
         u.queryPairs.should.eql([{key: 'a', val: 'b c d'}]);
       });
     });
+
     describe('getRootDomain', () => {
       it('should return root domain of host', () => {
         Url.getRootDomain('google.com').should.equal('google.com');
@@ -50,8 +53,29 @@ describe('Url', () => {
         // Url.getRootDomain('www.gov.com').should.equal('gov.com'); // I know it's a bug, but it's hard to resolve
       });
     });
+
+    describe('toDataURI', () => {
+      it('should resolve origin url if given a dataURI', () => {
+        let dataURI = 'data:,Hello%2C%20World!';
+        return Url.toDataURI(dataURI).then(res => res.should.equal(dataURI));
+      });
+      it('should reject an error if given a invalid url', () => {
+        let dataURI = 'dataHello%2C%20World!';
+        return Url.toDataURI(dataURI).catch(err => err.toString().should.equal('Error: Not a valid normal url or dataURI'));
+      });
+      it('should resolve a dataURI of given asset url', () => {
+        let url = 'https://favicon.yandex.net/favicon/www.google.com';
+        fetchMock.get('*', 'Hello, World!');
+        return Url.toDataURI(url).then(dataURI => {
+          dataURI.should.equal('data:text/plain;charset=utf-8;base64,SGVsbG8sIFdvcmxkIQ==');
+          fetchMock.restore();
+        });
+      });
+    });
+
     describe('faviconUrl', () => {
     });
+
     describe('host, origin, pathName', () => {
       it('should like window.URL', () => {
         u.host.should.equal('www.google.com');

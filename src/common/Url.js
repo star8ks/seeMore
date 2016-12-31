@@ -112,6 +112,9 @@ var Url = (function () {
   Url.isNormal = function(url) {
     return Url.NORMAL_REGEX.test(url);
   };
+  Url.isDataURI = function(url) {
+    return Url.DATA_URI_REGEX.test(url);
+  };
   /**
    * Get root domain(not strictly) of a host.
    * @see Url.spec.js for detail usage
@@ -133,6 +136,7 @@ var Url = (function () {
     return temp;
   };
   Url.NORMAL_REGEX = /^https?:\/\//i;
+  Url.DATA_URI_REGEX = /^data:.*,/i;
   Url.FAVICON_URL_REGEX = /\.ico$/i;
   Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
   Url.prototype = {
@@ -144,6 +148,42 @@ var Url = (function () {
       var val = this.url.match(new RegExp('[#?&]' + key + "=([^#?&]*)[#?&]", 'i'));
       return val ? val[1].replace(/\+/g, ' ') : null;
     }
+  };
+
+  function fetchImgBlob(url) {
+    return fetch(url).then(function(r) {
+      return r.blob();
+    });
+  }
+
+  function blobToDataURI(blob) {
+    return new Promise(function(resolve, reject) {
+      var a = new FileReader();
+      a.onload = function(e) {
+        resolve(e.target.result);
+      };
+      a.onerror = function(e) {
+        reject(e);
+      };
+      a.readAsDataURL(blob);
+    });
+  }
+
+  /**
+   * @param {String} url, a valid normal url
+   * @return {Promise}
+   * @resolve {String} the dataURI of image/icon
+   * */
+  Url.toDataURI = function (url) {
+    if(Url.DATA_URI_REGEX.test(url)) {
+      return Promise.resolve(url);
+    }
+    if(!Url.NORMAL_REGEX.test(url)) {
+      return Promise.reject(new Error('Not a valid normal url or dataURI'));
+    }
+    return fetchImgBlob(url).then(function(blob) {
+      return blobToDataURI(blob);
+    });
   };
 
   return Url;
