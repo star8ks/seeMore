@@ -1,5 +1,5 @@
 import '../dirtyShould';
-var fetchMock = require('fetch-mock');
+import fetchMock from 'fetch-mock';
 import Url from '../../src/common/Url';
 
 describe('Url', () => {

@@ -9,7 +9,8 @@ function setProperties(engines) {
     var oUrl = new Url(se.url);
     se.index = se['$$key'];
     se.href = se.url.replace(/%s/g, '');
-    return Icon.get(oUrl.host).then(function (url) {
+    // in case of too many host(like google), just search by first 3 hosts
+    return Icon.search(se.hosts.slice(0, 3)).then(function (url) {
       se.favicon = url || oUrl.faviconUrl;
       return se;
     });
