@@ -235,7 +235,7 @@ webpackJsonp([1,5],{
 	  });
 	};
 	Links.prototype.updateHref = function (searchWord) {
-	  if (!searchWord) return popupErr('invalid param', 'updateLinkHref with empty string');
+	  if (!searchWord) return new popupErr('invalid param: updateLinkHref with empty string');
 	  this.$links.forEach(function ($link) {
 	    $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
 	  });
@@ -289,7 +289,7 @@ webpackJsonp([1,5],{
 	    // @TODO not translate some language, from user config
 	    // if(chrome.i18n.detect)
 	    if (str.length > _config2.default.translateMaxLength) {
-	      return Promise.reject(popupErr('Translation', 'String too long: ' + str));
+	      return Promise.reject(new popupErr('Translation: String too long: ' + str));
 	    }
 
 	    var lang = navigator.language.split('-', 1)[0];
@@ -3229,8 +3229,10 @@ webpackJsonp([1,5],{
 	  (0, _wordHelper.forEachMarked)(titleMarked + h1Marked, marked => {
 	    candidateWords.addVipWords(marked, _const.CONFIDENCE_PARAM.map.vip);
 	  });
-	  (0, _base.clog)('vipWords: ', JSON.stringify([...candidateWords.vipWords]));
-	  (0, _base.clog)('siteWords: ', JSON.stringify([...candidateWords.siteKeywords]));
+	  (0, _base.clog)('Marked title:', titleMarked);
+	  (0, _base.clog)('Marked h1', h1Marked);
+	  (0, _base.clog)('vipWords:', JSON.stringify([...candidateWords.vipWords]));
+	  (0, _base.clog)('siteWords:', JSON.stringify([...candidateWords.siteKeywords]));
 	  // clog(tabUrl.url, meta, title, h1, h2);
 
 	  if (_isQualified(candidateWords.vipArray, 2 * _const.CONFIDENCE_MIN)) {
@@ -3241,7 +3243,7 @@ webpackJsonp([1,5],{
 	  // 1. without any divide, use meta keyword
 	  // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
 	  _matchKeywords(meta, keywordType.meta);
-	  // clog(candidateWords)
+	  (0, _base.clog)(candidateWords);
 	  if (_isQualified(candidateWords.orderedArray)) {
 	    (0, _base.clog)('use meta keywords');
 	    return candidateWords.orderedArray;
@@ -3249,6 +3251,7 @@ webpackJsonp([1,5],{
 
 	  // 2. completely divide all string into words(excluding meta keyword)
 	  // get frequently appeared words as keyword array(ordered by priority)
+	  // TODO: don't divide dash and dot between a-zA-Z0-9, in case of No.3 ANGULAR-2
 	  candidateWords.clear();
 	  const punctuations = _lodash2.default.chain(_const.PUNCT_FLATTEN).reduce(_lodash2.default.add);
 	  // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
@@ -3256,22 +3259,20 @@ webpackJsonp([1,5],{
 	  const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
 	  (0, _base.clog)('separate regex', SEPARATE_REGEX);
 
-	  let urlDividePreProcess = _lodash2.default.flow(_replaceUnderscore, str => str.split(SEPARATE_REGEX), _base.filterEmptyStr);
-	  urlDividePreProcess(tabUrl.pathName).forEach(pathWord => {
-	    (0, _base.clog)('pathWord', pathWord);
+	  let divideUrl = _lodash2.default.flow(_replaceUnderscore, str => str.split(SEPARATE_REGEX), _base.filterEmptyStr, _lodash2.default.uniq);
+	  divideUrl(tabUrl.pathName).forEach(pathWord => {
 	    candidateWords.increaseConfidence(pathWord, _const.CONFIDENCE_PARAM.keyword.pathName);
 	  });
-	  let dividePreProcess = _lodash2.default.flow(_replaceUnderscore, _fixHyphen, str => str.split(SEPARATE_REGEX), _base.filterEmptyStr);
-	  title && dividePreProcess(title).forEach(word => {
+	  let divideStr = _lodash2.default.flow(_replaceUnderscore, _fixHyphen, str => str.split(SEPARATE_REGEX), _base.filterEmptyStr, _lodash2.default.uniq);
+	  title && divideStr(title).forEach(word => {
 	    candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.title);
 	  });
-	  h1 && dividePreProcess(h1).forEach(word => {
+	  h1 && divideStr(h1).forEach(word => {
 	    candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.h1);
 	  });
 	  Array.isArray(h2) && h2.forEach(h2 => {
-	    dividePreProcess(h2).forEach(word => candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.h2));
+	    divideStr(h2).forEach(word => candidateWords.increaseConfidence(word, _const.CONFIDENCE_PARAM.keyword.h2));
 	  });
-	  // @TODO divide tabUrl.queryPairs here
 
 	  (0, _base.clog)('most frequently appeared words: ', JSON.stringify(candidateWords.orderedArray));
 	  if (_isQualified(candidateWords.orderedArray)) {
@@ -3281,12 +3282,12 @@ webpackJsonp([1,5],{
 
 	  // 3. divide title with common separator
 	  candidateWords.clear();
-	  const divider = _lodash2.default.chain([..._const.PUNCT.dash, ..._const.PUNCT.verticalBar, ..._const.PUNCT.colon, ..._const.PUNCT.brackets, ..._const.PUNCT.comma, ..._const.PUNCT.question, ..._const.PUNCT.exclamation, ..._const.PUNCT.guillemets.left, ..._const.PUNCT.guillemets.right]).reduce(_lodash2.default.add);
-	  const dividerStr = '[' + _lodash2.default.escapeRegExp(divider) + ']+|-{2,}';
-	  const TITLE_DIVIDE_REGEXP = _getDividerRegex(dividerStr);
-	  (0, _base.clog)(TITLE_DIVIDE_REGEXP);
-	  let preProcess = _lodash2.default.flow([_replaceUnderscore, _replaceSpaces, _fixHyphen]);
-	  let titleKeywords = (0, _base.filterEmptyStr)(preProcess(title).split(TITLE_DIVIDE_REGEXP));
+	  let divider = _lodash2.default.chain([..._const.PUNCT.dash, ..._const.PUNCT.verticalBar, ..._const.PUNCT.colon, ..._const.PUNCT.brackets, ..._const.PUNCT.comma, ..._const.PUNCT.question, ..._const.PUNCT.exclamation, ..._const.PUNCT.guillemets.left, ..._const.PUNCT.guillemets.right]).reduce(_lodash2.default.add);
+	  let dividerStr = '[' + _lodash2.default.escapeRegExp(divider) + ']+|-{2,}';
+	  let divideTitleRegExp = _getDividerRegex(dividerStr);
+	  (0, _base.clog)(divideTitleRegExp);
+	  let divideTitle = _lodash2.default.flow(_replaceUnderscore, _replaceSpaces, _fixHyphen, str => str.split(divideTitleRegExp), _base.filterEmptyStr, _lodash2.default.uniq);
+	  let titleKeywords = divideTitle(title);
 	  (0, _base.clog)('titleKeywords:', titleKeywords);
 	  _matchKeywords(titleKeywords, keywordType.title);
 
@@ -3408,7 +3409,15 @@ webpackJsonp([1,5],{
 	}, '');
 
 	let markUpperWord = function (str) {
-	  let upperSubstrRegex = new RegExp(_base.regex`(^|[^${ _const.CJK }a-zA-Z${ lGuimets }])([A-Z]{2,}[${ ASCII_CHAR }]*(?:\s+[A-Z]{2,}[${ ASCII_CHAR }]*)*)\b(?![${ _const.CJK }])`, 'g'); // ((\s+(?![A-Z]))?)
+	  let upperSubstrRegex = new RegExp(_base.regex`
+	    (^|[^${ _const.CJK }a-zA-Z${ lGuimets }])
+	    (
+	      [A-Z]{2,}[${ ASCII_CHAR }]*
+	      (?:\s+[A-Z]{2,}[${ ASCII_CHAR }]*)*
+	    )
+	    \b
+	    (?![${ _const.CJK }${ rGuimets }]|\s+[A-Z]{2,})
+	  `, 'g'); // ((\s+(?![A-Z]))?)
 	  return str.replace(upperSubstrRegex, '$1《$2》');
 	};
 
@@ -3437,9 +3446,15 @@ webpackJsonp([1,5],{
 	};
 
 	let markName = function (str) {
-	  let validCharacter = _base.regex`a-zÀ-ÿ`;
+	  let validCharacter = _base.regex`A-Za-zÀ-ÿ`;
 	  let name = _base.regex`[A-Z][${ validCharacter }]+`;
-	  let subElement = _base.regex`(?:[Nn]o.\s?\d+)|(?:${ name })`;
+	  let subElement = _base.regex`
+	    (?:
+	      (?:[Nn][roº]|[oO]p) # match string like 'No.3', 'Nr 3', 'Nº 3', 'op.13'
+	      .\s?\d+
+	    )
+	    |(?:${ name })
+	  `;
 	  let nameRegex1 = new RegExp(_base.regex`
 	    (^|[^${ _const.CJK }a-zA-Z${ lGuimets }])
 	    (
@@ -3447,7 +3462,7 @@ webpackJsonp([1,5],{
 	      (?:\s+(?:${ subElement }))+
 	    )
 	    \b
-	    (?![${ _const.CJK }])
+	    (?![${ _const.CJK }${ rGuimets }])
 	  `, 'g'); // ((\s+(?![A-Z]))?)
 	  // /[A-Z][a-z]+\s*[-_/]\s*[A-Z][a-z]+/.test('javascript - Mocha / Chai expect.se')
 	  let nameRegex2 = new RegExp(_base.regex`
@@ -3456,7 +3471,7 @@ webpackJsonp([1,5],{
 	      (?:${ subElement })
 	      (?:\s*[-_/]\s*(?:${ subElement }))+
 	    )
-	    (?![${ _const.CJK }])
+	    (?![${ _const.CJK }${ rGuimets }])
 	  `, 'g');
 	  return str.replace(nameRegex1, (match, p1, p2) => {
 	    let dividedName = p2.split(/\s+/g);
@@ -3482,12 +3497,16 @@ webpackJsonp([1,5],{
 	};
 
 	let markVipKeyword = function (str) {
-	  return concat(markName(markEnWord(markUpperWord(str))));
+	  return concat(markEnWord(markUpperWord(markName(str))));
 	};
 
+	/**
+	 * @param {String} str
+	 * @return {String[]}
+	 * */
 	let divide = function (str) {
 	  // dividers, not include \s
-	  let commonDivider = _base.regex`\.,，。\<\>《》、\/`;
+	  let commonDivider = _base.regex`\,，。\<\>《》、\/\[\]\{\}・…`;
 	  let regLeft = new RegExp(_base.regex`
 	    ([${ _const.CJK }])\s+(.)
 	  `, 'g');
@@ -3495,7 +3514,9 @@ webpackJsonp([1,5],{
 	    (.)\s+([${ _const.CJK }])
 	  `, 'g');
 	  let require = new RegExp(_base.regex`[${ commonDivider }]+`, 'g');
-	  return str.replace(regLeft, '$1|$2').replace(regRight, '$1|$2').replace(require, '|').split('|');
+	  return str.replace(regLeft, '$1|$2').replace(regRight, '$1|$2').replace(require, '|').split('|').map(word => {
+	    return (0, _base.trim)(word, _base.regex`\.`);
+	  }).filter(word => word);
 	};
 
 	let removeMarked = function (str) {

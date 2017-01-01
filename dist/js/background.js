@@ -45,6 +45,7 @@ webpackJsonp([0,5],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	var bgWarn = (0, _base.minErr)('Background Warning');
 	var Listener = function () {
 
 	  function removeRedirect(tab) {
@@ -97,19 +98,29 @@ webpackJsonp([0,5],{
 	      if (!changeInfo.status || 'loading' != changeInfo.status || !tab.url || !/^https?/.test(tab.url)) {
 	        return;
 	      }
-
-	      var oUrl = new _Url2.default(tab.url);
-	      if (tab.favIconUrl) {
-	        (0, _base.clog)('update favicon', oUrl.host, tab.favIconUrl);
-	        _Icon2.default.set(oUrl.host, tab.favIconUrl);
-	      }
-
 	      removeRedirect(tab);
 
-	      _Engine2.default.searchKeys(oUrl.host).then(function (keys) {
-	        if (keys.length > 0) {
-	          chrome.browserAction.setTitle({ title: '点击切换搜索引擎', tabId: tabId });
+	      var tabUrl = new _Url2.default(tab.url);
+	      _Engine2.default.searchKeys(tabUrl.host).then(function (keys) {
+	        if (!keys.length) {
+	          throw new bgWarn('onTabUpdated: Not found engine for host: {0}', tabUrl.host);
 	        }
+	        chrome.browserAction.setTitle({ title: '点击切换搜索引擎', tabId: tabId });
+	        if (!_Url2.default.isNormal(tab.favIconUrl) && !_Url2.default.isDataURI()) {
+	          throw new bgWarn('onTabUpdated: Not found valid favIconUrl: {0}', tab.favIconUrl);
+	        }
+	        return _Icon2.default.get(tabUrl.host);
+	      }).then(function (iconUrl) {
+	        if (_Url2.default.isDataURI(iconUrl)) {
+	          throw new bgWarn('onTabUpdated: No need to update favicon url.');
+	        }
+	        return _Url2.default.toDataURI(tab.favIconUrl);
+	      }).then(function (dataURI) {
+	        (0, _base.clog)('Update favicon of' + tabUrl.host, dataURI);
+	        return _Icon2.default.set(tabUrl.host, dataURI);
+	      }).catch(bgWarn, function (e) {
+	        // ignore
+	        (0, _base.clog)(e.toString());
 	      });
 	    },
 
@@ -142,8 +153,6 @@ webpackJsonp([0,5],{
 	chrome.tabs.onCreated.addListener(Listener.onTabCreated);
 	// Listen for any changes to the URL of any tab.
 	chrome.tabs.onUpdated.addListener(Listener.onTabUpdated);
-
-	// @TODO 兼容旧版本数据
 
 /***/ },
 

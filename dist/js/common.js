@@ -56,7 +56,25 @@ webpackJsonp([4,5],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	/**
+	 * @Why Icon is a DB, but not a field of Engine?
+	 * Cause technically icon is related to host, and an engine may have many host
+	 * @type {DB}
+	 */
 	let Icon = new _DB2.default(_localforageBluebird2.default, 'icon');
+	/**
+	 *
+	 * @param {[]|String} hosts
+	 */
+	Icon.search = function (hosts) {
+	  hosts = Array.isArray(hosts) ? hosts : [hosts];
+	  let searchPromises = [];
+	  for (let host of hosts) {
+	    searchPromises.push(Icon.get(host));
+	  }
+	  return Promise.all(searchPromises);
+	};
+
 	exports.default = Icon;
 
 /***/ },
@@ -69,7 +87,7 @@ webpackJsonp([4,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.minErr = exports.clog = exports.includeString = exports.regex = exports.match = exports.deepValue = exports.getMouseButton = exports.debounce = exports.filterEmptyStr = exports.isEmpty = exports.getCurrentTab = exports.onceLoaded = exports.$all = exports.$ = undefined;
+	exports.minErr = exports.clog = exports.includeString = exports.trim = exports.regex = exports.match = exports.deepValue = exports.getMouseButton = exports.debounce = exports.filterEmptyStr = exports.isEmpty = exports.getCurrentTab = exports.onceLoaded = exports.$all = exports.$ = undefined;
 
 	var _includeString = __webpack_require__("zdlF");
 
@@ -274,6 +292,17 @@ webpackJsonp([4,5],{
 	  return result;
 	}
 
+	/**
+	 * @param {String} str
+	 * @param {String} customChars
+	 * */
+	function trim(str, customChars) {
+	  // TODO: should escape customChars
+	  customChars = customChars || '';
+	  var reg = new RegExp(regex`^[\s\uFEFF\xA0${ customChars }]+|[\s\uFEFF\xA0${ customChars }]+$`, 'g');
+	  return str.replace(reg, '');
+	}
+
 	var util = {
 	  $: $,
 	  $all: $all,
@@ -284,7 +313,8 @@ webpackJsonp([4,5],{
 	  debounce: debounce,
 	  getMouseButton: getMouseButton,
 	  matchAll: match,
-	  regex: regex
+	  regex: regex,
+	  trim: trim
 	};
 
 	exports.default = util;
@@ -299,6 +329,7 @@ webpackJsonp([4,5],{
 	exports.deepValue = deepValue;
 	exports.match = match;
 	exports.regex = regex;
+	exports.trim = trim;
 	exports.includeString = _includeString2.default;
 	exports.clog = _clog2.default;
 	exports.minErr = _minErr2.default;
@@ -355,28 +386,22 @@ webpackJsonp([4,5],{
 	 * Created by ray7551@gmail.com on 12.06 006.
 	 */
 	/**
-	 * @return {moduleErr}
+	 * @return {ModuleErr}
 	 * */
 	function minErr(module) {
-	  /**
-	   * @function
-	   * @name moduleErr
-	   * @inner
-	   * @param {String} code
-	   * @param {String} template
-	   * @return {Error}
-	   * */
-	  function moduleErr(code, template) {
-	    var prefix = '[' + (module ? module + ':' : '') + code + '] ',
-	        templateArgs = arguments,
-	        message;
+	  ModuleErr.prototype = Object.create(Error.prototype);
+	  ModuleErr.prototype.constructor = ModuleErr;
+	  function ModuleErr(template) {
+	    var prefix = '[' + (module || '') + '] ',
+	        templateArgs = arguments;
 
-	    message = prefix + template.replace(/\{\d+\}/g, function (match) {
+	    this.name = module + 'Error';
+	    this.message = prefix + template.replace(/\{\d+}/g, function (match) {
 	      var index = +match.slice(1, -1),
 	          arg;
 
-	      if (index + 2 < templateArgs.length) {
-	        arg = templateArgs[index + 2];
+	      if (index + 1 < templateArgs.length) {
+	        arg = templateArgs[index + 1];
 	        if (typeof arg === 'function') {
 	          return arg.toString().replace(/ ?\{[\s\S]*$/, '');
 	        } else if (typeof arg === 'undefined') {
@@ -388,10 +413,9 @@ webpackJsonp([4,5],{
 	      }
 	      return match;
 	    });
-
-	    return new Error(message);
 	  }
-	  return moduleErr;
+
+	  return ModuleErr;
 	}
 
 	exports.default = minErr;
@@ -606,6 +630,7 @@ webpackJsonp([4,5],{
 	      typeId: 102,
 	      defaultTypeId: 7,
 	      displayName: 'Sub HD',
+	      siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', "电影字幕", "中文字幕", "电影字幕下载", "中文字幕下载", "字幕组", "射手网", "美剧字幕下载", "英剧字幕下载", "双语字幕下载", "美剧", "电影", "美剧下载", "英剧下载", "电影下载", "美剧字幕", "英剧字幕"],
 	      open: true,
 	      hosts: ['subhd.com'],
 	      url: 'http://subhd.com/search/%s'
@@ -1045,6 +1070,9 @@ webpackJsonp([4,5],{
 	  Url.isNormal = function (url) {
 	    return Url.NORMAL_REGEX.test(url);
 	  };
+	  Url.isDataURI = function (url) {
+	    return Url.DATA_URI_REGEX.test(url);
+	  };
 	  /**
 	   * Get root domain(not strictly) of a host.
 	   * @see Url.spec.js for detail usage
@@ -1053,7 +1081,7 @@ webpackJsonp([4,5],{
 	  Url.getRootDomain = function (host) {
 	    var temp = host.replace(/^[^.]+\./, "");
 	    var firstPart = temp.match(/^([^.]+)\./);
-	    var commonDomainSuffix = ['com', 'net', 'edu', 'gov', 'org'];
+	    var commonDomainSuffix = ['com', 'net', 'edu', 'gov', 'org', 'co'];
 	    if (firstPart === null) {
 	      return host;
 	    }
@@ -1066,6 +1094,7 @@ webpackJsonp([4,5],{
 	    return temp;
 	  };
 	  Url.NORMAL_REGEX = /^https?:\/\//i;
+	  Url.DATA_URI_REGEX = /^data:.*,/i;
 	  Url.FAVICON_URL_REGEX = /\.ico$/i;
 	  Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
 	  Url.prototype = {
@@ -1077,6 +1106,42 @@ webpackJsonp([4,5],{
 	      var val = this.url.match(new RegExp('[#?&]' + key + "=([^#?&]*)[#?&]", 'i'));
 	      return val ? val[1].replace(/\+/g, ' ') : null;
 	    }
+	  };
+
+	  function fetchImgBlob(url) {
+	    return fetch(url).then(function (r) {
+	      return r.blob();
+	    });
+	  }
+
+	  function blobToDataURI(blob) {
+	    return new Promise(function (resolve, reject) {
+	      var a = new FileReader();
+	      a.onload = function (e) {
+	        resolve(e.target.result);
+	      };
+	      a.onerror = function (e) {
+	        reject(e);
+	      };
+	      a.readAsDataURL(blob);
+	    });
+	  }
+
+	  /**
+	   * @param {String} url, a valid normal url
+	   * @return {Promise}
+	   * @resolve {String} the dataURI of image/icon
+	   * */
+	  Url.toDataURI = function (url) {
+	    if (Url.DATA_URI_REGEX.test(url)) {
+	      return Promise.resolve(url);
+	    }
+	    if (!Url.NORMAL_REGEX.test(url)) {
+	      return Promise.reject(new Error('Not a valid normal url or dataURI'));
+	    }
+	    return fetchImgBlob(url).then(function (blob) {
+	      return blobToDataURI(blob);
+	    });
 	  };
 
 	  return Url;
