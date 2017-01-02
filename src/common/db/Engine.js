@@ -45,15 +45,18 @@ Engine.getOpen = function (assoc, filter) {
 /**
  * @param {String} host A valid host
  * @param {Boolean} [includeRootDomain=false]
+ * @param {Boolean} [searchAll=false] it will only search open engine by default
  * @return {Promise}
  * if not found in hosts, next then() will get false,
  * if found, next then() will get the engine keys
  * */
-Engine.searchKeys = function(host, includeRootDomain) {
+Engine.searchKeys = function(host, includeRootDomain, searchAll) {
   host = host.toLowerCase();
   includeRootDomain = includeRootDomain === undefined ? false : !!includeRootDomain;
+  searchAll = searchAll === undefined ? false : !!searchAll;
 
-  return this.getOpen().filter(function (se) {
+  var p = searchAll ? this.getAll(true) : this.getOpen();
+  return p.filter(function (se) {
     if(se.hosts.includes(host)) {
       return true;
     }

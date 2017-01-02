@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import DB from '../../../src/common/db/DB';
 import Engine from '../../../src/common/db/Engine';
-import CONFIG from '../../../src/common/config.dev';
+import CONFIG from '../../../src/common/config.test';
 
 var expect = chai.expect;
 chai.config.includeStack = true;
@@ -78,6 +78,11 @@ describe('Engine', function () {
     it('can find in root domains', () => {
       return Engine.searchKeys('baidu.com', true).then(keys => {
         expect(keys).to.eql(['baidu']);
+      });
+    });
+    it('should support search all', () => {
+      return Engine.searchKeys('www.so.com', true, true).then(keys => {
+        expect(keys).to.eql(['360']);
       });
     });
   });

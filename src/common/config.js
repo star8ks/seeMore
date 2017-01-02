@@ -320,8 +320,8 @@ const CONFIG = {
       defaultTypeId: 2,
       displayName: 'AcFun',
       open: false,
-      hosts: ['www.acfun.tv'],
-      url: 'http://www.acfun.tv/search/#query=%s'
+      hosts: ['www.acfun.cn'],
+      url: 'http://www.acfun.cn/search/?#query=%s'
     },
     bilibili: {
       order: 1200,

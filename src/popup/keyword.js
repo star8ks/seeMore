@@ -42,11 +42,13 @@ async function getQueryString(tabUrl) {
     tabUrl = new Url(decodeURIComponent(tabUrl.getQueryVal('continue')));
   }
 
-  let keys = await Engine.searchKeys(tabUrl.host);
+  let keys = await Engine.searchKeys(tabUrl.host, false, true);
+  clog('searched keys', keys, tabUrl.host)
   if (keys.length <= 0) {
     return EMPTY_KEYWORDS;
   }
-  // TODO filter all engines here, only keep the matched(resultPageRegex), and if no matched, return EMPTY_KEYWORDS
+  // TODO: filter all engines here, not only keys[0]. Keep the matched(resultPageRegex), and if no matched, return EMPTY_KEYWORDS
+  // TODO: if there are two or more engine, use the open engine first
   let engine = await Engine.get(keys[0]);
 
   try {
