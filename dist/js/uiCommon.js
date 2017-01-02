@@ -192,8 +192,8 @@ webpackJsonp([3,5],{
 	    var oUrl = new _Url2.default(se.url);
 	    se.index = se['$$key'];
 	    se.href = se.url.replace(/%s/g, '');
-	    // TODO should use Icon.search(se.hosts)
-	    return _Icon2.default.get(oUrl.host).then(function (url) {
+	    // in case of too many host(like google), just search by first 3 hosts
+	    return _Icon2.default.search(se.hosts.slice(0, 3)).then(function (url) {
 	      se.favicon = url || oUrl.faviconUrl;
 	      return se;
 	    });

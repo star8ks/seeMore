@@ -54,25 +54,47 @@ webpackJsonp([4,5],{
 
 	var _localforageBluebird2 = _interopRequireDefault(_localforageBluebird);
 
+	var _Url = __webpack_require__("tDBr");
+
+	var _Url2 = _interopRequireDefault(_Url);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	/**
 	 * @Why Icon is a DB, but not a field of Engine?
 	 * Cause technically icon is related to host, and an engine may have many host
-	 * @type {DB}
 	 */
 	let Icon = new _DB2.default(_localforageBluebird2.default, 'icon');
+
 	/**
-	 *
-	 * @param {[]|String} hosts
+	 * search icon by hosts, if not found, fetch favicon from yandex,
+	 * then transform to dataURI
+	 * @param {String[]|String} hosts, it should not be an empty array or empty string
+	 */
+	Icon.fetch = function (hosts) {
+	  return Icon.search(hosts).then(url => {
+	    if (url) {
+	      return url;
+	    }
+	    let faviconUrl = 'http://favicon.yandex.net/favicon/' + hosts[0];
+	    return _Url2.default.toDataURI(faviconUrl);
+	  });
+	};
+
+	/**
+	 * search icon by hosts
+	 * @param {String[]|String} hosts, it should not be an empty array or empty string
 	 */
 	Icon.search = function (hosts) {
+	  if (Array.isArray(hosts) && hosts.length === 0 || hosts === '') {
+	    throw new Error('Icon.search: hosts should not be an empty array or empty string, given: ' + JSON.stringify(hosts));
+	  }
 	  hosts = Array.isArray(hosts) ? hosts : [hosts];
 	  let searchPromises = [];
 	  for (let host of hosts) {
-	    searchPromises.push(Icon.get(host));
+	    searchPromises.push(Icon.get(host.toLowerCase()));
 	  }
-	  return Promise.all(searchPromises);
+	  return Promise.race(searchPromises);
 	};
 
 	exports.default = Icon;
@@ -594,8 +616,8 @@ webpackJsonp([4,5],{
 	      defaultTypeId: 2,
 	      displayName: 'AcFun',
 	      open: false,
-	      hosts: ['www.acfun.tv'],
-	      url: 'http://www.acfun.tv/search/#query=%s'
+	      hosts: ['www.acfun.cn'],
+	      url: 'http://www.acfun.cn/search/?#query=%s'
 	    },
 	    bilibili: {
 	      order: 1200,
@@ -1262,15 +1284,18 @@ webpackJsonp([4,5],{
 	/**
 	 * @param {String} host A valid host
 	 * @param {Boolean} [includeRootDomain=false]
+	 * @param {Boolean} [searchAll=false] it will only search open engine by default
 	 * @return {Promise}
 	 * if not found in hosts, next then() will get false,
 	 * if found, next then() will get the engine keys
 	 * */
-	Engine.searchKeys = function (host, includeRootDomain) {
+	Engine.searchKeys = function (host, includeRootDomain, searchAll) {
 	  host = host.toLowerCase();
 	  includeRootDomain = includeRootDomain === undefined ? false : !!includeRootDomain;
+	  searchAll = searchAll === undefined ? false : !!searchAll;
 
-	  return this.getOpen().filter(function (se) {
+	  var p = searchAll ? this.getAll(true) : this.getOpen();
+	  return p.filter(function (se) {
 	    if (se.hosts.includes(host)) {
 	      return true;
 	    }

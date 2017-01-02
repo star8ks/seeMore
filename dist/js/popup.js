@@ -2848,11 +2848,13 @@ webpackJsonp([1,5],{
 	      tabUrl = new _Url2.default(decodeURIComponent(tabUrl.getQueryVal('continue')));
 	    }
 
-	    let keys = yield _Engine2.default.searchKeys(tabUrl.host);
+	    let keys = yield _Engine2.default.searchKeys(tabUrl.host, false, true);
+	    (0, _base.clog)('searched keys', keys, tabUrl.host);
 	    if (keys.length <= 0) {
 	      return _const.EMPTY_KEYWORDS;
 	    }
-	    // TODO filter all engines here, only keep the matched(resultPageRegex), and if no matched, return EMPTY_KEYWORDS
+	    // TODO: filter all engines here, not only keys[0]. Keep the matched(resultPageRegex), and if no matched, return EMPTY_KEYWORDS
+	    // TODO: if there are two or more engine, use the open engine first
 	    let engine = yield _Engine2.default.get(keys[0]);
 
 	    try {
@@ -3243,7 +3245,6 @@ webpackJsonp([1,5],{
 	  // 1. without any divide, use meta keyword
 	  // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
 	  _matchKeywords(meta, keywordType.meta);
-	  (0, _base.clog)(candidateWords);
 	  if (_isQualified(candidateWords.orderedArray)) {
 	    (0, _base.clog)('use meta keywords');
 	    return candidateWords.orderedArray;
