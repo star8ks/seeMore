@@ -43,8 +43,10 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   forEachMarked(titleMarked + h1Marked, marked => {
     candidateWords.addVipWords(marked, CONFIDENCE_PARAM.map.vip);
   });
-  clog('vipWords: ', JSON.stringify([...candidateWords.vipWords]))
-  clog('siteWords: ', JSON.stringify([...candidateWords.siteKeywords]))
+  clog('Marked title:', titleMarked)
+  clog('Marked h1', h1Marked)
+  clog('vipWords:', JSON.stringify([...candidateWords.vipWords]))
+  clog('siteWords:', JSON.stringify([...candidateWords.siteKeywords]))
   // clog(tabUrl.url, meta, title, h1, h2);
 
   if (_isQualified(candidateWords.vipArray, 2 * CONFIDENCE_MIN)) {
@@ -55,7 +57,6 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   // 1. without any divide, use meta keyword
   // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
   _matchKeywords(meta, keywordType.meta);
-  // clog(candidateWords)
   if (_isQualified(candidateWords.orderedArray)) {
     clog('use meta keywords')
     return candidateWords.orderedArray;
@@ -63,6 +64,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
 
   // 2. completely divide all string into words(excluding meta keyword)
   // get frequently appeared words as keyword array(ordered by priority)
+  // TODO: don't divide dash and dot between a-zA-Z0-9, in case of No.3 ANGULAR-2
   candidateWords.clear();
   const punctuations = _.chain(PUNCT_FLATTEN).reduce(_.add);
   // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
@@ -70,24 +72,22 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
   clog('separate regex', SEPARATE_REGEX)
 
-  let urlDividePreProcess = _.flow(_replaceUnderscore, str => str.split(SEPARATE_REGEX), filterEmptyStr);
-  urlDividePreProcess(tabUrl.pathName).forEach(pathWord => {
-    clog('pathWord', pathWord);
+  let divideUrl = _.flow(_replaceUnderscore, str => str.split(SEPARATE_REGEX), filterEmptyStr, _.uniq);
+  divideUrl(tabUrl.pathName).forEach(pathWord => {
     candidateWords.increaseConfidence(pathWord, CONFIDENCE_PARAM.keyword.pathName);
   });
-  let dividePreProcess = _.flow(_replaceUnderscore, _fixHyphen, str => str.split(SEPARATE_REGEX), filterEmptyStr);
-  title && dividePreProcess(title).forEach(word => {
+  let divideStr = _.flow(_replaceUnderscore, _fixHyphen, str => str.split(SEPARATE_REGEX), filterEmptyStr, _.uniq);
+  title && divideStr(title).forEach(word => {
     candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.title);
   });
-  h1 && dividePreProcess(h1).forEach(word => {
+  h1 && divideStr(h1).forEach(word => {
     candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.h1);
   });
   Array.isArray(h2) && h2.forEach(h2 => {
-    dividePreProcess(h2).forEach(word =>
+    divideStr(h2).forEach(word =>
       candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.h2)
     );
   });
-  // @TODO divide tabUrl.queryPairs here
 
   clog('most frequently appeared words: ', JSON.stringify(candidateWords.orderedArray))
   if (_isQualified(candidateWords.orderedArray)) {
@@ -97,16 +97,16 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
 
   // 3. divide title with common separator
   candidateWords.clear();
-  const divider = _.chain([
+  let divider = _.chain([
     ...PUNCT.dash, ...PUNCT.verticalBar, ...PUNCT.colon, ...PUNCT.brackets,
     ...PUNCT.comma, ...PUNCT.question, ...PUNCT.exclamation,
     ...PUNCT.guillemets.left, ...PUNCT.guillemets.right
   ]).reduce(_.add);
-  const dividerStr = '[' + _.escapeRegExp(divider) + ']+|-{2,}';
-  const TITLE_DIVIDE_REGEXP = _getDividerRegex(dividerStr);
-  clog(TITLE_DIVIDE_REGEXP)
-  let preProcess = _.flow([_replaceUnderscore, _replaceSpaces, _fixHyphen]);
-  let titleKeywords = filterEmptyStr(preProcess(title).split(TITLE_DIVIDE_REGEXP));
+  let dividerStr = '[' + _.escapeRegExp(divider) + ']+|-{2,}';
+  let divideTitleRegExp = _getDividerRegex(dividerStr);
+  clog(divideTitleRegExp)
+  let divideTitle = _.flow(_replaceUnderscore, _replaceSpaces, _fixHyphen, str => str.split(divideTitleRegExp), filterEmptyStr, _.uniq);
+  let titleKeywords = divideTitle(title);
   clog('titleKeywords:', titleKeywords)
   _matchKeywords(titleKeywords, keywordType.title);
 
