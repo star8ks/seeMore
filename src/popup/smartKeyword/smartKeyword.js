@@ -3,7 +3,7 @@
  * Created by ray7551@gmail.com on 12.10 010.
  */
 import _ from 'lodash';
-import {clog, filterEmptyStr} from '../../common/base';
+import {clog, filterEmptyStr, deepValue} from '../../common/base';
 import {PUNCT, PUNCT_FLATTEN, CONFIDENCE_PARAM, CONFIDENCE_MIN, EMPTY_KEYWORDS} from './const';
 import {markVipKeyword, divide, forEachMarked} from './wordHelper';
 import PriorityMap from './PriorityMap';
@@ -66,10 +66,10 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   // get frequently appeared words as keyword array(ordered by priority)
   // TODO: don't divide dash and dot between a-zA-Z0-9, in case of No.3 ANGULAR-2
   candidateWords.clear();
-  const punctuations = _.chain(PUNCT_FLATTEN).reduce(_.add);
+  let punctuations = _.chain(PUNCT_FLATTEN).reduce(_.add);
   // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
-  const punctuationsRegex = '[' + _.escapeRegExp(punctuations) + '\\s]+|\\b';
-  const SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
+  let punctuationsRegex = '[' + _.escapeRegExp(punctuations) + '\\s]+|\\b';
+  let SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
   clog('separate regex', SEPARATE_REGEX)
 
   let divideUrl = _.flow(_replaceUnderscore, str => str.split(SEPARATE_REGEX), filterEmptyStr, _.uniq);
@@ -77,10 +77,16 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
     candidateWords.increaseConfidence(pathWord, CONFIDENCE_PARAM.keyword.pathName);
   });
   let divideStr = _.flow(_replaceUnderscore, _fixHyphen, str => str.split(SEPARATE_REGEX), filterEmptyStr, _.uniq);
-  title && divideStr(title).forEach(word => {
+  titleMarked = forEachMarked(titleMarked, marked => {
+    candidateWords.increaseConfidence(marked, CONFIDENCE_PARAM.keyword.title);
+  });
+  h1Marked = forEachMarked(h1Marked, marked => {
+    candidateWords.increaseConfidence(marked, CONFIDENCE_PARAM.keyword.h1);
+  });
+  titleMarked && divideStr(titleMarked).forEach(word => {
     candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.title);
   });
-  h1 && divideStr(h1).forEach(word => {
+  h1Marked && divideStr(h1Marked).forEach(word => {
     candidateWords.increaseConfidence(word, CONFIDENCE_PARAM.keyword.h1);
   });
   Array.isArray(h2) && h2.forEach(h2 => {
@@ -158,8 +164,17 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
     return !_.isEmpty(orderedArray) && orderedArray[0].confidence > minConfidence;
   }
 
+  /**
+   * Escape '-' within a character set, but lodash.escapeRegExp will not do this.
+   * It's for avoiding this error:
+   * /^[.*-(]+$/.test('.*-'); // SyntaxError: Invalid regular expression: /^[.*-(]+$/: Range out of order in character class
+   * @param divider
+   * @param modifier
+   * @return {RegExp}
+   * @private
+   */
   function _getDividerRegex(divider, modifier) {
-    const escapedStr = divider.replace(/(^.*[^\\]?\[.*)-(.*\])/g, '$1\\-$2');
+    let escapedStr = divider.replace(/(^.*[^\\]?\[.*)-(.*\])/g, '$1\\-$2');
     return new RegExp(escapedStr, modifier);
   }
 

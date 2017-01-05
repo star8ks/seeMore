@@ -135,11 +135,13 @@ let removeMarked = function(str) {
   return str.replace(/《[^》]*》/g, ' ');
 };
 
-let forEachMarked = function (str, fn) {
+let forEachMarked = function (str, fn, remove) {
+  remove = remove === undefined ? true : !!remove;
   let matched = matchAll(str, /《([^《》]+)》/g) || [];
   matched.forEach(match => {
     fn(match[1]);
-  })
+  });
+  return !remove ? str : str.replace(/《([^《》]+)》/g, ' ');
 };
 
 export default markVipKeyword;
