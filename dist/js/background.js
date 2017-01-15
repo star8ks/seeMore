@@ -5,6 +5,7 @@ webpackJsonp([0,5],{
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
+	/* eslint-env node*/
 	global.Promise = __webpack_require__("qgje");
 
 	__webpack_require__("/FMp");
@@ -15,7 +16,7 @@ webpackJsonp([0,5],{
 /***/ "/FMp":
 /***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	var _config = __webpack_require__("wYMm");
 
@@ -116,7 +117,7 @@ webpackJsonp([0,5],{
 	        }
 	        return _Url2.default.toDataURI(tab.favIconUrl);
 	      }).then(function (dataURI) {
-	        (0, _base.clog)('Update favicon of' + tabUrl.host, dataURI);
+	        (0, _base.clog)('Update favicon of:', tabUrl.host, dataURI);
 	        return _Icon2.default.set(tabUrl.host, dataURI);
 	      }).catch(bgWarn, function (e) {
 	        // ignore

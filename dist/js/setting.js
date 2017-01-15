@@ -5,6 +5,7 @@ webpackJsonp([2,5],{
 
 	/* WEBPACK VAR INJECTION */(function(global) {'use strict';
 
+	/* eslint-env node*/
 	global.Promise = __webpack_require__("qgje");
 
 	__webpack_require__("zj96");
@@ -26,10 +27,6 @@ webpackJsonp([2,5],{
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
-	var _lodash = __webpack_require__("y7q8");
-
-	var _lodash2 = _interopRequireDefault(_lodash);
 
 	var _base = __webpack_require__("5a/Z");
 
@@ -81,7 +78,7 @@ webpackJsonp([2,5],{
 	  option.render().then(function () {
 	    // set icons
 	    (0, _base.$all)('.icon-link').forEach(function ($link) {
-	      $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
+	      $link.style.backgroundImage = 'url(\'' + $link.getAttribute('data-favicon') + '\')';
 	    });
 	    new _Mason2.default((0, _base.$)('.preview'), {
 	      itemSelector: 'ul',

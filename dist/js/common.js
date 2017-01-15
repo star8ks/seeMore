@@ -172,7 +172,7 @@ webpackJsonp([4,5],{
 
 	function onceLoaded(onLoad) {
 	  return new Promise(function (resolve) {
-	    window.addEventListener("DOMContentLoaded", function () {
+	    window.addEventListener('DOMContentLoaded', function () {
 	      resolve(onLoad());
 	    });
 	  });
@@ -261,7 +261,7 @@ webpackJsonp([4,5],{
 	  if ('object' !== typeof e) {
 	    throw Error('evt must be an object');
 	  } else if (typeof e.button === 'undefined') {
-	    throw Error("evt must hasOwnProperty 'button'");
+	    throw Error('evt must hasOwnProperty \'button\'');
 	  }
 
 	  return btnCode[e.button] ? btnCode[e.button] : '';
@@ -305,6 +305,7 @@ webpackJsonp([4,5],{
 	    result = regex.exec(str);
 	  } else {
 	    result = [];
+	    /* eslint-disable no-cond-assign */
 	    while (tempResult = regex.exec(str)) {
 	      result.push(tempResult);
 	    }
@@ -461,6 +462,7 @@ webpackJsonp([4,5],{
 
 	var clog = function () {
 	  if (_config2.default.devMode) {
+	    /* eslint-disable no-console */
 	    console.log.apply(this, arguments);
 	  }
 	}; /**
@@ -610,12 +612,22 @@ webpackJsonp([4,5],{
 	      hosts: ['rarbg.to'],
 	      url: 'https://rarbg.to/torrents.php?search=%s'
 	    },
+	    torrentkitty: {
+	      order: 1050,
+	      typeId: 102,
+	      defaultTypeId: 8,
+	      displayName: 'torrentkitty',
+	      open: true,
+	      hosts: ['torrentkitty.ws'],
+	      url: 'http://torrentkitty.ws/tk/%s/1-0-0.html'
+	    },
 	    AcFun: {
 	      order: 1100,
 	      typeId: 102,
 	      defaultTypeId: 2,
 	      displayName: 'AcFun',
-	      open: false,
+	      open: true,
+	      siteKeywords: ['弹幕'],
 	      hosts: ['www.acfun.cn'],
 	      url: 'http://www.acfun.cn/search/?#query=%s'
 	    },
@@ -625,7 +637,7 @@ webpackJsonp([4,5],{
 	      defaultTypeId: 2,
 	      displayName: 'bilibili',
 	      open: true,
-	      siteKeywords: ['哔哩哔哩', 'Bilibili', 'B站', '弹幕'],
+	      siteKeywords: ['哔哩哔哩', 'Bilibili', 'B站', '弹幕', '电影', '欧美电影'],
 	      hosts: ['search.bilibili.com'],
 	      url: 'http://search.bilibili.com/all?keyword=%s'
 	    },
@@ -635,6 +647,7 @@ webpackJsonp([4,5],{
 	      defaultTypeId: 2,
 	      displayName: '腾讯视频',
 	      open: true,
+	      siteKeywords: ['腾讯', '视频', '腾讯视频'],
 	      hosts: ['v.qq.com'],
 	      url: 'http://v.qq.com/x/search/?q=%s'
 	    },
@@ -652,7 +665,7 @@ webpackJsonp([4,5],{
 	      typeId: 102,
 	      defaultTypeId: 7,
 	      displayName: 'Sub HD',
-	      siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', "电影字幕", "中文字幕", "电影字幕下载", "中文字幕下载", "字幕组", "射手网", "美剧字幕下载", "英剧字幕下载", "双语字幕下载", "美剧", "电影", "美剧下载", "英剧下载", "电影下载", "美剧字幕", "英剧字幕"],
+	      siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', '电影字幕', '中文字幕', '电影字幕下载', '中文字幕下载', '字幕组', '射手网', '美剧字幕下载', '英剧字幕下载', '双语字幕下载', '美剧', '电影', '美剧下载', '英剧下载', '电影下载', '美剧字幕', '英剧字幕'],
 	      open: true,
 	      hosts: ['subhd.com'],
 	      url: 'http://subhd.com/search/%s'
@@ -775,6 +788,7 @@ webpackJsonp([4,5],{
 	      displayName: 'stackoverflow',
 	      open: true,
 	      hosts: ['stackoverflow.com'],
+	      siteKeywords: ['Stack Overflow'],
 	      url: 'https://stackoverflow.com/search?q=%s',
 	      resultPageRegex: /\/search/.source
 	    },
@@ -889,6 +903,8 @@ webpackJsonp([4,5],{
 	  if (item === null || item === void 0) {
 	    throw new Error('Can not define inner key of null or undefined');
 	  }
+
+	  /* eslint-disable no-unreachable */
 	  switch (typeof item) {
 	    case 'object':
 	      Object.defineProperty(item, keyName, {
@@ -944,6 +960,7 @@ webpackJsonp([4,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	/* eslint-env node*/
 	global.Promise = __webpack_require__("qgje");
 	// no need to replace babel's promise like this:
 	// require('babel-runtime/core-js/promise').default = global.Promise;
@@ -1056,6 +1073,8 @@ webpackJsonp([4,5],{
 	          var regex = /([^#?&]+)=([^&?#]*)/g;
 	          var pairs = [],
 	              tempResult;
+
+	          /* eslint-disable no-cond-assign */
 	          while (tempResult = regex.exec(this.url)) {
 	            pairs.push(tempResult);
 	          }
@@ -1101,7 +1120,7 @@ webpackJsonp([4,5],{
 	   * @param {String} host a valid host
 	   * */
 	  Url.getRootDomain = function (host) {
-	    var temp = host.replace(/^[^.]+\./, "");
+	    var temp = host.replace(/^[^.]+\./, '');
 	    var firstPart = temp.match(/^([^.]+)\./);
 	    var commonDomainSuffix = ['com', 'net', 'edu', 'gov', 'org', 'co'];
 	    if (firstPart === null) {
@@ -1125,7 +1144,7 @@ webpackJsonp([4,5],{
 	    },
 
 	    getQueryVal: function (key) {
-	      var val = this.url.match(new RegExp('[#?&]' + key + "=([^#?&]*)[#?&]", 'i'));
+	      var val = this.url.match(new RegExp('[#?&]' + key + '=([^#?&]*)[#?&]', 'i'));
 	      return val ? val[1].replace(/\+/g, ' ') : null;
 	    }
 	  };
