@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import {isEmpty, debounce} from 'lodash';
 import tjs from './translation';
 import CONFIG from '../common/config';
 import {clog, $, $all, filterEmptyStr, onceLoaded, getCurrentTab, getMouseButton, minErr} from "../common/base";
@@ -11,7 +11,7 @@ tjs.add(new tjs.BaiDu());
 tjs.add(new tjs.Google());
 if(CONFIG.devMode) tjs.add(new tjs.GoogleCN());
 
-var popupErr = minErr('Popup');
+let popupErr = minErr('Popup');
 
 /**
  * @param {Error} e
@@ -22,56 +22,87 @@ function errorHandler(e) {
   clog.err('Error stack: ', e.stack);
 }
 
-var Links = function ($links) {
-  this.$links = $links;
-};
-Links.prototype.init = function (tabId) {
-  this.$links.forEach(function ($link) {
-    // set icons
-    $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
+class Links {
+  constructor($links) {
+    this.$links = $links;
+  }
 
-    $link.onclick = function (evt) {
-      var button = getMouseButton(evt);
-      switch (button) {
-        case 'left':
-          chrome.tabs.update(tabId, {url: this.href});
-          break;
-        case 'middle':
-          chrome.tabs.create({url: this.href});
-          break;
-        default:
-          break;
+  init(tabId) {
+    this.$links.forEach(function ($link) {
+      // set icons
+      $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
+
+      $link.onclick = function (evt) {
+        var button = getMouseButton(evt);
+        switch (button) {
+          case 'left':
+            chrome.tabs.update(tabId, {url: this.href});
+            break;
+          case 'middle':
+            chrome.tabs.create({url: this.href});
+            break;
+          default:
+            break;
+        }
+        evt.preventDefault();
       }
-      evt.preventDefault();
-    }
-  });
-};
-Links.prototype.updateHref = function (searchWord) {
-  if (!searchWord) return new popupErr('invalid param: updateLinkHref with empty string');
-  this.$links.forEach(function ($link) {
-    $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
-  });
-};
+    });
+  }
+
+  updateHref(searchWord) {
+    if (!searchWord) return new popupErr('invalid param: updateLinkHref with empty string');
+    this.$links.forEach(function ($link) {
+      $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
+    });
+  }
+}
+
+class Keyword {
+  constructor($keyword) {
+    this.$el = $keyword;
+    this.$el.focus();
+    this.$el.addEventListener('input', debounce(() => {
+      this.dispatchEvent();
+    }, 500));
+  }
+
+  dispatchEvent() {
+    this.$el.dispatchEvent(new CustomEvent(
+      'keywordUpdated',
+      {detail: this.$el.value}
+    ));
+  }
+
+  onUpdated(fn) {
+    this.$el.addEventListener('keywordUpdated', fn)
+  }
+
+  get value() {
+    return this.$el.value;
+  }
+  set value(val) {
+    this.$el.value = val;
+    this.dispatchEvent();
+  }
+}
 
 onceLoaded(getCurrentTab).then(function onLoad(tab) {
-  var tabUrl = new Url(tab.url);
-  var $keyword = $`#keyword`;
-  var $translation = $`.translation`;
-  var links;
-  var engineListTpl = $`#tpl-engines`.innerHTML.trim();
-  var $enginesSection = $`.engines`;
-
-  $keyword.focus();
-  $keyword.addEventListener('input', _.debounce(function (e) {
-    //if press enter, search word using first enabled engine
-    if(e.key === 'Enter') {
-      $`.se:not(.disable)`.dispatchEvent(new MouseEvent(
-        'click',
-        {button: 0}
-      ));
+  let tabUrl = new Url(tab.url);
+  let keyword = new Keyword($`#keyword`);
+  let $translation = $`.translation`;
+  let links;
+  let engineListTpl = $`#tpl-engines`.innerHTML.trim();
+  let $enginesSection = $`.engines`;
+  keyword.onUpdated((e) => {
+    let searchString = e.detail.trim();
+    clog('translate ', searchString);
+    if (searchString && searchString.length <= CONFIG.translateMaxLength) {
+      translate(searchString).then(function (html) {
+        $translation.innerText = html;
+      }).catch(errorHandler);
     }
-    onKeywordUpdate(this.value);
-  }, 500));
+    if(links && searchString) links.updateHref(searchString);
+  });
 
   Render.openEngines(engineListTpl).then(function (rendered) {
     $enginesSection.innerHTML = rendered;
@@ -81,7 +112,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
       itemSelector: '.pin',
       columnNum: 2
     });
-    links.init(tab.id, $keyword.value);
+    links.init(tab.id, keyword.value);
   }).catch(errorHandler);
 
   getKeyword(tabUrl).then(function (keywords) {
@@ -89,9 +120,7 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
     var displayStr = keywords[0].word.trim();
     // @TODO if input is not empty, cancel getKeyWord and don't change input and link
     // @TODO add all keywords to auto-complete suggestion list
-    $keyword.value = displayStr;
-    onKeywordUpdate(displayStr);
-    if (displayStr && links) links.updateHref(displayStr);
+    keyword.value = displayStr;
     return null;
   }).catch(errorHandler);
 
@@ -113,28 +142,19 @@ onceLoaded(getCurrentTab).then(function onLoad(tab) {
         ? 'GoogleCN'
         : (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
       text: str,
-      to: lang === 'zh' ? navigator.language : lang
+      to: CONFIG.devMode
+        ? 'zh-CN'
+        : (lang === 'zh' ? navigator.language : lang)
     }).then(function (resultObj) {
       if (resultObj.error) return null;
       return resultObj.detailed || resultObj.result;
     }).then(function (translated) {
-      return _.isEmpty(filterEmptyStr(translated)) ? '' : translated.filter(function (line) {
-        return line.toLowerCase() !== str.toLowerCase();
-      }).reduce(function (html, line) {
-        html += line + '\n';
-        return html;
-      }, '');
+      return isEmpty(filterEmptyStr(translated)) ? '' : translated.filter(function (line) {
+          return line.toLowerCase() !== str.toLowerCase();
+        }).reduce(function (html, line) {
+          html += line + '\n';
+          return html;
+        }, '');
     });
   }
-
-  function onKeywordUpdate(searchString) {
-    clog('translate ', searchString);
-    if (searchString && searchString.length <= CONFIG.translateMaxLength) {
-      translate(searchString).then(function (html) {
-        $translation.innerText = html;
-      }).catch(errorHandler);
-    }
-    links && links.updateHref(searchString);
-  }
-
 });
