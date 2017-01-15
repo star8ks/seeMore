@@ -37,8 +37,8 @@ class ChromeAsync {
                 return reject(new Error(key + 'Err' + that.chrome.runtime.lastError.message));
               }
               return resolve(...arguments);
-            })
-          })
+            });
+          });
         };
       }
     });

@@ -1,3 +1,4 @@
+/* eslint-env node*/
 global.Promise = require('bluebird');
 
 require('../common/css/normalize.min.css');

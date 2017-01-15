@@ -1,10 +1,10 @@
-import CONFIG from "../common/config.js";
-import {clog, minErr} from "../common/base.js";
-import Engine from "../common/db/Engine.js";
-import EngineType from "../common/db/EngineType.js";
-import Setting from "../common/db/Setting.js";
-import Icon from "../common/db/Icon.js";
-import Url from "../common/Url.js";
+import CONFIG from '../common/config.js';
+import {clog, minErr} from '../common/base.js';
+import Engine from '../common/db/Engine.js';
+import EngineType from '../common/db/EngineType.js';
+import Setting from '../common/db/Setting.js';
+import Icon from '../common/db/Icon.js';
+import Url from '../common/Url.js';
 
 var bgWarn = minErr('Background Warning');
 var Listener = (function () {
@@ -82,7 +82,7 @@ var Listener = (function () {
         }
         return Url.toDataURI(tab.favIconUrl);
       }).then(function (dataURI) {
-        clog('Update favicon of' + tabUrl.host, dataURI);
+        clog('Update favicon of:', tabUrl.host, dataURI);
         return Icon.set(tabUrl.host, dataURI);
       }).catch(bgWarn, function (e) {
         // ignore
@@ -111,7 +111,7 @@ var Listener = (function () {
         chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/popup.html'});
       }
     }
-  }
+  };
 })();
 
 chrome.runtime.onInstalled.addListener(Listener.onInstalled);

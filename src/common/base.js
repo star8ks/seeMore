@@ -53,7 +53,7 @@ function regex(str, ...values) {
 
 function onceLoaded(onLoad) {
   return new Promise(function (resolve) {
-    window.addEventListener("DOMContentLoaded", function () {
+    window.addEventListener('DOMContentLoaded', function () {
       resolve(onLoad());
     });
   });
@@ -64,7 +64,7 @@ function getCurrentTab() {
     chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
       var tab = tabs[0];
       resolve(tab);
-    })
+    });
   });
 }
 
@@ -103,7 +103,7 @@ function filterEmptyStr(arr) {
   }
   return Array.isArray(arr)
     ? arr.map(function (str) {
-        return filterEmptyStr(str);
+      return filterEmptyStr(str);
     }).filter(function (str) {
       return str;
     })
@@ -143,7 +143,7 @@ function getMouseButton(evt) {
   if ('object' !== typeof e) {
     throw Error('evt must be an object');
   } else if (typeof e.button === 'undefined') {
-    throw Error("evt must hasOwnProperty 'button'");
+    throw Error('evt must hasOwnProperty \'button\'');
   }
 
   return btnCode[e.button] ? btnCode[e.button] : '';
@@ -153,7 +153,7 @@ function _enumOwnValues(obj) {
   if(Object.keys) {
     return Object.keys(obj).map(function (enumerableKey) {
       return obj[enumerableKey];
-    })
+    });
   }
   var values = [];
   for(var k in obj) {
@@ -185,6 +185,7 @@ function match(str, regex) {
     result = regex.exec(str);
   } else {
     result = [];
+    /* eslint-disable no-cond-assign */
     while (tempResult = regex.exec(str)) {
       result.push(tempResult);
     }

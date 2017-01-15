@@ -31,7 +31,7 @@ Engine.getSortedAll = function (assoc, filter) {
  * */
 Engine.getOpen = function (assoc, filter) {
   assoc = assoc===void 0 ? false : !!assoc;
-  filter = filter || function(){return true};
+  filter = filter || function(){return true;};
   return this.getAll(true, function(engine) {
     return engine.open && filter(engine);
   }).then(function (engines){

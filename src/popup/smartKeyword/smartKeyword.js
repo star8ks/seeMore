@@ -3,7 +3,7 @@
  * Created by ray7551@gmail.com on 12.10 010.
  */
 import _ from 'lodash';
-import {clog, filterEmptyStr, deepValue} from '../../common/base';
+import {clog, filterEmptyStr} from '../../common/base';
 import {PUNCT, PUNCT_FLATTEN, CONFIDENCE_PARAM, CONFIDENCE_MIN, EMPTY_KEYWORDS} from './const';
 import {markVipKeyword, divide, forEachMarked} from './wordHelper';
 import PriorityMap from './PriorityMap';
@@ -31,7 +31,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   meta = _.flatten(meta.map(metaStr => divide(metaStr)));
   title = _fixSpaces(title);
   h1 = _fixSpaces(h1);
-  clog('divided meta:', meta)
+  clog('divided meta:', meta);
 
   // add original marked words to vipWords
   forEachMarked(title + h1, marked => {
@@ -43,14 +43,14 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   forEachMarked(titleMarked + h1Marked, marked => {
     candidateWords.addVipWords(marked, CONFIDENCE_PARAM.map.vip);
   });
-  clog('Marked title:', titleMarked)
-  clog('Marked h1', h1Marked)
-  clog('vipWords:', JSON.stringify([...candidateWords.vipWords]))
-  clog('siteWords:', JSON.stringify([...candidateWords.siteKeywords]))
+  clog('Marked title:', titleMarked);
+  clog('Marked h1', h1Marked);
+  clog('vipWords:', JSON.stringify([...candidateWords.vipWords]));
+  clog('siteWords:', JSON.stringify([...candidateWords.siteKeywords]));
   // clog(tabUrl.url, meta, title, h1, h2);
 
   if (_isQualified(candidateWords.vipArray, 2 * CONFIDENCE_MIN)) {
-    clog('use good vip keywords')
+    clog('use good vip keywords');
     return candidateWords.vipArray;
   }
 
@@ -58,7 +58,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   // see if keywords.meta[i] appeared in title, head or tabUrl, use meta as keyword array
   _matchKeywords(meta, keywordType.meta);
   if (_isQualified(candidateWords.orderedArray)) {
-    clog('use meta keywords')
+    clog('use meta keywords');
     return candidateWords.orderedArray;
   }
 
@@ -70,7 +70,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   // lodash.escapeRegExp will escape [], and \s is not properly escaped, so put them outside
   let punctuationsRegex = '[' + _.escapeRegExp(punctuations) + '\\s]+|\\b';
   let SEPARATE_REGEX = _getDividerRegex(punctuationsRegex, 'g');
-  clog('separate regex', SEPARATE_REGEX)
+  clog('separate regex', SEPARATE_REGEX);
 
   let divideUrl = _.flow(_replaceUnderscore, str => str.split(SEPARATE_REGEX), filterEmptyStr, _.uniq);
   divideUrl(tabUrl.pathName).forEach(pathWord => {
@@ -95,9 +95,9 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
     );
   });
 
-  clog('most frequently appeared words: ', JSON.stringify(candidateWords.orderedArray))
+  clog('most frequently appeared words: ', JSON.stringify(candidateWords.orderedArray));
   if (_isQualified(candidateWords.orderedArray)) {
-    clog('use divide keywords')
+    clog('use divide keywords');
     return candidateWords.orderedArray;
   }
 
@@ -110,23 +110,23 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   ]).reduce(_.add);
   let dividerStr = '[' + _.escapeRegExp(divider) + ']+|-{2,}';
   let divideTitleRegExp = _getDividerRegex(dividerStr);
-  clog(divideTitleRegExp)
+  clog(divideTitleRegExp);
   let divideTitle = _.flow(_replaceUnderscore, _replaceSpaces, _fixHyphen, str => str.split(divideTitleRegExp), filterEmptyStr, _.uniq);
   let titleKeywords = divideTitle(title);
-  clog('titleKeywords:', titleKeywords)
+  clog('titleKeywords:', titleKeywords);
   _matchKeywords(titleKeywords, keywordType.title);
 
   if (_isQualified(candidateWords.orderedArray)) {
-    clog('use title keywords')
+    clog('use title keywords');
     return candidateWords.orderedArray;
   }
-  clog('vip array', candidateWords.vipArray)
+  clog('vip array', candidateWords.vipArray);
   if (_isQualified(candidateWords.vipArray)) {
-    clog('use vip keywords')
+    clog('use vip keywords');
     return candidateWords.vipArray;
   }
 
-  clog('failed to get smartKeyword')
+  clog('failed to get smartKeyword');
   return EMPTY_KEYWORDS;
 
   function _matchKeywords(keywords, ignore) {
@@ -142,7 +142,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
           if (pair.val.includeString(keyword, pair.val.length >= 2)) {
             candidateWords.increaseConfidence(keyword, CONFIDENCE_PARAM.match.queryPairs);
           }
-        })
+        });
       }
       ignore !== keywordType.meta && meta.forEach(metaKeyword => {
         if (metaKeyword.includeString(keyword, true)) {

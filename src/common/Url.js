@@ -76,6 +76,8 @@ var Url = (function () {
         get: function () {
           var regex = /([^#?&]+)=([^&?#]*)/g;
           var pairs = [], tempResult;
+
+          /* eslint-disable no-cond-assign */
           while (tempResult = regex.exec(this.url)) {
             pairs.push(tempResult);
           }
@@ -83,7 +85,7 @@ var Url = (function () {
             return {
               key: pair[1],
               val: decodeURIComponent(pair[2] || '').replace(/\+/g, ' ')
-            }
+            };
           });
         },
         enumerable: true
@@ -121,7 +123,7 @@ var Url = (function () {
    * @param {String} host a valid host
    * */
   Url.getRootDomain = function(host) {
-    var temp = host.replace(/^[^.]+\./, "");
+    var temp = host.replace(/^[^.]+\./, '');
     var firstPart = temp.match(/^([^.]+)\./);
     var commonDomainSuffix = ['com', 'net', 'edu', 'gov', 'org', 'co'];
     if(firstPart === null) {
@@ -145,7 +147,7 @@ var Url = (function () {
     },
 
     getQueryVal: function (key) {
-      var val = this.url.match(new RegExp('[#?&]' + key + "=([^#?&]*)[#?&]", 'i'));
+      var val = this.url.match(new RegExp('[#?&]' + key + '=([^#?&]*)[#?&]', 'i'));
       return val ? val[1].replace(/\+/g, ' ') : null;
     }
   };

@@ -7,41 +7,41 @@ import {deepValue, regex} from '../../common/base';
 // https://en.wikipedia.org/wiki/Punctuation_of_English
 const PUNCT = {
   // punctuations
-  apostrophe: ["’", "'"],
-  brackets: ["[", "]", "(", ")", "{", "}", "⟨", "⟩", "（", "）", "【", "】"],
-  colon: [":", "："],
-  comma: [",", "،", "、", "，"],
-  dash: ["-", "‐", "‒", "–", "—", "―"],
-  ellipsis: ["…", "..."],
-  exclamation: ["!", "！"],
-  period: [".", "。"],
+  apostrophe: ['’', '\''],
+  brackets: ['[', ']', '(', ')', '{', '}', '⟨', '⟩', '（', '）', '【', '】'],
+  colon: [':', '：'],
+  comma: [',', '،', '、', '，'],
+  dash: ['-', '‐', '‒', '–', '—', '―'],
+  ellipsis: ['…', '...'],
+  exclamation: ['!', '！'],
+  period: ['.', '。'],
   guillemets: {
-    left: ["‹", "«", "《", "〈", "『"],
-    right: ["›", "»", "》", "〉", "』"]
+    left: ['‹', '«', '《', '〈', '『'],
+    right: ['›', '»', '》', '〉', '』']
   },
-  question: ["?", "？"],
-  quotation: ["‘", "’", "“", "”", "'", "'", "\"", "「", "」"],
-  semicolon: [";", "；"],
-  slash: ["/", "⁄", "\\"],
-  math: ["`", "+", "=", "<", ">", "°"],
+  question: ['?', '？'],
+  quotation: ['‘', '’', '“', '”', '\'', '\'', '"', '「', '」'],
+  semicolon: [';', '；'],
+  slash: ['/', '⁄', '\\'],
+  math: ['`', '+', '=', '<', '>', '°'],
   // word dividers
-  interpunct: ["·", "・", "･"],
-  block: ["¶", "§"],
+  interpunct: ['·', '・', '･'],
+  block: ['¶', '§'],
 
   // typography
-  verticalBar: ["|", "¦", "‖", "∣"],
-  tilde: ["~", "˜", "∼"],
-  at: ["@"],
-  hash: ["#"],
-  currency: ["¤", "￥", "$", "€", "£"],// "₳", "฿", "₵", "¢", "₡", "₢", "₫", "₯", "֏", "₠", "ƒ", "₣", "₲", "₴", "₭", "₺", "ℳ", "₥", "₦", "₧", "₱", "₰", "៛", "₽", "₹", "₨", "₪", "৳", "₸", "₮", "₩"],
-  per: ["%", "‰", "‱"],
-  caret: ["^", "‸"],
-  ampersand: ["&"],
-  asterisk: ["*"],
-  underscore: ["_"],
-  ip: ["©", "℗", "®", "℠", "™"]
+  verticalBar: ['|', '¦', '‖', '∣'],
+  tilde: ['~', '˜', '∼'],
+  at: ['@'],
+  hash: ['#'],
+  currency: ['¤', '￥', '$', '€', '£'],// "₳", "฿", "₵", "¢", "₡", "₢", "₫", "₯", "֏", "₠", "ƒ", "₣", "₲", "₴", "₭", "₺", "ℳ", "₥", "₦", "₧", "₱", "₰", "៛", "₽", "₹", "₨", "₪", "৳", "₸", "₮", "₩"],
+  per: ['%', '‰', '‱'],
+  caret: ['^', '‸'],
+  ampersand: ['&'],
+  asterisk: ['*'],
+  underscore: ['_'],
+  ip: ['©', '℗', '®', '℠', '™']
 };
-const SPACES = [" ", " ", " ", "	"];
+const SPACES = [' ', ' ', ' ', '	'];
 
 let PUNCT_FLATTEN = deepValue(PUNCT);
 /**
@@ -51,21 +51,21 @@ let PUNCT_FLATTEN = deepValue(PUNCT);
  */
 const KEYWORD_BLACKLIST = [
   ...PUNCT_FLATTEN,
-  "i", "me", "you", "he", "she", "they", "it", "one", "there", "that", "this", "other",
-  "some", "someone", "something", "any", "anybody", "anything",
-  "my", "your", "his", "her", "there", "own",
-  "the", "a", "my", "more", "much", "either",
-  "while", "meanwhile",
-  "be", "is", "isn't", "isnt", "am", "ain't", "aint", "are", "have", "has", "get", "gets", "got", "was", "wasnt",
-  "no", "not",
-  "what", "when", "who", "how", "why", "whereas", "whether",
-  "very", "so", "most", "least", "all", "only", "just", "but",
-  "do", "doing", "did", "does", "can", "cannot", "can't", "up",
-  "should", "would",
+  'i', 'me', 'you', 'he', 'she', 'they', 'it', 'one', 'there', 'that', 'this', 'other',
+  'some', 'someone', 'something', 'any', 'anybody', 'anything',
+  'my', 'your', 'his', 'her', 'there', 'own',
+  'the', 'a', 'my', 'more', 'much', 'either',
+  'while', 'meanwhile',
+  'be', 'is', 'isn\'t', 'isnt', 'am', 'ain\'t', 'aint', 'are', 'have', 'has', 'get', 'gets', 'got', 'was', 'wasnt',
+  'no', 'not',
+  'what', 'when', 'who', 'how', 'why', 'whereas', 'whether',
+  'very', 'so', 'most', 'least', 'all', 'only', 'just', 'but',
+  'do', 'doing', 'did', 'does', 'can', 'cannot', 'can\'t', 'up',
+  'should', 'would',
   // https://en.wikipedia.org/wiki/List_of_English_prepositions
-  "about", "above", "across", "after", "against", "along", "amid", "among", "around", "at", "by", "before", "behind", "below", "beneath", "beside", "besides", "between", "beyond", "during", "except", "for", "from", "in", "into", "of", "off", "on", "over", "past", "through", "to", "toward", "towards", "under", "underneath", "until", "with", "without",
+  'about', 'above', 'across', 'after', 'against', 'along', 'amid', 'among', 'around', 'at', 'by', 'before', 'behind', 'below', 'beneath', 'beside', 'besides', 'between', 'beyond', 'during', 'except', 'for', 'from', 'in', 'into', 'of', 'off', 'on', 'over', 'past', 'through', 'to', 'toward', 'towards', 'under', 'underneath', 'until', 'with', 'without',
   // Conjunctions
-  "and", "as", "both", "because", "even", "for", "if", "that", "then", "since", "seeing", "so", "or", "nor", "either", "neither", "than", "though", "although", "yet", "but", "except", "lest", "unless"
+  'and', 'as', 'both', 'because', 'even', 'for', 'if', 'that', 'then', 'since', 'seeing', 'so', 'or', 'nor', 'either', 'neither', 'than', 'though', 'although', 'yet', 'but', 'except', 'lest', 'unless'
 ];
 
 /**

@@ -314,12 +314,22 @@ const CONFIG = {
       hosts: ['rarbg.to'],
       url: 'https://rarbg.to/torrents.php?search=%s'
     },
+    torrentkitty: {
+      order: 1050,
+      typeId: 102,
+      defaultTypeId: 8,
+      displayName: 'torrentkitty',
+      open: true,
+      hosts: ['torrentkitty.ws'],
+      url: 'http://torrentkitty.ws/tk/%s/1-0-0.html'
+    },
     AcFun: {
       order: 1100,
       typeId: 102,
       defaultTypeId: 2,
       displayName: 'AcFun',
-      open: false,
+      open: true,
+      siteKeywords: ['弹幕'],
       hosts: ['www.acfun.cn'],
       url: 'http://www.acfun.cn/search/?#query=%s'
     },
@@ -329,7 +339,7 @@ const CONFIG = {
       defaultTypeId: 2,
       displayName: 'bilibili',
       open: true,
-      siteKeywords: ['哔哩哔哩', 'Bilibili', 'B站', '弹幕'],
+      siteKeywords: ['哔哩哔哩', 'Bilibili', 'B站', '弹幕', '电影', '欧美电影'],
       hosts: ['search.bilibili.com'],
       url: 'http://search.bilibili.com/all?keyword=%s'
     },
@@ -339,6 +349,7 @@ const CONFIG = {
       defaultTypeId: 2,
       displayName: '腾讯视频',
       open: true,
+      siteKeywords: ['腾讯', '视频', '腾讯视频'],
       hosts: ['v.qq.com'],
       url: 'http://v.qq.com/x/search/?q=%s'
     },
@@ -356,7 +367,7 @@ const CONFIG = {
       typeId: 102,
       defaultTypeId: 7,
       displayName: 'Sub HD',
-      siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', "电影字幕", "中文字幕", "电影字幕下载", "中文字幕下载", "字幕组", "射手网", "美剧字幕下载", "英剧字幕下载", "双语字幕下载", "美剧", "电影", "美剧下载", "英剧下载", "电影下载", "美剧字幕", "英剧字幕"],
+      siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', '电影字幕', '中文字幕', '电影字幕下载', '中文字幕下载', '字幕组', '射手网', '美剧字幕下载', '英剧字幕下载', '双语字幕下载', '美剧', '电影', '美剧下载', '英剧下载', '电影下载', '美剧字幕', '英剧字幕'],
       open: true,
       hosts: ['subhd.com'],
       url: 'http://subhd.com/search/%s'
@@ -479,6 +490,7 @@ const CONFIG = {
       displayName: 'stackoverflow',
       open: true,
       hosts: ['stackoverflow.com'],
+      siteKeywords: ['Stack Overflow'],
       url: 'https://stackoverflow.com/search?q=%s',
       resultPageRegex: /\/search/.source
     },

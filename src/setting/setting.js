@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {clog, $, $all} from '../common/base.js';
 import Setting from '../common/db/Setting';
 import Render from '../common/Render';
@@ -41,7 +40,7 @@ window.addEventListener('DOMContentLoaded', function () {
   option.render().then(function () {
     // set icons
     $all('.icon-link').forEach(function ($link) {
-      $link.style.backgroundImage = "url('" + $link.getAttribute('data-favicon') + "')";
+      $link.style.backgroundImage = 'url(\'' + $link.getAttribute('data-favicon') + '\')';
     });
     new Mason($('.preview'), {
       itemSelector: 'ul',

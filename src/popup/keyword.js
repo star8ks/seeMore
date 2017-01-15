@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import CONFIG from '../common/config';
-import {clog, filterEmptyStr} from "../common/base.js";
+import {clog, filterEmptyStr} from '../common/base.js';
 import Engine from '../common/db/Engine';
 import Url from '../common/Url';
 import ChromeAsync from '../common/ChromeAsync';
@@ -19,7 +19,7 @@ async function getSelection(tabUrl) {
   // @TODO move it to contentScript.js, and execute while select change
   // @TODO don't block popup here
   var selection = await chromeTabsProxy.executeScript({
-    code: "window.getSelection().toString();",
+    code: 'window.getSelection().toString();',
     allFrames: true
   });
 
@@ -43,7 +43,7 @@ async function getQueryString(tabUrl) {
   }
 
   let keys = await Engine.searchKeys(tabUrl.host, false, true);
-  clog('searched keys', keys, tabUrl.host)
+  clog('searched keys', keys, tabUrl.host);
   if (keys.length <= 0) {
     return EMPTY_KEYWORDS;
   }
@@ -55,7 +55,7 @@ async function getQueryString(tabUrl) {
     engine.resultPageRegex = engine.resultPageRegex || _.escapeRegExp(new Url(engine.url).pathName);
     if(engine.resultPageRegex) {
       let resultPageRegex = new RegExp(engine.resultPageRegex);
-      clog(resultPageRegex)
+      clog(resultPageRegex);
       if(!resultPageRegex.test(tabUrl.url)) {
         clog('Matched a engine, but not a result page. resultPageRegex: ', resultPageRegex);
         return EMPTY_KEYWORDS;
@@ -101,7 +101,7 @@ async function smartKeyword(tabUrl) {
   if (keys.length > 0) {
     let engine = await Engine.get(keys[0]);
     siteKeywords = engine.siteKeywords || [];
-    clog('configured siteKeywords:', siteKeywords)
+    clog('configured siteKeywords:', siteKeywords);
   }
 
   clog('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords]);

@@ -4,6 +4,7 @@
 import CONFIG from '../config';
 var clog = function () {
   if (CONFIG.devMode) {
+    /* eslint-disable no-console */
     console.log.apply(this, arguments);
   }
 };

@@ -34,8 +34,9 @@ class StringMap{
     for(let key of keys) {
       yield [this.map[key].$originKey, this.map[key].val];
     }
-   }
+  }
 }
+
 /**
  * @author ray7551@gmail.com
  */
@@ -108,7 +109,7 @@ class PriorityMap {
     ).map(item => ({
       word: item[0],
       confidence: item[1]
-    }))
+    }));
   }
 
   get vipArray() {

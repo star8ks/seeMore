@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "webpack --config tool/webpack.dev.config.js",
     "build": "webpack --config tool/webpack.build.config.js",
-    "lint": "",
+    "lint": "eslint \"src/**/*.js\"",
     "test": "karma start tool/karma.conf.js",
-    "cover": "node_modules/.bin/nyc.cmd --reporter=html --reporter=text mocha test/**/*.js"
+    "cover": "nyc --reporter=html --reporter=text mocha test/**/*.js"
   },
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.26.1",
     "dirty-chai": "^1.2.2",
+    "eslint": "^3.13.1",
     "extract-text-webpack-plugin": "^1.0.1",
     "fetch-mock": "^5.8.0",
     "file-loader": "^0.9.0",

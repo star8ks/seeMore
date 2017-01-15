@@ -47,20 +47,22 @@ function _defineInnerKey(item, key, keyName) {
   if (item === null || item === void 0) {
     throw new Error('Can not define inner key of null or undefined');
   }
+
+  /* eslint-disable no-unreachable */
   switch (typeof item) {
-    case 'object':
-      Object.defineProperty(item, keyName, {
-        value: key,
-        enumerable: false
-      });
-      return item;
-      break;
-    case 'string':
-    case 'number':
-      var obj = {};
-      obj[key] = item;
-      return _defineInnerKey(obj, key);
-      break;
+  case 'object':
+    Object.defineProperty(item, keyName, {
+      value: key,
+      enumerable: false
+    });
+    return item;
+    break;
+  case 'string':
+  case 'number':
+    var obj = {};
+    obj[key] = item;
+    return _defineInnerKey(obj, key);
+    break;
   }
   return item;
 }
