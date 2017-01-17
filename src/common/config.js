@@ -323,7 +323,9 @@ const CONFIG = {
       displayName: 'torrentkitty',
       open: true,
       hosts: ['torrentkitty.ws'],
-      url: 'http://torrentkitty.ws/tk/%s/1-0-0.html'
+      url: 'http://torrentkitty.ws/tk/%s/1-0-0.html',
+      resultPageRegex: /\/tk/.source,
+      wordRegex: /\/tk\/([^/]+)\/?/.source
     },
     dianyingFM: {
       order: 1075,
@@ -342,7 +344,9 @@ const CONFIG = {
       open: true,
       siteKeywords: ['弹幕'],
       hosts: ['www.acfun.cn'],
-      url: 'http://www.acfun.cn/search/?#query=%s'
+      url: 'http://www.acfun.cn/search/?#query=%s',
+      resultPageRegex: /\/search/.source,
+      wordRegex: /\/search\/.+query=([^?&#;]+)/.source
     },
     bilibili: {
       order: 1200,
@@ -381,7 +385,9 @@ const CONFIG = {
       siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', '电影字幕', '中文字幕', '电影字幕下载', '中文字幕下载', '字幕组', '射手网', '美剧字幕下载', '英剧字幕下载', '双语字幕下载', '美剧', '电影', '美剧下载', '英剧下载', '电影下载', '美剧字幕', '英剧字幕'],
       open: true,
       hosts: ['subhd.com'],
-      url: 'http://subhd.com/search/%s'
+      url: 'http://subhd.com/search/%s',
+      resultPageRegex: /\/search/.source,
+      wordRegex: /\/search\/([^/?&#]+)\/?/.source
     },
     zimuku: {
       order: 1600,
@@ -400,7 +406,9 @@ const CONFIG = {
       displayName: '爱词霸',
       open: true,
       hosts: ['www.iciba.com'],
-      url: 'http://www.iciba.com/%s'
+      url: 'http://www.iciba.com/%s',
+      resultPageRegex: /https?:\/\/www.iciba.com/.source,
+      wordRegex: /www\.iciba\.com\/([^?&#]+)\/?/.source
     },
     youdaoTranslate: {
       order: 1710,
@@ -418,7 +426,9 @@ const CONFIG = {
       displayName: '有道词典',
       open: false,
       hosts: ['dict.youdao.com'],
-      url: 'http://dict.youdao.com/w/%s'
+      url: 'http://dict.youdao.com/w/%s',
+      resultPageRegex: /youdao\.com\/w\//.source,
+      wordRegex: /\/w\/([^?&#/]+)\/?/.source
     },
     zdic: {
       order: 1750,
@@ -483,7 +493,9 @@ const CONFIG = {
       displayName: 'HTMLPreview',
       open: true,
       hosts: ['htmlpreview.github.io'],
-      url: 'http://htmlpreview.github.io/?%s'
+      url: 'http://htmlpreview.github.io/?%s',
+      resultPageRegex: /htmlpreview\.github\.io\/\?.*/.source,
+      wordRegex: /htmlpreview\.github\.io\/\?(.+)/.source
     },
     devDocs: {
       order: 2400,
