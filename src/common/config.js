@@ -10,7 +10,7 @@ const CONFIG = {
     6: {name: 'Development', order: 6, default: true},
     7: {name: 'Sub', order: 7, default: true},
     8: {name: 'Torrents', order: 8, default: true},
-    8: {name: 'Social Network', order: 9, default: true},
+    9: {name: 'Social Network', order: 9, default: true},
     101: {name: 'Search Engine', order: 1},
     102: {name: 'Video', order: 2},
     103: {name: 'Translate', order: 3},
@@ -554,7 +554,7 @@ const CONFIG = {
     weibo: {
       order: 3100,
       typeId: 107,
-      defaultTypeId: 8,
+      defaultTypeId: 9,
       displayName: '微博',
       open: true,
       hosts: ['s.weibo.com'],
@@ -565,7 +565,7 @@ const CONFIG = {
     twitter: {
       order: 3200,
       typeId: 107,
-      defaultTypeId: 8,
+      defaultTypeId: 9,
       displayName: 'twitter',
       open: false,
       hosts: ['twitter.com'],
