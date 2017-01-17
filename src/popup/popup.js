@@ -66,7 +66,7 @@ class Keyword {
   dispatchEvent() {
     this.$el.dispatchEvent(new CustomEvent(
       'keywordUpdated',
-      {detail: this.$el.value}
+      {detail: this.$el.value || this.$el.placeholder}
     ));
   }
 
@@ -77,8 +77,8 @@ class Keyword {
   get value() {
     return this.$el.value;
   }
-  set value(val) {
-    this.$el.value = val;
+  set placeholder(val) {
+    this.$el.placeholder = val;
     this.dispatchEvent();
   }
 }
@@ -114,14 +114,14 @@ onceLoaded(getCurrentTab).then(tab => {
 
   getKeyword(tabUrl).then(keywords => {
     clog('get keywords: ', JSON.stringify(keywords));
-    let displayStr = keywords[0].word.trim();
     // @TODO if input is not empty, cancel getKeyWord and don't change input and link
     // @TODO add all keywords to auto-complete suggestion list
-    keyword.value = displayStr;
+    keyword.placeholder = keywords[0].word.trim();
     return null;
   }).catch(errorHandler);
 
 });
+
 /**
  * @param {String} str
  * */
