@@ -52,7 +52,7 @@ async function getQueryString(tabUrl) {
   let engine = await Engine.get(keys[0]);
 
   try {
-    engine.resultPageRegex = engine.resultPageRegex || _.escapeRegExp(new Url(engine.url).pathName);
+    engine.resultPageRegex = engine.resultPageRegex || _.escapeRegExp(new Url(engine.url.split('%s', 1)[0]).pathName);
     if(engine.resultPageRegex) {
       let resultPageRegex = new RegExp(engine.resultPageRegex);
       clog(resultPageRegex);
@@ -64,9 +64,27 @@ async function getQueryString(tabUrl) {
   } catch(e) {
     clog('Error while try to test url', e);
   }
+
+  if(engine.wordRegex) {
+    let wordRegex = new RegExp(engine.wordRegex);
+    clog('wordRegex', wordRegex, 'tabUrl:', tabUrl.url);
+    let match = tabUrl.url.match(wordRegex);
+
+    return match ? [{
+      word: tabUrl.isWeiboUrl ? decodeURIComponent(decodeURIComponent(match[1])) : decodeURIComponent(match[1]),
+      confidence: CONFIDENCE_PARAM.searchString
+    }] : EMPTY_KEYWORDS;
+  }
+
   let searchKey = (new Url(engine.url)).searchKey;
+  // TODO support no queryPairs engine
+  clog('queryPairs:', tabUrl.queryPairs);
   let searchStrings = _.filter(tabUrl.queryPairs, {key: searchKey});
-  let searchString = /google/.test(tabUrl.host) && searchStrings.length
+  if(!searchStrings.length) {
+    return EMPTY_KEYWORDS;
+  }
+
+  let searchString = /google/.test(tabUrl.host)
     ? _.last(searchStrings).val
     : searchStrings[0].val;
   clog('match searchString from url:', searchString);
