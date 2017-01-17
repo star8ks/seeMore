@@ -10,12 +10,14 @@ const CONFIG = {
     6: {name: 'Development', order: 6, default: true},
     7: {name: 'Sub', order: 7, default: true},
     8: {name: 'Torrents', order: 8, default: true},
+    8: {name: 'Social Network', order: 9, default: true},
     101: {name: 'Search Engine', order: 1},
     102: {name: 'Video', order: 2},
     103: {name: 'Translate', order: 3},
     104: {name: 'EBook', order: 4},
     105: {name: 'Development', order: 5},
-    106: {name: 'Shopping', order: 6}
+    106: {name: 'Shopping', order: 6},
+    107: {name: 'Social Network', order: 7},
   },
   engines: {
     // Search engines
@@ -323,6 +325,15 @@ const CONFIG = {
       hosts: ['torrentkitty.ws'],
       url: 'http://torrentkitty.ws/tk/%s/1-0-0.html'
     },
+    dianyingFM: {
+      order: 1075,
+      typeId: 102,
+      defaultTypeId: 8,
+      displayName: '电影 FM',
+      open: true,
+      hosts: ['dianying.fm'],
+      url: 'http://dianying.fm/search/?text=%s'
+    },
     AcFun: {
       order: 1100,
       typeId: 102,
@@ -405,7 +416,7 @@ const CONFIG = {
       typeId: 103,
       defaultTypeId: 3,
       displayName: '有道词典',
-      open: true,
+      open: false,
       hosts: ['dict.youdao.com'],
       url: 'http://dict.youdao.com/w/%s'
     },
@@ -443,7 +454,7 @@ const CONFIG = {
       typeId: 105,
       defaultTypeId: 6,
       displayName: 'explainShell',
-      open: true,
+      open: false,
       hosts: ['explainShell.com'],
       url: 'http://explainshell.com/explain?cmd=%s'
     },
@@ -536,9 +547,29 @@ const CONFIG = {
       typeId: 106,
       defaultTypeId: 5,
       displayName: '淘宝',
-      open: true,
+      open: false,
       hosts: ['s.taobao.com'],
       url: 'https://s.taobao.com/search?q=%s'
+    },
+    weibo: {
+      order: 3100,
+      typeId: 107,
+      defaultTypeId: 8,
+      displayName: '微博',
+      open: true,
+      hosts: ['s.weibo.com'],
+      url: 'http://s.weibo.com/weibo/%s?frm=opensearch',
+      resultPageRegex: /\/weibo/.source,
+      wordRegex: /\/weibo\/([^?&#]+)[?&#]/.source
+    },
+    twitter: {
+      order: 3200,
+      typeId: 107,
+      defaultTypeId: 8,
+      displayName: 'twitter',
+      open: false,
+      hosts: ['twitter.com'],
+      url: 'https://twitter.com/search?q=%s'
     }
   },
   devMode: true
