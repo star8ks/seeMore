@@ -102,6 +102,12 @@ var Url = (function () {
         },
         enumerable: true
       },
+      isWeiboUrl: {
+        get: function () {
+          return Url.WEIBO_URL_REGEX.test(this.url);
+        },
+        enumerable: true
+      },
       pathName: {
         get: function () {
           var match = this.url.match(/https?:\/\/[^\/]*(\/[^?]+)/);
@@ -141,6 +147,7 @@ var Url = (function () {
   Url.DATA_URI_REGEX = /^data:.*,/i;
   Url.FAVICON_URL_REGEX = /\.ico$/i;
   Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
+  Url.WEIBO_URL_REGEX = /^https?:\/\/s\.weibo\.com\/weibo/i;
   Url.prototype = {
     includes: function (search) {
       return this.url.includeString(search);
