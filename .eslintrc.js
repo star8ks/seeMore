@@ -8,9 +8,13 @@ module.exports = {
     "chrome": true
   },
   "extends": "eslint:recommended",
+  "parser": "babel-eslint",
   "parserOptions": {
     "ecmaVersion": 8, // or 2017
-    "sourceType": "module"
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "classes": true
+    },
   },
   "rules": {
     "indent": [

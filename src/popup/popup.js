@@ -1,7 +1,7 @@
 import {isEmpty, debounce} from 'lodash';
 import tjs from './translation';
 import CONFIG from '../common/config';
-import {clog, $, $all, filterEmptyStr, onceLoaded, getCurrentTab, btnCode, getMouseButton, minErr} from '../common/base';
+import {clog, $, filterEmptyStr, onceLoaded, getCurrentTab, btnCode, getMouseButton, minErr} from '../common/base';
 import Url from '../common/Url';
 import Render from '../common/Render';
 import Mason from '../common/Mason';
@@ -24,11 +24,11 @@ function errorHandler(e) {
 }
 
 class Links {
-  $defaultLink = null;
   static defaultLinkClass = 'icon-link-default';
   constructor($linksWrapper) {
     this.$linksWrapper = $linksWrapper;
-    this.$links = $linksWrapper.querySelectorAll('.icon-link');
+    this.$links = this.$linksWrapper.querySelectorAll('.icon-link');
+    this.$defaultLink = null;
     this.setDefaultLink();
   }
 
@@ -162,21 +162,22 @@ onceLoaded(getCurrentTab).then(async (tab) => {
     let searchString = e.detail.trim();
     clog('translate ', searchString);
 
-    if (searchString && searchString.length <= CONFIG.translateMaxLength) {
-      translate(searchString).then(html => {
-        $translation.innerText = html;
-      }).catch(errorHandler);
+    if (searchString) {
+      links.updateHref(searchString);
+      if(searchString.length <= CONFIG.translateMaxLength) {
+        translate(searchString).then(html => {
+          $translation.innerText = html;
+        }).catch(errorHandler);
+      }
     }
-
-    if(searchString) links.updateHref(searchString);
 
     if(keyword.engineSelector === '') return;
     Engine.getOpen(true, engine => {
       return engine.displayName.startsWith(keyword.engineSelector) || engine.$$key.startsWith(keyword.engineSelector);
     }).then(engines => {
       let engineNames = Object.keys(engines);
-      return isEmpty(engineNames) 
-        ? Promise.reject() 
+      return isEmpty(engineNames)
+        ? Promise.reject()
         : links.setDefaultLink(engineNames[0]);
     });
   });
