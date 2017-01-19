@@ -33,12 +33,12 @@ describe('Engine', function () {
           return host.toLowerCase();
         }));
       });
-    })
+    });
   });
 
   describe('getSortedAll', function () {
     it('should return assoc object', function () {
-      return Engine.getSortedAll(true).then(function (engines) {
+      return Engine.getSortedAll(Engine.returnType.assoc).then(function (engines) {
         expect(engines).to.eql(CONFIG.engines);
       });
     });
@@ -53,7 +53,7 @@ describe('Engine', function () {
       return engine.open;
     });
     it('should return assoc object', function () {
-      return Engine.getOpen(true).then(function (engines) {
+      return Engine.getOpen(Engine.returnType.assoc).then(function (engines) {
         expect(engines).to.eql(DB.assoc(openEngines));
       });
     });

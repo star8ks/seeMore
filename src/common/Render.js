@@ -28,7 +28,7 @@ let Render = {
   openEngines: function (template) {
     return EngineType.getAllReal().map(function (typeObj) {
       var typeId = typeObj['$$key'];
-      return Engine.getOpen(false, function (engine) {
+      return Engine.getOpen(Engine.returnType.normal, function (engine) {
         return '' + engine.typeId === typeId;// key always saved as string
       }).bind({
         typeName: typeObj.name,
@@ -44,7 +44,7 @@ let Render = {
   defaultEngines: function (template) {
     return EngineType.getAllDefault().map(function (typeObj) {
       var typeId = typeObj['$$key'];
-      return Engine.getSortedAll(false, function (engine) {
+      return Engine.getSortedAll(Engine.returnType.normal, function (engine) {
         // if(''+engine.defaultTypeId === typeId) clog(engine.displayName, typeId, typeObj.name);
         return '' + engine.defaultTypeId === typeId;// key always saved as string
       }).bind({

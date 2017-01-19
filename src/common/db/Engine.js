@@ -3,6 +3,12 @@ import localforage from '../localforage-bluebird';
 import Url from '../../common/Url';
 
 let Engine = new DB(localforage, 'engine');
+// return data structure
+Engine.returnType = {
+  assoc: Symbol(),
+  normal: Symbol()
+};
+
 Engine.set = function (key, engine) {
   // ensure all hosts are lower case
   engine.hosts = engine.hosts.map(function (host) {
@@ -11,35 +17,43 @@ Engine.set = function (key, engine) {
   return DB.prototype.set.call(this, key, engine);
 };
 /**
- * @param {Boolean} [assoc=false] if resolve a assoc object
+ * @param {Engine.returnType} [returnType=false] if resolve a assoc object
  * @param {Function?} filter
  * @return {Promise}
  * */
-Engine.getSortedAll = function (assoc, filter) {
-  assoc = assoc===void 0 ? false : !!assoc;
+Engine.getSortedAll = function (returnType = Engine.returnType.normal, filter) {
+  returnType = Engine.returnType.assoc;
   return this.getAll(true, filter).then(function (engines){
     engines.sort(function (engineA, engineB) {
       return engineA.order - engineB.order;
     });
-    return assoc ? DB.assoc(engines) : engines;
+    return returnType === Engine.returnType.assoc ? DB.assoc(engines) : engines;
   });
 };
 /**
- * @param {Boolean} [assoc=false] if resolve a assoc object
+ * @param {Engine.returnType} [returnType=Engine.returnType.normal] if resolve a assoc object
  * @param {Function?} filter
+ * @param {String[]?} fields
  * @return {Promise}
  * */
-Engine.getOpen = function (assoc, filter) {
-  assoc = assoc===void 0 ? false : !!assoc;
-  filter = filter || function(){return true;};
-  return this.getAll(true, function(engine) {
+Engine.getOpen = async function (returnType = Engine.returnType.normal, filter, fields = []) {
+  filter = filter || function() {return true;};
+  let engines = await this.getAll(true, function(engine) {
     return engine.open && filter(engine);
-  }).then(function (engines){
-    var openEngines = engines.sort(function (engineA, engineB) {
-      return engineA.order - engineB.order;
-    });
-    return assoc ? DB.assoc(openEngines) : openEngines;
   });
+  var openEngines = engines.sort(function (engineA, engineB) {
+    return engineA.order - engineB.order;
+  });
+  if(fields.length) {
+    openEngines = openEngines.map(engine => {
+      let obj = {};
+      for(let field of fields) {
+        obj[field] = engine[field];
+      }
+      return obj;
+    });
+  }
+  return returnType === Engine.returnType.assoc ? DB.assoc(openEngines) : openEngines;
 };
 
 /**
