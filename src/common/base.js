@@ -131,14 +131,14 @@ function debounce(fn, delay, atBegin) {
   };
 }
 
+const btnCode = {
+  0: 'left',
+  1: 'middle',
+  2: 'right'
+};
 function getMouseButton(evt) {
   // Handle different event models
   var e = evt || window.event;
-  var btnCode = {
-    0: 'left',
-    1: 'middle',
-    2: 'right'
-  };
 
   if ('object' !== typeof e) {
     throw Error('evt must be an object');
@@ -214,6 +214,7 @@ var util = {
   isEmpty: isEmpty,
   filterEmptyStr: filterEmptyStr,
   debounce: debounce,
+  btnCode: btnCode,
   getMouseButton: getMouseButton,
   matchAll: match,
   regex: regex,
@@ -223,7 +224,7 @@ var util = {
 export default util;
 export {
   $, $all, onceLoaded, getCurrentTab,
-  isEmpty, filterEmptyStr, debounce, getMouseButton,
+  isEmpty, filterEmptyStr, debounce, btnCode, getMouseButton,
   deepValue, match, regex, trim,
   includeString, clog, minErr
 };

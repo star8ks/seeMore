@@ -1,11 +1,12 @@
 import {isEmpty, debounce} from 'lodash';
 import tjs from './translation';
 import CONFIG from '../common/config';
-import {clog, $, $all, filterEmptyStr, onceLoaded, getCurrentTab, getMouseButton, minErr} from '../common/base';
+import {clog, $, $all, filterEmptyStr, onceLoaded, getCurrentTab, btnCode, getMouseButton, minErr} from '../common/base';
 import Url from '../common/Url';
 import Render from '../common/Render';
 import Mason from '../common/Mason';
 import getKeyword from './keyword';
+import Engine from '../common/db/Engine';
 
 tjs.add(new tjs.BaiDu());
 tjs.add(new tjs.Google());
@@ -23,8 +24,12 @@ function errorHandler(e) {
 }
 
 class Links {
-  constructor($links) {
-    this.$links = $links;
+  $defaultLink = null;
+  static defaultLinkClass = 'icon-link-default';
+  constructor($linksWrapper) {
+    this.$linksWrapper = $linksWrapper;
+    this.$links = $linksWrapper.querySelectorAll('.icon-link');
+    this.setDefaultLink();
   }
 
   init(tabId) {
@@ -54,19 +59,48 @@ class Links {
       $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
     });
   }
+
+  _setDefaultLink($link) {
+    if(this.$defaultLink) {
+      this.$defaultLink.classList.remove(Links.defaultLinkClass);
+    }
+    this.$defaultLink = $link;
+    this.$defaultLink.classList.add(Links.defaultLinkClass);
+  }
+
+  setDefaultLink(seName) {
+    if(isEmpty(seName)) {
+      this._setDefaultLink(this.$links[0]);
+      return;
+    }
+    seName = seName.toLowerCase();
+    for(let $link of this.$links) {
+      if($link.getAttribute('data-se').toLowerCase() === seName) {
+        this._setDefaultLink($link);
+        break;
+      }
+    }
+  }
 }
 
 class Keyword {
+  suggestions = [];
   constructor($keyword) {
     this.$el = $keyword;
     this.$el.focus();
+    this.$el.addEventListener('keydown', e => {
+      if(e.key === 'Tab') {
+        // TODO serarch in this.sugesstion, and autocomplete by press Tab
+        e.preventDefault();
+      }
+    });
     this.$el.addEventListener('input', debounce(() => this.dispatchEvent(), 500));
   }
 
   dispatchEvent() {
     this.$el.dispatchEvent(new CustomEvent(
       'keywordUpdated',
-      {detail: this.$el.value || this.$el.placeholder}
+      {detail: this.value || this.$el.placeholder}
     ));
   }
 
@@ -74,53 +108,83 @@ class Keyword {
     this.$el.addEventListener('keywordUpdated', fn);
   }
 
+  onKeyup(fn) {
+    this.$el.addEventListener('keyup', fn);
+  }
+
+  static engineSelectorRegex = /(?:^|\s)([^\s]+)/;
+
   get value() {
-    return this.$el.value;
+    return this.$el.value.replace(Keyword.engineSelectorRegex, '').trim();
   }
   set placeholder(val) {
     this.$el.placeholder = val;
     this.dispatchEvent();
   }
+  get engineSelector() {
+    let match = this.$el.value.match(Keyword.engineSelectorRegex);
+    return match ? match[1] : '';
+  }
 }
 
-onceLoaded(getCurrentTab).then(tab => {
+onceLoaded(getCurrentTab).then(async (tab) => {
   let tabUrl = new Url(tab.url);
   let keyword = new Keyword($`#keyword`);
   let $translation = $`.translation`;
   let links;
   let engineListTpl = $`#tpl-engines`.innerHTML.trim();
   let $enginesSection = $`.engines`;
-  keyword.onUpdated(e => {
-    let searchString = e.detail.trim();
-    clog('translate ', searchString);
-    if (searchString && searchString.length <= CONFIG.translateMaxLength) {
-      translate(searchString).then(html => {
-        $translation.innerText = html;
-      }).catch(errorHandler);
-    }
-    if(links && searchString) links.updateHref(searchString);
-  });
-
-  Render.openEngines(engineListTpl).then(rendered => {
-    $enginesSection.innerHTML = rendered;
-    links = new Links($all`.engines .icon-link`);
-    links.init(tab.id, keyword.value);
-  }).then(() => {
-    new Mason($`.engines`, {
-      itemSelector: '.pin',
-      columnNum: 2
-    });
-  }).catch(errorHandler);
 
   getKeyword(tabUrl).then(keywords => {
     clog('get keywords: ', JSON.stringify(keywords));
     // @TODO if input is not empty, cancel getKeyWord and don't change input and link
     // @TODO add all keywords to auto-complete suggestion list
+    // keywords.forEach(kw => keyword.suggestions.push(kw.word.trim()));
     keyword.placeholder = keywords[0].word.trim();
     return null;
   }).catch(errorHandler);
 
-});
+  let rendered = await Render.openEngines(engineListTpl);
+  $enginesSection.innerHTML = rendered;
+
+  links = new Links($`.engines`);
+  links.init(tab.id, keyword.value);
+
+  keyword.onKeyup(e => {
+    if(e.key === 'Enter') {
+      links.$defaultLink.dispatchEvent(new MouseEvent(
+        'click',
+        {button: btnCode.left}
+      ));
+    }
+  });
+  keyword.onUpdated(e => {
+    let searchString = e.detail.trim();
+    clog('translate ', searchString);
+
+    if (searchString && searchString.length <= CONFIG.translateMaxLength) {
+      translate(searchString).then(html => {
+        $translation.innerText = html;
+      }).catch(errorHandler);
+    }
+
+    if(searchString) links.updateHref(searchString);
+
+    if(keyword.engineSelector === '') return;
+    Engine.getOpen(true, engine => {
+      return engine.displayName.startsWith(keyword.engineSelector) || engine.$$key.startsWith(keyword.engineSelector);
+    }).then(engines => {
+      let engineNames = Object.keys(engines);
+      return isEmpty(engineNames) 
+        ? Promise.reject() 
+        : links.setDefaultLink(engineNames[0]);
+    });
+  });
+  new Mason($`.engines`, {
+    itemSelector: '.pin',
+    columnNum: 2
+  });
+}).catch(errorHandler);
 
 /**
  * @param {String} str
