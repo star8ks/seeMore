@@ -104,9 +104,11 @@ class SearchBox {
 
   _onInput(selectEngineFn) {
     if(this.engineSelector !== '') {
+      let engineSelectorLower = this.engineSelector.toLowerCase();
       let engine = this.engines.find(engine => {
-        return engine.displayName.startsWith(this.engineSelector) || engine.$$key.startsWith(this.engineSelector);
+        return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
       });
+      clog('select engine:', engine.displayName);
       selectEngineFn(engine ? engine.$$key : '');
     }
     this.$el.dispatchEvent(new CustomEvent(
@@ -148,6 +150,7 @@ onceLoaded(getCurrentTab).then(async (tab) => {
     clog('get keywords: ', JSON.stringify(keywords));
     // @TODO if input is not empty, cancel getKeyWord and don't change input and link
     // @TODO add all keywords to auto-complete suggestion list
+    if(!searchBox) return;
     keywords.forEach(kw => searchBox.suggestions.push(kw.word.trim()));
     searchBox.placeholder = keywords[0].word.trim();
     return null;
