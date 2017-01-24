@@ -253,7 +253,7 @@ const CONFIG = {
       typeId: 101,
       defaultTypeId: 1,
       displayName: 'Bing',
-      open: true,
+      open: false,
       hosts: [
         'www.bing.com', 'bing.co', 'bing.co.uk', 'bing.com', 'be.bing.com', 'br.bing.com', 'ca.bing.com', 'cn.bing.com', 'de.bing.com', 'fr.bing.com', 'hk.bing.com', 'it.bing.com', 'jp.bing.com', 'm.bing.com', 'nz.bing.com', 'ssl.bing.com', 'uk.bing.com'
       ],
@@ -321,12 +321,25 @@ const CONFIG = {
       typeId: 102,
       defaultTypeId: 8,
       displayName: 'torrentkitty',
-      open: true,
+      open: false,
       hosts: ['torrentkitty.ws'],
       url: 'http://torrentkitty.ws/tk/%s/1-0-0.html',
       resultPageRegex: /\/tk/.source,
       wordRegex: /\/tk\/([^/]+)\/?/.source
     },
+    btdb: {
+      order: 1060,
+      typeId: 102, 
+      defaultTypeId: 8,
+      displayName: 'BTDB',
+      open: true,
+      hosts: ['btdb.in'],
+      url: 'https://btdb.in/q/%s',
+      resultPageRegex: /\/q\//.source,
+      wordRegex: /\/q\/([^/]+)\/?/.source
+    },
+    // https://torrentproject.se/?t=
+    // https://btdig.com/search?order=0&q=
     dianyingFM: {
       order: 1075,
       typeId: 102,
