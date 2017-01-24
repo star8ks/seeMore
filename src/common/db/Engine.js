@@ -22,7 +22,6 @@ Engine.set = function (key, engine) {
  * @return {Promise}
  * */
 Engine.getSortedAll = function (returnType = Engine.returnType.normal, filter) {
-  returnType = Engine.returnType.assoc;
   return this.getAll(true, filter).then(function (engines){
     engines.sort(function (engineA, engineB) {
       return engineA.order - engineB.order;

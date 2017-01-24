@@ -108,7 +108,6 @@ class SearchBox {
       let engine = this.engines.find(engine => {
         return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
       });
-      clog('select engine:', engine.displayName);
       selectEngineFn(engine ? engine.$$key : '');
     }
     this.$el.dispatchEvent(new CustomEvent(
