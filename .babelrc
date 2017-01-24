@@ -2,11 +2,12 @@
   "presets": [
     ["env", {
       "targets": {
-        "chrome": 50
+        "chrome": 51
       }
     }]
   ],
   "plugins":  [
+    ["transform-class-properties"],
     ["transform-runtime", {
       "helpers": false, // defaults to true
       "polyfill": false, // defaults to true
