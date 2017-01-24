@@ -169,7 +169,7 @@ webpackJsonp([1,5],{
 	 * @param {String} str
 	 * */
 	let translate = (() => {
-	  var _ref = _asyncToGenerator(function* (str) {
+	  var _ref2 = _asyncToGenerator(function* (str) {
 	    str = str.trim().replace(/\n/, '') || '';
 	    // @TODO only translate some language, from user config
 	    // @TODO not translate some language, from user config
@@ -197,8 +197,8 @@ webpackJsonp([1,5],{
 	    }, '');
 	  });
 
-	  return function translate(_x) {
-	    return _ref.apply(this, arguments);
+	  return function translate(_x2) {
+	    return _ref2.apply(this, arguments);
 	  };
 	})();
 
@@ -230,6 +230,10 @@ webpackJsonp([1,5],{
 
 	var _keyword2 = _interopRequireDefault(_keyword);
 
+	var _Engine = __webpack_require__("gLfi");
+
+	var _Engine2 = _interopRequireDefault(_Engine);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
@@ -250,11 +254,15 @@ webpackJsonp([1,5],{
 	}
 
 	class Links {
-	  constructor($links) {
-	    this.$links = $links;
+	  constructor($linksWrapper, tabId) {
+	    this.$linksWrapper = $linksWrapper;
+	    this.$links = this.$linksWrapper.querySelectorAll('.icon-link');
+	    this.$defaultLink = null;
+	    this.setDefaultLink();
+	    this._init(tabId);
 	  }
 
-	  init(tabId) {
+	  _init(tabId) {
 	    this.$links.forEach($link => {
 	      $link.style.backgroundImage = 'url(\'' + $link.getAttribute('data-favicon') + '\')';
 
@@ -281,70 +289,138 @@ webpackJsonp([1,5],{
 	      $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
 	    });
 	  }
-	}
 
-	class Keyword {
-	  constructor($keyword) {
-	    this.$el = $keyword;
-	    this.$el.focus();
-	    this.$el.addEventListener('input', (0, _lodash.debounce)(() => this.dispatchEvent(), 500));
+	  _setDefaultLink($link) {
+	    if (this.$defaultLink) {
+	      this.$defaultLink.classList.remove(Links.defaultLinkClass);
+	    }
+	    this.$defaultLink = $link;
+	    this.$defaultLink.classList.add(Links.defaultLinkClass);
 	  }
 
-	  dispatchEvent() {
-	    this.$el.dispatchEvent(new CustomEvent('keywordUpdated', { detail: this.$el.value }));
+	  setDefaultLink(seName) {
+	    if ((0, _lodash.isEmpty)(seName)) {
+	      if (this.$defaultLink === null) {
+	        this._setDefaultLink(this.$links[0]);
+	      }
+	      return;
+	    }
+	    seName = seName.toLowerCase();
+	    for (let $link of this.$links) {
+	      if ($link.getAttribute('data-se').toLowerCase() === seName) {
+	        this._setDefaultLink($link);
+	        break;
+	      }
+	    }
+	  }
+	}
+
+	Links.defaultLinkClass = 'icon-link-default';
+	class SearchBox {
+	  constructor($keyword, engines, selectEngineFn) {
+	    this.suggestions = [];
+
+	    this.$el = $keyword;
+	    this.engines = engines;
+	    this.suggestions.concat((0, _base.deepValue)(engines));
+	    this.$el.focus();
+	    this.$el.addEventListener('keydown', e => {
+	      if (e.key === 'Tab') {
+	        // TODO serarch in this.sugesstion, and autocomplete by press Tab
+	        e.preventDefault();
+	      }
+	    });
+	    this.$el.addEventListener('input', (0, _lodash.debounce)(() => this._onInput(selectEngineFn), 500));
+	  }
+
+	  _onInput(selectEngineFn) {
+	    if (this.engineSelector !== '') {
+	      let engineSelectorLower = this.engineSelector.toLowerCase();
+	      let engine = this.engines.find(engine => {
+	        return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
+	      });
+	      selectEngineFn(engine ? engine.$$key : '');
+	    }
+	    this.$el.dispatchEvent(new CustomEvent('keywordUpdated', { detail: this.value || this.$el.placeholder }));
 	  }
 
 	  onUpdated(fn) {
 	    this.$el.addEventListener('keywordUpdated', fn);
 	  }
 
+	  onKeyup(fn) {
+	    this.$el.addEventListener('keyup', fn);
+	  }
+
 	  get value() {
 	    return this.$el.value;
 	  }
-	  set value(val) {
-	    this.$el.value = val;
-	    this.dispatchEvent();
+	  set placeholder(val) {
+	    this.$el.placeholder = val;
+	    this._onInput();
+	  }
+	  get engineSelector() {
+	    let match = this.$el.value.match(SearchBox.engineSelectorRegex);
+	    return match ? match[1] : '';
 	  }
 	}
 
-	(0, _base.onceLoaded)(_base.getCurrentTab).then(tab => {
-	  let tabUrl = new _Url2.default(tab.url);
-	  let keyword = new Keyword(_base.$`#keyword`);
-	  let $translation = _base.$`.translation`;
-	  let links;
-	  let engineListTpl = _base.$`#tpl-engines`.innerHTML.trim();
-	  let $enginesSection = _base.$`.engines`;
-	  keyword.onUpdated(e => {
-	    let searchString = e.detail.trim();
-	    (0, _base.clog)('translate ', searchString);
-	    if (searchString && searchString.length <= _config2.default.translateMaxLength) {
-	      translate(searchString).then(html => {
-	        $translation.innerText = html;
-	      }).catch(errorHandler);
-	    }
-	    if (links && searchString) links.updateHref(searchString);
-	  });
+	SearchBox.engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
+	(0, _base.onceLoaded)(_base.getCurrentTab).then((() => {
+	  var _ref = _asyncToGenerator(function* (tab) {
+	    let tabUrl = new _Url2.default(tab.url);
+	    let $translation = _base.$`.translation`;
+	    let engineListTpl = _base.$`#tpl-engines`.innerHTML.trim();
+	    let $enginesSection = _base.$`.engines`;
 
-	  _Render2.default.openEngines(engineListTpl).then(rendered => {
-	    $enginesSection.innerHTML = rendered;
-	    links = new Links(_base.$all`.engines .icon-link`);
-	    links.init(tab.id, keyword.value);
-	  }).then(() => {
+	    (0, _keyword2.default)(tabUrl).then(function (keywords) {
+	      (0, _base.clog)('get keywords: ', JSON.stringify(keywords));
+	      // @TODO if input is not empty, cancel getKeyWord and don't change input and link
+	      // @TODO add all keywords to auto-complete suggestion list
+	      if (!searchBox) return;
+	      keywords.forEach(function (kw) {
+	        return searchBox.suggestions.push(kw.word.trim());
+	      });
+	      searchBox.placeholder = keywords[0].word.trim();
+	      return null;
+	    }).catch(errorHandler);
+
+	    $enginesSection.innerHTML = yield _Render2.default.openEngines(engineListTpl);
+
+	    let links = new Links(_base.$`.engines`, tab.id);
+	    let engines = yield _Engine2.default.getOpen(_Engine2.default.returnType.normal, null, ['displayName', '$$key']);
+	    let searchBox = new SearchBox(_base.$`#keyword`, engines, function (engineKey) {
+	      return links.setDefaultLink(engineKey);
+	    });
+
+	    searchBox.onKeyup(function (e) {
+	      if (e.key === 'Enter') {
+	        links.$defaultLink.dispatchEvent(new MouseEvent('click', { button: _base.btnCode.left }));
+	      }
+	    });
+	    searchBox.onUpdated(function (e) {
+	      let searchString = e.detail.trim();
+	      (0, _base.clog)('translate ', searchString);
+
+	      if (searchString) {
+	        links.updateHref(searchString);
+	        if (searchString.length <= _config2.default.translateMaxLength) {
+	          translate(searchString).then(function (html) {
+	            $translation.innerText = html;
+	          }).catch(errorHandler);
+	        }
+	      }
+	    });
 	    new _Mason2.default(_base.$`.engines`, {
 	      itemSelector: '.pin',
 	      columnNum: 2
 	    });
-	  }).catch(errorHandler);
+	  });
 
-	  (0, _keyword2.default)(tabUrl).then(keywords => {
-	    (0, _base.clog)('get keywords: ', JSON.stringify(keywords));
-	    let displayStr = keywords[0].word.trim();
-	    // @TODO if input is not empty, cancel getKeyWord and don't change input and link
-	    // @TODO add all keywords to auto-complete suggestion list
-	    keyword.value = displayStr;
-	    return null;
-	  }).catch(errorHandler);
-	});
+	  return function (_x) {
+	    return _ref.apply(this, arguments);
+	  };
+	})()).catch(errorHandler);
 
 /***/ },
 
@@ -3025,7 +3101,7 @@ webpackJsonp([1,5],{
 	    let engine = yield _Engine2.default.get(keys[0]);
 
 	    try {
-	      engine.resultPageRegex = engine.resultPageRegex || _lodash2.default.escapeRegExp(new _Url2.default(engine.url).pathName);
+	      engine.resultPageRegex = engine.resultPageRegex || _lodash2.default.escapeRegExp(new _Url2.default(engine.url.split('%s', 1)[0]).pathName);
 	      if (engine.resultPageRegex) {
 	        let resultPageRegex = new RegExp(engine.resultPageRegex);
 	        (0, _base.clog)(resultPageRegex);
@@ -3037,9 +3113,27 @@ webpackJsonp([1,5],{
 	    } catch (e) {
 	      (0, _base.clog)('Error while try to test url', e);
 	    }
+
+	    if (engine.wordRegex) {
+	      let wordRegex = new RegExp(engine.wordRegex);
+	      (0, _base.clog)('wordRegex', wordRegex, 'tabUrl:', tabUrl.url);
+	      let match = tabUrl.url.match(wordRegex);
+
+	      return match ? [{
+	        word: tabUrl.isWeiboUrl ? decodeURIComponent(decodeURIComponent(match[1])) : decodeURIComponent(match[1]),
+	        confidence: _const.CONFIDENCE_PARAM.searchString
+	      }] : _const.EMPTY_KEYWORDS;
+	    }
+
 	    let searchKey = new _Url2.default(engine.url).searchKey;
+	    // TODO support no queryPairs engine
+	    (0, _base.clog)('queryPairs:', tabUrl.queryPairs);
 	    let searchStrings = _lodash2.default.filter(tabUrl.queryPairs, { key: searchKey });
-	    let searchString = /google/.test(tabUrl.host) && searchStrings.length ? _lodash2.default.last(searchStrings).val : searchStrings[0].val;
+	    if (!searchStrings.length) {
+	      return _const.EMPTY_KEYWORDS;
+	    }
+
+	    let searchString = /google/.test(tabUrl.host) ? _lodash2.default.last(searchStrings).val : searchStrings[0].val;
 	    (0, _base.clog)('match searchString from url:', searchString);
 	    return searchString ? [{
 	      word: decodeURIComponent(searchString),

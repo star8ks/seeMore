@@ -26,6 +26,9 @@ body {
   color: rgb(51, 102, 204); }
 .icon-link:hover {
   text-decoration: underline;}
+a.icon-link-default {
+  outline: 1px solid cadetblue;
+}
 
 input {
   width: 100%;
@@ -35,6 +38,9 @@ input {
 }
 
 .setting {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
   font-size: .14rem;
   background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAZZJREFUOBGtkjtIA0EQhu+iYKeNREglQnyQC9pYayEIFlaGXAKCNkIqG0GIYGMhirWFjYWSB9ZpcoXYCBYB4U6LHGgaUYO9RSDnN2tWrjhR0IHZnZn///c1axh/NPMbvZnP51/A4oIHQXBYLpe3o7ixqGImk0lQV2LBTdOcieIpTAO2bR9DHCC/wAvEyxrjBO/4Lvkr9bVut3tQrVbrgqsrIJ6PxWKXWvDTzGJNzGo0Gh11BcRHEaI2xFO8hgdhnFOMJ5PJDan194AzONMAKiduUZ/l4d4E54QrYHI1bQ9wriTpk8F13Zt0Ot2BtCA5to/Y+QwNw/O8e8uybPBhqSGeqlQqjxJHdkGA35pagJ5vItgLiQq5XE7tJrXeFSY1zkmus9msJbl+g1WKOpa+j4LdsUiNWf7DEh62MThzFDwloq9bEW2MQ1oPq3TMGzR93z+RXD0ij9RKpVIj5C5exAcRTzArQyAfqYifUxhiwx3HcXwB1UdSrNDAnROc6ClUqpdKpcVQ/hVGdoEWPcNoaxY73+r43+cPzGyUUc40y+cAAAAASUVORK5CYII=');
 }

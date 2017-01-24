@@ -109,7 +109,7 @@ webpackJsonp([4,5],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.minErr = exports.clog = exports.includeString = exports.trim = exports.regex = exports.match = exports.deepValue = exports.getMouseButton = exports.debounce = exports.filterEmptyStr = exports.isEmpty = exports.getCurrentTab = exports.onceLoaded = exports.$all = exports.$ = undefined;
+	exports.minErr = exports.clog = exports.includeString = exports.trim = exports.regex = exports.match = exports.deepValue = exports.getMouseButton = exports.btnCode = exports.debounce = exports.filterEmptyStr = exports.isEmpty = exports.getCurrentTab = exports.onceLoaded = exports.$all = exports.$ = undefined;
 
 	var _includeString = __webpack_require__("zdlF");
 
@@ -249,14 +249,14 @@ webpackJsonp([4,5],{
 	  };
 	}
 
+	const btnCode = {
+	  0: 'left',
+	  1: 'middle',
+	  2: 'right'
+	};
 	function getMouseButton(evt) {
 	  // Handle different event models
 	  var e = evt || window.event;
-	  var btnCode = {
-	    0: 'left',
-	    1: 'middle',
-	    2: 'right'
-	  };
 
 	  if ('object' !== typeof e) {
 	    throw Error('evt must be an object');
@@ -334,6 +334,7 @@ webpackJsonp([4,5],{
 	  isEmpty: isEmpty,
 	  filterEmptyStr: filterEmptyStr,
 	  debounce: debounce,
+	  btnCode: btnCode,
 	  getMouseButton: getMouseButton,
 	  matchAll: match,
 	  regex: regex,
@@ -348,6 +349,7 @@ webpackJsonp([4,5],{
 	exports.isEmpty = isEmpty;
 	exports.filterEmptyStr = filterEmptyStr;
 	exports.debounce = debounce;
+	exports.btnCode = btnCode;
 	exports.getMouseButton = getMouseButton;
 	exports.deepValue = deepValue;
 	exports.match = match;
@@ -509,12 +511,14 @@ webpackJsonp([4,5],{
 	    6: { name: 'Development', order: 6, default: true },
 	    7: { name: 'Sub', order: 7, default: true },
 	    8: { name: 'Torrents', order: 8, default: true },
+	    9: { name: 'Social Network', order: 9, default: true },
 	    101: { name: 'Search Engine', order: 1 },
 	    102: { name: 'Video', order: 2 },
 	    103: { name: 'Translate', order: 3 },
 	    104: { name: 'EBook', order: 4 },
 	    105: { name: 'Development', order: 5 },
-	    106: { name: 'Shopping', order: 6 }
+	    106: { name: 'Shopping', order: 6 },
+	    107: { name: 'Social Network', order: 7 }
 	  },
 	  engines: {
 	    // Search engines
@@ -553,7 +557,7 @@ webpackJsonp([4,5],{
 	      typeId: 101,
 	      defaultTypeId: 1,
 	      displayName: 'Bing',
-	      open: true,
+	      open: false,
 	      hosts: ['www.bing.com', 'bing.co', 'bing.co.uk', 'bing.com', 'be.bing.com', 'br.bing.com', 'ca.bing.com', 'cn.bing.com', 'de.bing.com', 'fr.bing.com', 'hk.bing.com', 'it.bing.com', 'jp.bing.com', 'm.bing.com', 'nz.bing.com', 'ssl.bing.com', 'uk.bing.com'],
 	      url: 'https://cn.bing.com/search?q=%s'
 	    },
@@ -617,9 +621,33 @@ webpackJsonp([4,5],{
 	      typeId: 102,
 	      defaultTypeId: 8,
 	      displayName: 'torrentkitty',
-	      open: true,
+	      open: false,
 	      hosts: ['torrentkitty.ws'],
-	      url: 'http://torrentkitty.ws/tk/%s/1-0-0.html'
+	      url: 'http://torrentkitty.ws/tk/%s/1-0-0.html',
+	      resultPageRegex: /\/tk/.source,
+	      wordRegex: /\/tk\/([^/]+)\/?/.source
+	    },
+	    btdb: {
+	      order: 1060,
+	      typeId: 102,
+	      defaultTypeId: 8,
+	      displayName: 'BTDB',
+	      open: true,
+	      hosts: ['btdb.in'],
+	      url: 'https://btdb.in/q/%s',
+	      resultPageRegex: /\/q\//.source,
+	      wordRegex: /\/q\/([^/]+)\/?/.source
+	    },
+	    // https://torrentproject.se/?t=
+	    // https://btdig.com/search?order=0&q=
+	    dianyingFM: {
+	      order: 1075,
+	      typeId: 102,
+	      defaultTypeId: 8,
+	      displayName: '电影 FM',
+	      open: true,
+	      hosts: ['dianying.fm'],
+	      url: 'http://dianying.fm/search/?text=%s'
 	    },
 	    AcFun: {
 	      order: 1100,
@@ -629,7 +657,9 @@ webpackJsonp([4,5],{
 	      open: true,
 	      siteKeywords: ['弹幕'],
 	      hosts: ['www.acfun.cn'],
-	      url: 'http://www.acfun.cn/search/?#query=%s'
+	      url: 'http://www.acfun.cn/search/?#query=%s',
+	      resultPageRegex: /\/search/.source,
+	      wordRegex: /\/search\/.+query=([^?&#;]+)/.source
 	    },
 	    bilibili: {
 	      order: 1200,
@@ -668,7 +698,9 @@ webpackJsonp([4,5],{
 	      siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', '电影字幕', '中文字幕', '电影字幕下载', '中文字幕下载', '字幕组', '射手网', '美剧字幕下载', '英剧字幕下载', '双语字幕下载', '美剧', '电影', '美剧下载', '英剧下载', '电影下载', '美剧字幕', '英剧字幕'],
 	      open: true,
 	      hosts: ['subhd.com'],
-	      url: 'http://subhd.com/search/%s'
+	      url: 'http://subhd.com/search/%s',
+	      resultPageRegex: /\/search/.source,
+	      wordRegex: /\/search\/([^/?&#]+)\/?/.source
 	    },
 	    zimuku: {
 	      order: 1600,
@@ -687,7 +719,9 @@ webpackJsonp([4,5],{
 	      displayName: '爱词霸',
 	      open: true,
 	      hosts: ['www.iciba.com'],
-	      url: 'http://www.iciba.com/%s'
+	      url: 'http://www.iciba.com/%s',
+	      resultPageRegex: /https?:\/\/www.iciba.com/.source,
+	      wordRegex: /www\.iciba\.com\/([^?&#]+)\/?/.source
 	    },
 	    youdaoTranslate: {
 	      order: 1710,
@@ -703,9 +737,11 @@ webpackJsonp([4,5],{
 	      typeId: 103,
 	      defaultTypeId: 3,
 	      displayName: '有道词典',
-	      open: true,
+	      open: false,
 	      hosts: ['dict.youdao.com'],
-	      url: 'http://dict.youdao.com/w/%s'
+	      url: 'http://dict.youdao.com/w/%s',
+	      resultPageRegex: /youdao\.com\/w\//.source,
+	      wordRegex: /\/w\/([^?&#/]+)\/?/.source
 	    },
 	    zdic: {
 	      order: 1750,
@@ -741,7 +777,7 @@ webpackJsonp([4,5],{
 	      typeId: 105,
 	      defaultTypeId: 6,
 	      displayName: 'explainShell',
-	      open: true,
+	      open: false,
 	      hosts: ['explainShell.com'],
 	      url: 'http://explainshell.com/explain?cmd=%s'
 	    },
@@ -770,7 +806,9 @@ webpackJsonp([4,5],{
 	      displayName: 'HTMLPreview',
 	      open: true,
 	      hosts: ['htmlpreview.github.io'],
-	      url: 'http://htmlpreview.github.io/?%s'
+	      url: 'http://htmlpreview.github.io/?%s',
+	      resultPageRegex: /htmlpreview\.github\.io\/\?.*/.source,
+	      wordRegex: /htmlpreview\.github\.io\/\?(.+)/.source
 	    },
 	    devDocs: {
 	      order: 2400,
@@ -834,9 +872,29 @@ webpackJsonp([4,5],{
 	      typeId: 106,
 	      defaultTypeId: 5,
 	      displayName: '淘宝',
-	      open: true,
+	      open: false,
 	      hosts: ['s.taobao.com'],
 	      url: 'https://s.taobao.com/search?q=%s'
+	    },
+	    weibo: {
+	      order: 3100,
+	      typeId: 107,
+	      defaultTypeId: 9,
+	      displayName: '微博',
+	      open: true,
+	      hosts: ['s.weibo.com'],
+	      url: 'http://s.weibo.com/weibo/%s?frm=opensearch',
+	      resultPageRegex: /\/weibo/.source,
+	      wordRegex: /\/weibo\/([^?&#]+)[?&#]/.source
+	    },
+	    twitter: {
+	      order: 3200,
+	      typeId: 107,
+	      defaultTypeId: 9,
+	      displayName: 'twitter',
+	      open: false,
+	      hosts: ['twitter.com'],
+	      url: 'https://twitter.com/search?q=%s'
 	    }
 	  },
 	  devMode: true
@@ -1099,6 +1157,12 @@ webpackJsonp([4,5],{
 	        },
 	        enumerable: true
 	      },
+	      isWeiboUrl: {
+	        get: function () {
+	          return Url.WEIBO_URL_REGEX.test(this.url);
+	        },
+	        enumerable: true
+	      },
 	      pathName: {
 	        get: function () {
 	          var match = this.url.match(/https?:\/\/[^\/]*(\/[^?]+)/);
@@ -1138,6 +1202,7 @@ webpackJsonp([4,5],{
 	  Url.DATA_URI_REGEX = /^data:.*,/i;
 	  Url.FAVICON_URL_REGEX = /\.ico$/i;
 	  Url.GOOGLE_FAILED_REGEX = /^https?:\/\/ipv[46]\.google\.[^/]*\/sorry/i;
+	  Url.WEIBO_URL_REGEX = /^https?:\/\/s\.weibo\.com\/weibo/i;
 	  Url.prototype = {
 	    includes: function (search) {
 	      return this.url.includeString(search);
@@ -1258,7 +1323,15 @@ webpackJsonp([4,5],{
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 	let Engine = new _DB2.default(_localforageBluebird2.default, 'engine');
+	// return data structure
+	Engine.returnType = {
+	  assoc: Symbol(),
+	  normal: Symbol()
+	};
+
 	Engine.set = function (key, engine) {
 	  // ensure all hosts are lower case
 	  engine.hosts = engine.hosts.map(function (host) {
@@ -1267,38 +1340,51 @@ webpackJsonp([4,5],{
 	  return _DB2.default.prototype.set.call(this, key, engine);
 	};
 	/**
-	 * @param {Boolean} [assoc=false] if resolve a assoc object
+	 * @param {Engine.returnType} [returnType=false] if resolve a assoc object
 	 * @param {Function?} filter
 	 * @return {Promise}
 	 * */
-	Engine.getSortedAll = function (assoc, filter) {
-	  assoc = assoc === void 0 ? false : !!assoc;
+	Engine.getSortedAll = function (returnType = Engine.returnType.normal, filter) {
 	  return this.getAll(true, filter).then(function (engines) {
 	    engines.sort(function (engineA, engineB) {
 	      return engineA.order - engineB.order;
 	    });
-	    return assoc ? _DB2.default.assoc(engines) : engines;
+	    return returnType === Engine.returnType.assoc ? _DB2.default.assoc(engines) : engines;
 	  });
 	};
 	/**
-	 * @param {Boolean} [assoc=false] if resolve a assoc object
+	 * @param {Engine.returnType} [returnType=Engine.returnType.normal] if resolve a assoc object
 	 * @param {Function?} filter
+	 * @param {String[]?} fields
 	 * @return {Promise}
 	 * */
-	Engine.getOpen = function (assoc, filter) {
-	  assoc = assoc === void 0 ? false : !!assoc;
-	  filter = filter || function () {
-	    return true;
-	  };
-	  return this.getAll(true, function (engine) {
-	    return engine.open && filter(engine);
-	  }).then(function (engines) {
+	Engine.getOpen = (() => {
+	  var _ref = _asyncToGenerator(function* (returnType = Engine.returnType.normal, filter, fields = []) {
+	    filter = filter || function () {
+	      return true;
+	    };
+	    let engines = yield this.getAll(true, function (engine) {
+	      return engine.open && filter(engine);
+	    });
 	    var openEngines = engines.sort(function (engineA, engineB) {
 	      return engineA.order - engineB.order;
 	    });
-	    return assoc ? _DB2.default.assoc(openEngines) : openEngines;
+	    if (fields.length) {
+	      openEngines = openEngines.map(function (engine) {
+	        let obj = {};
+	        for (let field of fields) {
+	          obj[field] = engine[field];
+	        }
+	        return obj;
+	      });
+	    }
+	    return returnType === Engine.returnType.assoc ? _DB2.default.assoc(openEngines) : openEngines;
 	  });
-	};
+
+	  return function () {
+	    return _ref.apply(this, arguments);
+	  };
+	})();
 
 	/**
 	 * @param {String} host A valid host

@@ -69,7 +69,7 @@ webpackJsonp([3,5],{
 	  openEngines: function (template) {
 	    return _EngineType2.default.getAllReal().map(function (typeObj) {
 	      var typeId = typeObj['$$key'];
-	      return _Engine2.default.getOpen(false, function (engine) {
+	      return _Engine2.default.getOpen(_Engine2.default.returnType.normal, function (engine) {
 	        return '' + engine.typeId === typeId; // key always saved as string
 	      }).bind({
 	        typeName: typeObj.name,
@@ -83,7 +83,7 @@ webpackJsonp([3,5],{
 	  defaultEngines: function (template) {
 	    return _EngineType2.default.getAllDefault().map(function (typeObj) {
 	      var typeId = typeObj['$$key'];
-	      return _Engine2.default.getSortedAll(false, function (engine) {
+	      return _Engine2.default.getSortedAll(_Engine2.default.returnType.normal, function (engine) {
 	        // if(''+engine.defaultTypeId === typeId) clog(engine.displayName, typeId, typeObj.name);
 	        return '' + engine.defaultTypeId === typeId; // key always saved as string
 	      }).bind({
