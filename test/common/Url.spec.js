@@ -60,9 +60,13 @@ describe('Url', () => {
         let url = new Url(`http://a.com/?b=${encodeURIComponent(val)}&bb=a`);
         url.getQueryVal('b').should.equal(val);
       });
-      it('should work on last param', () => {
+      it('should work on last key', () => {
         let url = new Url('http://a.com/?b=12');
         url.getQueryVal('b').should.equal('12');
+      });
+      it('should return null if no matched key', () => {
+        let url = new Url('http://a.com/?b=12');
+        (url.getQueryVal('c') === null).should.be.true();
       });
     });
 
