@@ -24,8 +24,7 @@ const keywordType = {
  * @param {String[]} h2
  * @param {String[]} [siteKeywords=[]]
  * */
-function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
-  siteKeywords = siteKeywords || [];
+function smartKeyword(tabUrl, {meta=[], title='', h1='', h2=[]}, siteKeywords = []) {
   let candidateWords = new PriorityMap(tabUrl, CONFIDENCE_PARAM.map, siteKeywords);
 
   meta = _.flatten(meta.map(metaStr => divide(metaStr)));
@@ -198,10 +197,7 @@ function smartKeyword(tabUrl, meta, title, h1, h2, siteKeywords) {
   }
   function _fixHyphen(str, replace = '') {
     replace = `$1${replace}$2`;
-    let hyphens = PUNCT.dash.reduce((hyphens, current) => {
-      hyphens += current;
-      return hyphens;
-    }, '');
+    let hyphens = PUNCT.dash.reduce((hyphens, current) => hyphens + current, '');
     let regex = _getDividerRegex(`(\w)[${hyphens}]+(\w)`, 'g');
     return str.replace(regex, replace);
   }

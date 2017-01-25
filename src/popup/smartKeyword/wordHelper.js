@@ -10,14 +10,8 @@ import {CJK, CJK_PUNCT, PUNCT, KEYWORD_BLACKLIST} from './const';
 // ASCII characters those not break word meaning
 const ASCII_CHAR = regex`a-zA-Z\d~&*+'\-`;
 const ASCII_PUNCT = regex`/_,\.<>\?\`!@#\$%\^=";\:\[\]{}\|\(\)\\`;
-const lGuimets = PUNCT.guillemets.left.reduce((all, current) => {
-  all += current;
-  return all;
-}, '');
-const rGuimets = PUNCT.guillemets.right.reduce((all, current) => {
-  all += current;
-  return all;
-}, '');
+const lGuimets = PUNCT.guillemets.left.reduce((all, current) => all + current, '');
+const rGuimets = PUNCT.guillemets.right.reduce((all, current) => all + current, '');
 
 let markUpperWord = function (str) {
   let upperSubstrRegex = new RegExp(regex`

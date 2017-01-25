@@ -39,7 +39,7 @@ async function getSelection(tabUrl) {
 // get keyword from tab url
 async function getQueryString(tabUrl) {
   if (tabUrl.isGoogleFail) {
-    tabUrl = new Url(decodeURIComponent(tabUrl.getQueryVal('continue')));
+    tabUrl = new Url(tabUrl.getQueryVal('continue'));
   }
 
   let keys = await Engine.searchKeys(tabUrl.host, false, true);
@@ -123,7 +123,7 @@ async function smartKeyword(tabUrl) {
   }
 
   clog('content script result: ', [tabUrl.url, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords]);
-  return smart(tabUrl, keywords.meta, keywords.title, keywords.h1, keywords.h2, siteKeywords);
+  return smart(tabUrl, keywords, siteKeywords);
 }
 
 /**

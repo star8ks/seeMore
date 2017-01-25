@@ -60,12 +60,7 @@ let Render = {
 };
 
 function combineHtml(lists) {
-  return lists.reduce(function (html, list) {
-    if (list !== '') {
-      html += list;
-    }
-    return html;
-  }, '');
+  return lists.reduce((html, list) => html + list, '');
 }
 
 export default Render;

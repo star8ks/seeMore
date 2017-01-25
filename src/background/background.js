@@ -31,8 +31,8 @@ var Listener = (function () {
         return;
       }
 
-      var originUrl = decodeURIComponent(tabUrl.getQueryVal('url'));
-      var originImgUrl = decodeURIComponent(tabUrl.getQueryVal('imgrefurl'));
+      var originUrl = tabUrl.getQueryVal('url');
+      var originImgUrl = tabUrl.getQueryVal('imgrefurl');
       // google's interstitial page will warn people 'This site may harm your computer'
       // so keep it as it is
       // if(/^\/interstitial\?url=/.test(originUrl)) {
