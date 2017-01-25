@@ -74,7 +74,7 @@ var Url = (function () {
       },
       queryPairs: {
         get: function () {
-          var regex = /([^#?&]+)=([^&?#]*)/g;
+          var regex = /([^?&#]+)=([^?&#]*)/g;
           var pairs = [], tempResult;
 
           /* eslint-disable no-cond-assign */
@@ -154,7 +154,7 @@ var Url = (function () {
     },
 
     getQueryVal: function (key) {
-      var val = this.url.match(new RegExp('[#?&]' + key + '=([^#?&]*)[#?&]', 'i'));
+      var val = this.url.match(new RegExp('[#?&]' + key + '=([^?&#]*)(?:[?&#]|$)', 'i'));
       return val ? val[1].replace(/\+/g, ' ') : null;
     }
   };
