@@ -10,6 +10,8 @@ var bgWarn = minErr('Background Warning');
 var Listener = (function () {
 
   function removeRedirect(tab) {
+    const {url, id} = tab;
+    clog('removing redirect', url, id, tab);
     return Promise.all([
       Setting.get('cfg_remove_redirect'),
       Engine.get('google')
@@ -18,10 +20,10 @@ var Listener = (function () {
         return;
       }
 
-      var tabUrl = new Url(tab.url);
+      var tabUrl = new Url(url);
       if(!engine.hosts.includes(tabUrl.host.toLowerCase())
         || (!tabUrl.includes('url?') && !tabUrl.includes('imgres?'))) {
-        // clog('Not a valid google redirect url', tab.url);
+        // clog('Not a valid google redirect url', tabUrl);
         return;
       }
 
@@ -34,11 +36,11 @@ var Listener = (function () {
       //   originUrl = decodeURIComponent(tempUrl.getQueryVal('url'));
       // }
       if (Url.isNormal(originUrl)) {
-        clog.info('█████Remove redirection: ', tab.url, ' to ', originUrl);
-        chrome.tabs.update(tab.id, {url: originUrl});
+        clog.info('█████Remove redirection: ', url, ' to ', originUrl);
+        chrome.tabs.update(id, {url: originUrl});
       } else if (Url.isNormal(originImgUrl)) {
-        clog.info('█████Remove redirection: ', tab.url, ' to ', originImgUrl);
-        chrome.tabs.update(tab.id, {url: originImgUrl});
+        clog.info('█████Remove redirection: ', url, ' to ', originImgUrl);
+        chrome.tabs.update(id, {url: originImgUrl});
       }
     }).catch(function (error) {
       throw new Error('Error in remove redirect: ' + error);
@@ -47,16 +49,12 @@ var Listener = (function () {
 
   return {
     onTabCreated: function (tabInfo) {
-      // Since chrome.tabs.onCreated listener may not get tab.url properly,
-      // but It seem that chrome.tabs.get listener will be called
-      // AFTER tab.url is ready(at most of time).
-      // This way takes shorter time compare to chrome.tabs.onUpdated
-      chrome.tabs.get(tabInfo.id, function (tab) {
-        if(!tab.url || !/^https?/.test(tab.url)) {
-          return;
-        }
-        removeRedirect(tab);
-      });
+      // chrome.tabs.onCreated listener may not get tab url properly,
+      // but it takes shorter time compare to chrome.tabs.onUpdated
+      if(!tabInfo.url || !/^https?/.test(tabInfo.url)) {
+        return;
+      }
+      removeRedirect(tabInfo);
     },
 
     onTabUpdated: function (tabId, changeInfo, tab) {
