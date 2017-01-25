@@ -54,6 +54,18 @@ describe('Url', () => {
       });
     });
 
+    describe('getQueryVal', () => {
+      it('should return decoded query val', () => {
+        let val = '%cx&#?';
+        let url = new Url(`http://a.com/?b=${encodeURIComponent(val)}&bb=a`);
+        url.getQueryVal('b').should.equal(val);
+      });
+      it('should work on last param', () => {
+        let url = new Url('http://a.com/?b=12');
+        url.getQueryVal('b').should.equal('12');
+      });
+    });
+
     describe('toDataURI', () => {
       it('should resolve origin url if given a dataURI', () => {
         let dataURI = 'data:,Hello%2C%20World!';
@@ -83,5 +95,5 @@ describe('Url', () => {
         u.pathName.should.equal('/webhp');
       });
     });
-  })
+  });
 });

@@ -155,7 +155,7 @@ var Url = (function () {
 
     getQueryVal: function (key) {
       var val = this.url.match(new RegExp('[#?&]' + key + '=([^?&#]*)(?:[?&#]|$)', 'i'));
-      return val ? val[1].replace(/\+/g, ' ') : null;
+      return val ? decodeURIComponent(val[1].replace(/\+/g, ' ')) : null;
     }
   };
 
