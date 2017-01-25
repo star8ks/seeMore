@@ -11,6 +11,11 @@ var Listener = (function () {
 
   function removeRedirect(tab) {
     const {url, id} = tab;
+    var tabUrl = new Url(url);
+    if(!tabUrl.isNormal() || !Number.isInteger(id)) {
+      return;
+    }
+
     clog('removing redirect', url, id, tab);
     return Promise.all([
       Setting.get('cfg_remove_redirect'),
@@ -20,7 +25,6 @@ var Listener = (function () {
         return;
       }
 
-      var tabUrl = new Url(url);
       if(!engine.hosts.includes(tabUrl.host.toLowerCase())
         || (!tabUrl.includes('url?') && !tabUrl.includes('imgres?'))) {
         // clog('Not a valid google redirect url', tabUrl);
