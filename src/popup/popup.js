@@ -86,6 +86,28 @@ class Links {
   }
 }
 
+/*class ResultList {
+  constructor($listWrapper, tabId, results) {
+    this.$listWrapper = $listWrapper;
+    results.forEach(result => this.add(result));
+  }
+
+  moveToHead() {}
+  add() {}
+}
+// result item
+class Result {
+  innerHtml = '';
+  constructor() {}
+  onSelect() {}
+  onTab() {}
+  onEnter() {}
+  render() {}
+}
+class TextResult extends Result {}
+class LinkResult extends Result {}*/
+
+
 class SearchBox {
   suggestions = [];
   constructor($keyword, engines, selectEngineFn) {
@@ -96,6 +118,9 @@ class SearchBox {
     this.$el.addEventListener('keydown', e => {
       if(e.key === 'Tab') {
         // TODO serarch in this.sugesstion, and autocomplete by press Tab
+        if(this.value === '' && this.$el.placeholder !== '') {
+          this.$el.value = this.$el.placeholder;
+        }
         e.preventDefault();
       }
     });
@@ -149,7 +174,9 @@ onceLoaded(getCurrentTab).then(async (tab) => {
     clog('get keywords: ', JSON.stringify(keywords));
     // @TODO if input is not empty, cancel getKeyWord and don't change input and link
     // @TODO add all keywords to auto-complete suggestion list
-    if(!searchBox) return;
+    if(typeof searchBox === 'undefined') {
+      return;
+    }
     keywords.forEach(kw => searchBox.suggestions.push(kw.word.trim()));
     searchBox.placeholder = keywords[0].word.trim();
     return null;
@@ -159,7 +186,7 @@ onceLoaded(getCurrentTab).then(async (tab) => {
 
   let links = new Links($`.engines`, tab.id);
   let engines = await Engine.getOpen(Engine.returnType.normal, null, ['displayName', '$$key']);
-  let searchBox = new SearchBox($`#keyword`, engines, engineKey => links.setDefaultLink(engineKey));
+  var searchBox = new SearchBox($`#keyword`, engines, engineKey => links.setDefaultLink(engineKey));
 
   searchBox.onKeyup(e => {
     if(e.key === 'Enter') {
@@ -217,8 +244,5 @@ async function translate(str) {
 
   return translated.filter(line => {
     return line.toLowerCase() !== str.toLowerCase();
-  }).reduce((html, line) => {
-    html += line + '\n';
-    return html;
-  }, '');
+  }).reduce((html, line) => html + line + '\n', '');
 }
