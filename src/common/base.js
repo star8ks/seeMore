@@ -53,7 +53,7 @@ function regex(str, ...values) {
 
 function onceLoaded(onLoad) {
   return new Promise(function (resolve) {
-    window.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
       resolve(onLoad());
     });
   });
