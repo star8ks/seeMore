@@ -164,7 +164,7 @@ class SearchBox {
   }
 }
 
-onceLoaded(getCurrentTab).then(async (tab) => {
+onceLoaded(getCurrentTab).then(async function(tab) {
   let tabUrl = new Url(tab.url);
   let $translation = $`.translation`;
   let engineListTpl = $`#tpl-engines`.innerHTML.trim();

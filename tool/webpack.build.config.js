@@ -1,5 +1,6 @@
 "use strict";
 const path = require('path');
+const webpack = require('webpack');
 const getConfig = require('./webpack.base.config');
 
 let distDirectory = 'dist';
@@ -15,5 +16,11 @@ config.resolve.alias = {
 config.module.loaders = config.module.loaders.concat([{
   test: /\.(jpg|png)$/i, loader: 'url-loader?limit=1000&name=img/[name].[ext]'
 }]);
+config.plugins.push(new webpack.DefinePlugin({
+  "__BUILD__": {
+    // you must JSON.stringify any string here
+    ENV: JSON.stringify('prod')
+  }
+}));
 
 module.exports = config;

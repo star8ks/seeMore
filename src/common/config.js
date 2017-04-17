@@ -329,7 +329,7 @@ const CONFIG = {
     },
     btdb: {
       order: 1060,
-      typeId: 102, 
+      typeId: 102,
       defaultTypeId: 8,
       displayName: 'BTDB',
       open: true,
@@ -423,6 +423,18 @@ const CONFIG = {
       resultPageRegex: /https?:\/\/www.iciba.com/.source,
       wordRegex: /www\.iciba\.com\/([^?&#]+)\/?/.source
     },
+    // https://www.merriam-webster.com/dictionary/pretty
+    merriamWebster: {
+      order: 1715,
+      typeId: 103,
+      defaultTypeId: 3,
+      displayName: 'Merriam-Webster',
+      open: true,
+      hosts: ['www.merriam-webster.com'],
+      url: 'https://www.merriam-webster.com/dictionary/%s',
+      resultPageRegex: /merriam-webster\.com\/dictionary\//.source,
+      wordRegex: /\/dictionary\/([^?&#/]+)/.source
+    },
     youdaoTranslate: {
       order: 1710,
       typeId: 103,
@@ -442,6 +454,27 @@ const CONFIG = {
       url: 'http://dict.youdao.com/w/%s',
       resultPageRegex: /youdao\.com\/w\//.source,
       wordRegex: /\/w\/([^?&#/]+)\/?/.source
+    },
+    // http://dictionary.cambridge.org/zhs/词典/英语/
+    cambridge: {
+      order: 1725,
+      typeId: 103,
+      defaultTypeId: 3,
+      displayName: '剑桥',
+      open: true,
+      hosts: ['dictionary.cambridge.org'],
+      url: 'http://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD/%s',
+      resultPageRegex: /dictionary\.cambridge\.org\/zhs\/%E8%AF%8D%E5%85%B8\/%E8%8B%B1%E8%AF%AD\//.source,
+      wordRegex: /\/zhs\/%E8%AF%8D%E5%85%B8\/%E8%8B%B1%E8%AF%AD\/([^?&#/]+)\/?/.source
+    },
+    renren: {
+      order: 1730,
+      typeId: 103,
+      defaultTypeId: 3,
+      displayName: '人人词典',
+      open: true,
+      hosts: ['www.91dict.com'],
+      url: 'http://www.91dict.com/words?w=%s'
     },
     zdic: {
       order: 1750,
@@ -597,7 +630,7 @@ const CONFIG = {
       url: 'https://twitter.com/search?q=%s'
     }
   },
-  devMode: true
+  devMode: __BUILD__.ENV === 'dev'
 };
 
 export default CONFIG;

@@ -17,5 +17,10 @@ config.module.loaders = config.module.loaders.concat([{
 }, {
   test: require.resolve("lodash"), loader: "expose-loader?_"
 }]);
+config.plugins.push(new webpack.DefinePlugin({
+  "__BUILD__": {
+    ENV: JSON.stringify('dev')
+  }
+}));
 
 module.exports = config;
