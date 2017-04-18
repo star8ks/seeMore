@@ -344,7 +344,7 @@ let getQueryString = (() => {
       tabUrl = new _Url2.default(tabUrl.getQueryVal('continue'));
     }
 
-    let keys = yield _Engine2.default.searchKeys(tabUrl.host, false, true);
+    let keys = yield _Engine2.default.searchKeys(tabUrl.host, { searchAll: true });
     (0, _base.clog)('searched keys', keys, tabUrl.host);
     if (keys.length <= 0) {
       return _const.EMPTY_KEYWORDS;
@@ -422,7 +422,7 @@ let smartKeyword = (() => {
       keywords[key] = (0, _base.filterEmptyStr)(unfiltered[key]);
     });
 
-    let keys = yield _Engine2.default.searchKeys(tabUrl.host, true);
+    let keys = yield _Engine2.default.searchKeys(tabUrl.host, { includeRootDomain: true });
     let siteKeywords = null;
     if (keys.length > 0) {
       let engine = yield _Engine2.default.get(keys[0]);

@@ -14,6 +14,9 @@ body {
   overflow-x: hidden;
   list-style-type: none;
 }
+.engines ul li {
+  white-space: nowrap;
+}
 .engines ul>.type {font-weight: bold}
 .icon-link {
   cursor: pointer;

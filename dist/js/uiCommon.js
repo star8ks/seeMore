@@ -135,16 +135,40 @@ var _Icon = __webpack_require__("sInu");
 
 var _Icon2 = _interopRequireDefault(_Icon);
 
+var _clog = __webpack_require__("3JzL");
+
+var _clog2 = _interopRequireDefault(_clog);
+
+var _minErr = __webpack_require__("iIaI");
+
+var _minErr2 = _interopRequireDefault(_minErr);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+let renderErr = (0, _minErr2.default)('Render');
 function setProperties(engines) {
   return Promise.map(engines, function (se) {
     var oUrl = new _Url2.default(se.url);
     se.index = se['$$key'];
     se.href = se.url.replace(/%s/g, '');
-    // in case of too many host(like google), just search by first 3 hosts
-    return _Icon2.default.search(se.hosts.slice(0, 3)).then(function (url) {
-      se.favicon = url || oUrl.faviconUrl;
+
+    return _Icon2.default.search(oUrl.host).then(function (url) {
+      // get data URI from yandex favicon url may take long time
+      // so don't add to promise chain.
+      url || _Url2.default.toDataURI(oUrl.yandexFaviconUrl).then(function (dataURI) {
+        if (!_Url2.default.isInvalidFavicon(dataURI)) {
+          (0, _clog2.default)('Update favicon of:', oUrl.host, dataURI);
+          _Icon2.default.set(oUrl.host, dataURI);
+          return dataURI;
+        }
+        (0, _clog2.default)('invalid favicon', dataURI);
+        return '';
+      }).catch(e => {
+        (0, _clog2.default)(new renderErr('Error in setProperties' + e.toString()));
+      });
+      return url || oUrl.faviconUrl;
+    }).then(faviconUrl => {
+      se.favicon = faviconUrl;
       return se;
     });
   });
