@@ -5,6 +5,7 @@ import EngineType from '../common/db/EngineType.js';
 import Setting from '../common/db/Setting.js';
 import Icon from '../common/db/Icon.js';
 import Url from '../common/Url.js';
+import iconData from '../common/iconData';
 
 let bgWarn = minErr('Background Warning');
 let Listener = (function () {
@@ -96,6 +97,11 @@ let Listener = (function () {
       let manifest = chrome.runtime.getManifest();
       Setting.set('version', manifest.version);
 
+      iconData.forEach(group => {
+        group.hosts.forEach(host => {
+          Icon.set(host, group.dataURI);
+        });
+      });
       Object.keys(CONFIG.engineTypes).forEach(function (typeId) {
         EngineType.set(typeId, CONFIG.engineTypes[typeId]).catch(function (err) {
           clog.err('Error when init set engineTypes' + err);
@@ -108,7 +114,7 @@ let Listener = (function () {
       });
       Setting.set('cfg_remove_redirect', true);
       if (!CONFIG.devMode) {
-        chrome.tabs.create({url: 'chrome://extensions/?options=' + chrome.runtime.id});
+        // chrome.tabs.create({url: 'chrome://extensions/?options=' + chrome.runtime.id});
       } else {
         chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/popup.html'});
       }
