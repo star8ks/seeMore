@@ -1,4 +1,4 @@
-const path = require('path');
+// const path = require('path');
 const webpack = require('webpack');
 const webpackCfg = require('./webpack.test.config');
 // Karma configuration
@@ -19,7 +19,7 @@ module.exports = function(config) {
     },
 
     plugins: [
-      require("karma-webpack"),
+      require('karma-webpack'),
       require('karma-mocha'),
       require('karma-chrome-launcher'),
       require('karma-mocha-reporter'),
@@ -95,5 +95,5 @@ module.exports = function(config) {
     // Concurrency level
     // how many browser should be started simultaneous
     concurrency: Infinity
-  })
+  });
 };
