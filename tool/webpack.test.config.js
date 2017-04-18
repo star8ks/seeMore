@@ -56,10 +56,11 @@ module.exports = {
         }
       }]
     }, {
+      // get dataURI of fail.png and pass.png
       test: /\.(jpg|png)$/i, use: [{
         loader: 'url-loader',
         options: {
-          limit: 900,
+          limit: 9000,
           name: 'img/[name].[ext]'
         }
       }]
