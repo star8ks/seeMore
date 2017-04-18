@@ -597,7 +597,7 @@ const CONFIG = {
       defaultTypeId: 5,
       displayName: '亚马逊',
       open: true,
-      hosts: ['list.tmall.com'],
+      hosts: ['www.amazon.cn'],
       url: 'https://www.amazon.cn/s/?field-keywords=%s'
     },
     taobao: {
