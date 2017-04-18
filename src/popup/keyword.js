@@ -42,7 +42,7 @@ async function getQueryString(tabUrl) {
     tabUrl = new Url(tabUrl.getQueryVal('continue'));
   }
 
-  let keys = await Engine.searchKeys(tabUrl.host, false, true);
+  let keys = await Engine.searchKeys(tabUrl.host, {searchAll: true});
   clog('searched keys', keys, tabUrl.host);
   if (keys.length <= 0) {
     return EMPTY_KEYWORDS;
@@ -114,7 +114,7 @@ async function smartKeyword(tabUrl) {
     keywords[key] = filterEmptyStr(unfiltered[key]);
   });
 
-  let keys = await Engine.searchKeys(tabUrl.host, true);
+  let keys = await Engine.searchKeys(tabUrl.host, {includeRootDomain: true});
   let siteKeywords = null;
   if (keys.length > 0) {
     let engine = await Engine.get(keys[0]);

@@ -28,7 +28,7 @@ body {
   line-height: 1.5;
 }
 
-.options ul {
+.engine-wrapper ul {
   width: 1.30rem;
   margin-right: .1rem;
   padding: .08rem;
@@ -37,7 +37,10 @@ body {
   display: inline-block;
   vertical-align: top;
   overflow-x: hidden;
+}
+ul li {
   list-style-type: none;
+  white-space: nowrap;
 }
 ul .head {font-weight: bold;}
 ul .icon-link {
@@ -54,3 +57,7 @@ ul .icon-link {
   line-height: 20px;
   font-size: 10px;
 }
+
+.group {
+  border-bottom: 1px solid #DADADA;
+  padding-bottom: 20px;}

@@ -76,12 +76,20 @@ describe('Engine', function () {
       });
     });
     it('can find in root domains', () => {
-      return Engine.searchKeys('baidu.com', true).then(keys => {
+      return Engine.searchKeys('baidu.com', {includeRootDomain: true}).then(keys => {
         expect(keys).to.eql(['baidu']);
       });
     });
+    // it('can find in root domains', () => {
+    //   return Engine.searchKeys('www.amazon.cn', {includeRootDomain: true, searchAll: true}).then(keys => {
+    //     expect(keys).to.eql(['amazon']);
+    //   });
+    // });
     it('should support search all', () => {
-      return Engine.searchKeys('www.so.com', true, true).then(keys => {
+      return Engine.searchKeys('www.so.com', {
+        includeRootDomain: false,
+        searchAll: true
+      }).then(keys => {
         expect(keys).to.eql(['360']);
       });
     });

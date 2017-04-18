@@ -63,10 +63,8 @@ Engine.getOpen = async function (returnType = Engine.returnType.normal, filter, 
  * if not found in hosts, next then() will get false,
  * if found, next then() will get the engine keys
  * */
-Engine.searchKeys = function(host, includeRootDomain, searchAll) {
+Engine.searchKeys = function(host, {includeRootDomain = false, searchAll = false} = {}) {
   host = host.toLowerCase();
-  includeRootDomain = includeRootDomain === undefined ? false : !!includeRootDomain;
-  searchAll = searchAll === undefined ? false : !!searchAll;
 
   var p = searchAll ? this.getAll(true) : this.getOpen();
   return p.filter(function (se) {

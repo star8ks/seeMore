@@ -3,15 +3,33 @@ import Url from '../common/Url';
 import Engine from '../common/db/Engine';
 import EngineType from '../common/db/EngineType';
 import Icon from '../common/db/Icon';
+import clog from './base/clog';
+import minErr from './base/minErr';
 
+let renderErr = minErr('Render');
 function setProperties(engines) {
   return Promise.map(engines, function (se) {
     var oUrl = new Url(se.url);
     se.index = se['$$key'];
     se.href = se.url.replace(/%s/g, '');
-    // in case of too many host(like google), just search by first 3 hosts
-    return Icon.search(se.hosts.slice(0, 3)).then(function (url) {
-      se.favicon = url || oUrl.faviconUrl;
+
+    return Icon.search(oUrl.host).then(function (url) {
+      // get data URI from yandex favicon url may take long time
+      // so don't add to promise chain.
+      url || Url.toDataURI(oUrl.yandexFaviconUrl).then(function (dataURI) {
+        if (!Url.isInvalidFavicon(dataURI)) {
+          clog('Update favicon of:', oUrl.host, dataURI);
+          Icon.set(oUrl.host, dataURI);
+          return dataURI;
+        }
+        clog('invalid favicon', dataURI);
+        return '';
+      }).catch(e => {
+        clog(new renderErr('Error in setProperties' + e.toString()));
+      });
+      return url || oUrl.faviconUrl;
+    }).then(faviconUrl => {
+      se.favicon = faviconUrl;
       return se;
     });
   });
@@ -39,6 +57,7 @@ let Render = {
     }).then(function (lists) {
       return combineHtml(lists);
     });
+
   },
 
   defaultEngines: function (template) {

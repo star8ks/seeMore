@@ -54,8 +54,11 @@ window.addEventListener('DOMContentLoaded', function () {
     clog.err('render failed ' + err);
   });
 
-  $('#cfg_remove_redirect').addEventListener('click', function (evt) {
+  $`#cfg_remove_redirect`.addEventListener('click', function (evt) {
     Setting.set('cfg_remove_redirect', evt.target.checked);
+  });
+  $`#cfg_shortcut`.addEventListener('click', () => {
+    chrome.tabs.create({url:'chrome://extensions/configureCommands '});
   });
 
 });

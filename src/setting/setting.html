@@ -18,19 +18,32 @@
         <strong>只显示我想切换的搜索引擎：</strong>
       </p>
 
-      <div class="preview">
+      <div class="engine-wrapper preview">
       </div>
 
       <p>
         <strong>所有备选搜索引擎：</strong>
       </p>
-      <div class="engines">
+      <div class="engine-wrapper engines">
       </div>
 
       <p>其它选项：</p>
-      <label>
-        <input type="checkbox" id="cfg_remove_redirect"/>略过 Google 跳转页直接访问目标页
-      </label>
+      <div class="group">
+        <h2 class="group__name"></h2>
+        <ul class="group__list">
+          <li>
+            <label for="cfg_remove_redirect"><input type="checkbox" class="group" id="cfg_remove_redirect"/>略过 Google 跳转页直接访问目标页</label>
+          </li>
+        </ul>
+      </div>
+      <div class="group">
+        <h2 class="group__name"></h2>
+        <ul class="group__list">
+          <li>
+            <button id="cfg_shortcut">配置快捷键</button>
+          </li>
+        </ul>
+      </div>
       <!--<label>-->
         <!--<input type="checkbox" name="cfg_auto_keyword">智能获取页面关键词-->
       <!--</label>-->
