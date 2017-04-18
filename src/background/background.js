@@ -6,32 +6,32 @@ import Setting from '../common/db/Setting.js';
 import Icon from '../common/db/Icon.js';
 import Url from '../common/Url.js';
 
-var bgWarn = minErr('Background Warning');
-var Listener = (function () {
+let bgWarn = minErr('Background Warning');
+let Listener = (function () {
 
   function removeRedirect(tab) {
     const {url, id} = tab;
-    var tabUrl = new Url(url);
-    if(!tabUrl.isNormal || !Number.isInteger(id)) {
+    let tabUrl = new Url(url);
+    if (!tabUrl.isNormal || !Number.isInteger(id)) {
       return;
     }
 
     return Promise.all([
       Setting.get('cfg_remove_redirect'),
       Engine.get('google')
-    ]).spread(function(removeRedirect, engine) {
-      if(!removeRedirect) {
+    ]).spread(function (removeRedirect, engine) {
+      if (!removeRedirect) {
         return;
       }
 
-      if(!engine.hosts.includes(tabUrl.host.toLowerCase())
+      if (!engine.hosts.includes(tabUrl.host.toLowerCase())
         || (!tabUrl.includes('url?') && !tabUrl.includes('imgres?'))) {
         // clog('Not a valid google redirect url', tabUrl);
         return;
       }
 
-      var originUrl = tabUrl.getQueryVal('url');
-      var originImgUrl = tabUrl.getQueryVal('imgrefurl');
+      let originUrl = tabUrl.getQueryVal('url');
+      let originImgUrl = tabUrl.getQueryVal('imgrefurl');
       // google's interstitial page will warn people 'This site may harm your computer'
       // so keep it as it is
       // if(/^\/interstitial\?url=/.test(originUrl)) {
@@ -54,30 +54,31 @@ var Listener = (function () {
     onTabCreated: function (tabInfo) {
       // chrome.tabs.onCreated listener may not get tab url properly,
       // but it takes shorter time compare to chrome.tabs.onUpdated
-      if(!tabInfo.url || !/^https?/.test(tabInfo.url)) {
+      if (!tabInfo.url || !/^https?/.test(tabInfo.url)) {
         return;
       }
       removeRedirect(tabInfo);
     },
 
     onTabUpdated: function (tabId, changeInfo, tab) {
-      if (!changeInfo.status || 'loading' != changeInfo.status
+      if (!changeInfo.status || 'loading' !== changeInfo.status
         || !tab.url || !/^https?/.test(tab.url)) {
         return;
       }
       removeRedirect(tab);
 
-      var tabUrl = new Url(tab.url);
+      let tabUrl = new Url(tab.url);
+      let faviconUrl = new Url(tab.favIconUrl);
       Engine.searchKeys(tabUrl.host).then(function (keys) {
         if (!keys.length) {
           throw new bgWarn('onTabUpdated: Not found engine for host: {0}', tabUrl.host);
         }
         chrome.browserAction.setTitle({title: '点击切换搜索引擎', tabId: tabId});
-        if (!Url.isNormal(tab.favIconUrl) && !Url.isDataURI()) {
+        if (!faviconUrl.isNormal && !faviconUrl.isDataURI) {
           throw new bgWarn('onTabUpdated: Not found valid favIconUrl: {0}', tab.favIconUrl);
         }
         return Icon.get(tabUrl.host);
-      }).then(function(iconUrl){
+      }).then(function (iconUrl) {
         if (Url.isDataURI(iconUrl)) {
           throw new bgWarn('onTabUpdated: No need to update favicon url.');
         }
@@ -92,7 +93,7 @@ var Listener = (function () {
     },
 
     onInstalled: function () {
-      var manifest = chrome.runtime.getManifest();
+      let manifest = chrome.runtime.getManifest();
       Setting.set('version', manifest.version);
 
       Object.keys(CONFIG.engineTypes).forEach(function (typeId) {
