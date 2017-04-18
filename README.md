@@ -34,12 +34,12 @@ Currently under development, you can load it manually.
 - [x] :man_with_turban: Auto translation.
 - [x] :metal: Shortcut for SeeMore.
 - [x] :rocket: Intelligently get any page's keywords as search words.
+- [ ] Full-text search the pages you visited and bookmarked.
 - [ ] Search local files， open directory.
 - [ ] :ghost: Add custom search engine.
 - [ ] Customize chrome new tab search engine and style.
 - [ ] Preview results in popup page.
 - [ ] Customize popup page.
-- [ ] Search history and bookmarks.
 - [ ] Support search engines need to POST keywords.
 - [ ] Search images
 - [ ] Search audio, videos

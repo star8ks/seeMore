@@ -630,6 +630,7 @@ const CONFIG = {
       url: 'https://twitter.com/search?q=%s'
     }
   },
+  /* eslint-disable no-undef */
   devMode: __BUILD__.ENV === 'dev'
 };
 

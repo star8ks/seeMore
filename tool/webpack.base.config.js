@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 const path = require('path');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
@@ -6,11 +6,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HashedModuleIdsPlugin = require('./HashedModuleIdsPlugin');
-const CommonsChunkPlugin = require("webpack/lib/optimize/CommonsChunkPlugin");
+const CommonsChunkPlugin = require('webpack/lib/optimize/CommonsChunkPlugin');
 
 function getBaseConfig(distDirectory) {
   return {
-    debug: true,
     // watch: true,
     entry: {
       background: './src/background/',
@@ -23,8 +22,10 @@ function getBaseConfig(distDirectory) {
       path: path.resolve('./' + distDirectory)
     },
     resolve: {
-      root: path.resolve('./src'),
-      modulesDirectories: ['node_modules'],
+      modules: [
+        path.resolve('./src'),
+        'node_modules'
+      ],
       alias: {
         localforage: path.resolve('./node_modules/localforage/dist/localforage.nopromises.js'),
         bluebird: path.resolve('./node_modules/bluebird/js/browser/bluebird.js'),
@@ -39,22 +40,48 @@ function getBaseConfig(distDirectory) {
         /node_modules[\/\\]mustache[\/\\]mustache.(min\.)?js$/,
         // /node_modules[\/\\]lodash[\/\\]lodash.(min\.)?js$/
       ],
-      loaders: [{
+      rules: [{
         test: /\.js$/,
         exclude: [/node_modules/],
-        loader: 'babel-loader?cacheDirectory'// will use .babelrc config by default
+        use: [{
+          loader: 'babel-loader', // will use .babelrc config by default
+          options: {
+            cacheDirectory: true
+          }
+        }]
       }, {
-        test: /\.css$/, loader: ExtractTextPlugin.extract('style-loader', 'css-loader?sourceMap!postcss-loader')
-      }, {
-        test: /\.html$/, loader: 'html-loader?interpolate=require&' + JSON.stringify({
-          attrs: ["img:src", "link:href"]
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: ['css-loader', {
+            loader: 'postcss-loader',
+            options: {
+              plugins: function () {
+                return [require('autoprefixer')];
+              }
+            }
+          }]
         })
+      }, {
+        test: /\.html$/,
+        use: [{
+          loader: 'html-loader',
+          options: {
+            plugins:   {
+              ignoreCustomFragments: [/\{\{.*?}}/],
+              interpolate: 'require',
+              // root: path.resolve('../static/img'),
+              // root: path.resolve(__dirname, 'assets'),
+              attrs: ['img:src', 'link:href']
+            }
+          }
+        }],
       }]
     },
-    postcss: function () {
-      return [require('autoprefixer')()]
-    },
     plugins: [
+      new webpack.LoaderOptionsPlugin({
+        debug: true
+      }),
       new HashedModuleIdsPlugin(),
       new CleanWebpackPlugin([distDirectory], {
         root: path.resolve(__dirname, '../')

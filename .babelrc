@@ -9,10 +9,9 @@
   "plugins":  [
     ["transform-class-properties"],
     ["transform-runtime", {
-      "helpers": false, // defaults to true
-      "polyfill": false, // defaults to true
-      "regenerator": false // defaults to true
-      // "moduleName": "babel-runtime" // defaults to "babel-runtime"
+      "helpers": false,
+      "polyfill": false,
+      "regenerator": false
     }]
   ]
 }
