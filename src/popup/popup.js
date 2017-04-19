@@ -154,6 +154,9 @@ class SearchBox {
   get value() {
     return this.$el.value;
   }
+  get placeholder() {
+    return this.$el.placeholder;
+  }
   set placeholder(val) {
     this.$el.placeholder = val;
     this._onInput();
@@ -178,7 +181,8 @@ onceLoaded(getCurrentTab).then(async function(tab) {
       return;
     }
     keywords.forEach(kw => searchBox.suggestions.push(kw.word.trim()));
-    searchBox.placeholder = keywords[0].word.trim();
+    let newPlaceholder = keywords[0].word.trim();
+    searchBox.placeholder = newPlaceholder || searchBox.placeholder;
     return null;
   }).catch(errorHandler);
 
