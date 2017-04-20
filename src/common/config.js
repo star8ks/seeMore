@@ -1,6 +1,8 @@
 const CONFIG = {
   selectionMaxLength: 200,
   translateMaxLength: 80,
+  // TODO move engineTypes and engines to data file initData.js.
+  // They are data for initialize extension, like iconData.js
   engineTypes: {
     1: {name: 'Search Engine', order: 1, default: true},
     2: {name: 'Video', order: 2, default: true},
@@ -460,7 +462,7 @@ const CONFIG = {
       order: 1725,
       typeId: 103,
       defaultTypeId: 3,
-      displayName: '剑桥',
+      displayName: 'Cambridge',
       open: true,
       hosts: ['dictionary.cambridge.org'],
       url: 'http://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD/%s',
@@ -472,7 +474,7 @@ const CONFIG = {
       typeId: 103,
       defaultTypeId: 3,
       displayName: '人人词典',
-      open: true,
+      open: false,
       hosts: ['www.91dict.com'],
       url: 'http://www.91dict.com/words?w=%s'
     },

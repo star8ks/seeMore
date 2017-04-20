@@ -1,16 +1,26 @@
-import {isEmpty, debounce} from 'lodash';
+import {isEmpty} from 'lodash';
 import tjs from './translation';
 import CONFIG from '../common/config';
-import {clog, $, filterEmptyStr, onceLoaded, getCurrentTab, btnCode, getMouseButton, minErr, deepValue} from '../common/base';
+import {
+  clog,
+  $,
+  filterEmptyStr,
+  onceLoaded,
+  getCurrentTab,
+  btnCode,
+  getMouseButton,
+  minErr
+} from '../common/base';
 import Url from '../common/Url';
 import Render from '../common/Render';
 import Mason from '../common/Mason';
 import getKeyword from './keyword';
 import Engine from '../common/db/Engine';
+import SearchBox from './SearchBox';
 
 tjs.add(new tjs.BaiDu());
 tjs.add(new tjs.Google());
-if(CONFIG.devMode) tjs.add(new tjs.GoogleCN());
+if (CONFIG.devMode) tjs.add(new tjs.GoogleCN());
 
 let popupErr = minErr('Popup');
 
@@ -25,6 +35,7 @@ function errorHandler(e) {
 
 class Links {
   static defaultLinkClass = 'icon-link-default';
+
   constructor($linksWrapper, tabId) {
     this.$linksWrapper = $linksWrapper;
     this.$links = this.$linksWrapper.querySelectorAll('.icon-link');
@@ -40,18 +51,22 @@ class Links {
       $link.addEventListener('click', evt => {
         let button = getMouseButton(evt);
         switch (button) {
-        case 'left':
-          chrome.tabs.update(tabId, {url: $link.href});
-          break;
-        case 'middle':
-          chrome.tabs.create({url: $link.href});
-          break;
-        default:
-          break;
+          case 'left':
+            chrome.tabs.update(tabId, {url: $link.href});
+            break;
+          case 'middle':
+            chrome.tabs.create({url: $link.href});
+            break;
+          default:
+            break;
         }
         evt.preventDefault();
       });
     });
+  }
+
+  get defaultLinkIndex() {
+    return Array.from(this.$links).indexOf(this.$defaultLink);
   }
 
   updateHref(searchWord) {
@@ -62,7 +77,7 @@ class Links {
   }
 
   _setDefaultLink($link) {
-    if(this.$defaultLink) {
+    if (this.$defaultLink) {
       this.$defaultLink.classList.remove(Links.defaultLinkClass);
     }
     this.$defaultLink = $link;
@@ -70,105 +85,63 @@ class Links {
   }
 
   setDefaultLink(seName) {
-    if(isEmpty(seName)) {
-      if(this.$defaultLink === null) {
+    if (isEmpty(seName)) {
+      if (this.$defaultLink === null) {
         this._setDefaultLink(this.$links[0]);
       }
       return;
     }
     seName = seName.toLowerCase();
-    for(let $link of this.$links) {
-      if($link.getAttribute('data-se').toLowerCase() === seName) {
+    for (let $link of this.$links) {
+      if ($link.getAttribute('data-se').toLowerCase() === seName) {
         this._setDefaultLink($link);
         break;
       }
     }
   }
+
+  setPrevDefaultLink() {
+    let currentIndex = this.defaultLinkIndex;
+    let $link = (currentIndex >= 1) ? this.$links[currentIndex - 1] : this.$links[this.$links.length - 1];
+    this._setDefaultLink($link);
+  }
+
+  setNextDefaultLink() {
+    let currentIndex = this.defaultLinkIndex;
+    let $link = (currentIndex >= this.$links.length - 1) ? this.$links[0] : this.$links[currentIndex + 1];
+    this._setDefaultLink($link);
+  }
+
+  setRightDefaultLink() {
+    let currentUl = this.$defaultLink.parentElement.parentElement;
+    let nextUl = currentUl.nextElementSibling || currentUl.parentElement.firstElementChild;
+    let nextDefaultLink = nextUl.querySelector('a');
+    nextDefaultLink && this._setDefaultLink(nextDefaultLink);
+  }
 }
 
 /*class ResultList {
-  constructor($listWrapper, tabId, results) {
-    this.$listWrapper = $listWrapper;
-    results.forEach(result => this.add(result));
-  }
+ constructor($listWrapper, tabId, results) {
+ this.$listWrapper = $listWrapper;
+ results.forEach(result => this.add(result));
+ }
 
-  moveToHead() {}
-  add() {}
-}
-// result item
-class Result {
-  innerHtml = '';
-  constructor() {}
-  onSelect() {}
-  onTab() {}
-  onEnter() {}
-  render() {}
-}
-class TextResult extends Result {}
-class LinkResult extends Result {}*/
+ moveToHead() {}
+ add() {}
+ }
+ // result item
+ class Result {
+ innerHtml = '';
+ constructor() {}
+ onSelect() {}
+ onTab() {}
+ onEnter() {}
+ render() {}
+ }
+ class TextResult extends Result {}
+ class LinkResult extends Result {}*/
 
-
-class SearchBox {
-  suggestions = [];
-  constructor($keyword, engines, selectEngineFn) {
-    this.$el = $keyword;
-    this.engines = engines;
-    this.suggestions.concat(deepValue(engines));
-    this.$el.focus();
-    this.defaultPlaceholder = this.$el.placeholder;
-    this.$el.addEventListener('keydown', e => {
-      if(e.key === 'Tab') {
-        // TODO serarch in this.sugesstion, and autocomplete by press Tab
-        if(this.value === '' && this.$el.placeholder !== '') {
-          this.$el.value = this.$el.placeholder;
-        }
-        e.preventDefault();
-      }
-    });
-    this.$el.addEventListener('input', debounce(() => this._onInput(selectEngineFn), 500));
-  }
-
-  _onInput(selectEngineFn) {
-    if(this.engineSelector !== '') {
-      let engineSelectorLower = this.engineSelector.toLowerCase();
-      let engine = this.engines.find(engine => {
-        return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
-      });
-      selectEngineFn(engine ? engine.$$key : '');
-    }
-    this.$el.dispatchEvent(new CustomEvent(
-      'keywordUpdated',
-      {detail: this.value || this.$el.placeholder}
-    ));
-  }
-
-  onUpdated(fn) {
-    this.$el.addEventListener('keywordUpdated', fn);
-  }
-
-  onKeyup(fn) {
-    this.$el.addEventListener('keyup', fn);
-  }
-
-  static engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
-
-  get value() {
-    return this.$el.value;
-  }
-  get placeholder() {
-    return this.$el.placeholder;
-  }
-  set placeholder(val) {
-    this.$el.placeholder = val;
-    this._onInput();
-  }
-  get engineSelector() {
-    let match = this.$el.value.match(SearchBox.engineSelectorRegex);
-    return match ? match[1] : '';
-  }
-}
-
-onceLoaded(getCurrentTab).then(async function(tab) {
+onceLoaded(getCurrentTab).then(async function (tab) {
   let tabUrl = new Url(tab.url);
   let $translation = $`.translation`;
   let engineListTpl = $`#tpl-engines`.innerHTML.trim();
@@ -178,12 +151,12 @@ onceLoaded(getCurrentTab).then(async function(tab) {
     clog('get keywords: ', JSON.stringify(keywords));
     // @TODO if input is not empty, cancel getKeyWord and don't change input and link
     // @TODO add all keywords to auto-complete suggestion list
-    if(typeof searchBox === 'undefined') {
+    if (typeof searchBox === 'undefined') {
       return;
     }
     keywords.forEach(kw => searchBox.suggestions.push(kw.word.trim()));
     let newPlaceholder = keywords[0].word.trim();
-    if(newPlaceholder) searchBox.placeholder = newPlaceholder;
+    if (newPlaceholder) searchBox.placeholder = newPlaceholder;
     return null;
   }).catch(errorHandler);
 
@@ -191,26 +164,38 @@ onceLoaded(getCurrentTab).then(async function(tab) {
 
   let links = new Links($`.engines`, tab.id);
   let engines = await Engine.getOpen(Engine.returnType.normal, null, ['displayName', '$$key']);
-  var searchBox = new SearchBox($`#keyword`, engines, engineKey => links.setDefaultLink(engineKey));
+  var searchBox = new SearchBox({
+    $keyword: $`#keyword`,
+    engines: engines,
+    selectEngineFn: engineKey => links.setDefaultLink(engineKey),
+    onKeyup: e => {
+      if (e.key === 'Enter') {
+        links.$defaultLink.dispatchEvent(new MouseEvent(
+          'click',
+          {button: btnCode.left}
+        ));
+      }
+    },
+    onKeydown: e => {
+      if(e.key === 'ArrowDown') {
+        links.setNextDefaultLink();
+      } else if(e.key === 'ArrowUp') {
+        links.setPrevDefaultLink();
+      } else if(e.key === 'ArrowRight') {
+        links.setRightDefaultLink();
+      }
+    },
+    onUpdated: async (e) => {
+      let searchString = e.detail.trim();
+      if (searchString === searchBox.defaultPlaceholder || !searchString) {
+        return;
+      }
+      clog('translate ', searchString);
 
-  searchBox.onKeyup(e => {
-    if(e.key === 'Enter') {
-      links.$defaultLink.dispatchEvent(new MouseEvent(
-        'click',
-        {button: btnCode.left}
-      ));
-    }
-  });
-  searchBox.onUpdated(async (e) => {
-    let searchString = e.detail.trim();
-    if(searchString === searchBox.defaultPlaceholder || !searchString) {
-      return;
-    }
-    clog('translate ', searchString);
-
-    links.updateHref(searchString);
-    if(searchString.length <= CONFIG.translateMaxLength) {
-      $translation.innerText = await translate(searchString);
+      links.updateHref(searchString);
+      if (searchString.length <= CONFIG.translateMaxLength) {
+        $translation.innerText = await translate(searchString);
+      }
     }
   });
 
@@ -235,8 +220,8 @@ async function translate(str) {
   let lang = navigator.language.split('-', 1)[0];
   let resultObj = await tjs.translate({
     api: /*CONFIG.devMode
-      ? 'GoogleCN'
-      :*/ (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
+     ? 'GoogleCN'
+     :*/ (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
     text: str,
     to: CONFIG.devMode
       ? 'zh-CN'
@@ -245,7 +230,7 @@ async function translate(str) {
   if (resultObj.error) return null;
 
   let translated = resultObj.detailed || resultObj.result;
-  if(isEmpty(filterEmptyStr(translated))) return '';
+  if (isEmpty(filterEmptyStr(translated))) return '';
 
   return translated.filter(line => {
     return line.toLowerCase() !== str.toLowerCase();
