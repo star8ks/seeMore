@@ -201,22 +201,19 @@ onceLoaded(getCurrentTab).then(async function(tab) {
       ));
     }
   });
-  searchBox.onUpdated(e => {
+  searchBox.onUpdated(async (e) => {
     let searchString = e.detail.trim();
-    if(searchString === searchBox.defaultPlaceholder) {
+    if(searchString === searchBox.defaultPlaceholder || !searchString) {
       return;
     }
     clog('translate ', searchString);
 
-    if (searchString) {
-      links.updateHref(searchString);
-      if(searchString.length <= CONFIG.translateMaxLength) {
-        translate(searchString).then(html => {
-          $translation.innerText = html;
-        }).catch(errorHandler);
-      }
+    links.updateHref(searchString);
+    if(searchString.length <= CONFIG.translateMaxLength) {
+      $translation.innerText = await translate(searchString);
     }
   });
+
   new Mason($`.engines`, {
     itemSelector: '.pin',
     columnNum: 2
