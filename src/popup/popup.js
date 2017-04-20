@@ -115,6 +115,7 @@ class SearchBox {
     this.engines = engines;
     this.suggestions.concat(deepValue(engines));
     this.$el.focus();
+    this.defaultPlaceholder = this.$el.placeholder;
     this.$el.addEventListener('keydown', e => {
       if(e.key === 'Tab') {
         // TODO serarch in this.sugesstion, and autocomplete by press Tab
@@ -182,7 +183,7 @@ onceLoaded(getCurrentTab).then(async function(tab) {
     }
     keywords.forEach(kw => searchBox.suggestions.push(kw.word.trim()));
     let newPlaceholder = keywords[0].word.trim();
-    searchBox.placeholder = newPlaceholder || searchBox.placeholder;
+    if(newPlaceholder) searchBox.placeholder = newPlaceholder;
     return null;
   }).catch(errorHandler);
 
@@ -202,6 +203,9 @@ onceLoaded(getCurrentTab).then(async function(tab) {
   });
   searchBox.onUpdated(e => {
     let searchString = e.detail.trim();
+    if(searchString === searchBox.defaultPlaceholder) {
+      return;
+    }
     clog('translate ', searchString);
 
     if (searchString) {
@@ -233,9 +237,9 @@ async function translate(str) {
 
   let lang = navigator.language.split('-', 1)[0];
   let resultObj = await tjs.translate({
-    api: CONFIG.devMode
+    api: /*CONFIG.devMode
       ? 'GoogleCN'
-      : (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
+      :*/ (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
     text: str,
     to: CONFIG.devMode
       ? 'zh-CN'
