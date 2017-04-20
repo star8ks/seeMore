@@ -13,13 +13,13 @@
 ## 搜索+
 `搜索+`（SeeMore），是一个智能、便捷的浏览器搜索增强插件。有了它，你就可以
 
-1. 自由切换搜索引擎：在__不重新输入__关键词的情况下在 Google，百度，淘宝，知乎等搜索引擎或网站搜索更多相关内容。
-2. 划词搜索：在任意页面__选中__关键词，点击`搜索+`图标，即可对选中词展开搜索。
+1. 自由切换搜索引擎：在 __不重新输入__ 关键词的情况下在 Google，百度，淘宝，知乎等搜索引擎或网站搜索更多相关内容。
+2. 划词搜索：在任意页面 __选中__ 关键词，点击`搜索+`图标，即可对选中词展开搜索。
 3. 自动翻译：点击`搜索+`图标就可以把关键词翻译成当前使用的语言。
-3. 添加__自定义__搜索引擎及分组，分组列出搜索引擎。
+3. 添加 __自定义__ 搜索引擎及分组，分组列出搜索引擎。
 4. 支持略过 Google 跳转页直接访问目标页面。
 5. 快捷键： Ctrl/Cmd + Shift + S 弹出搜索界面。
-5. __智能__获取页面关键词，无需输入即可搜索。
+5. __智能__ 获取页面关键词，无需输入即可搜索。
 
 ## Install 安装
 Currently under development, you can load it manually.
@@ -34,12 +34,11 @@ Currently under development, you can load it manually.
 - [x] :man_with_turban: Auto translation.
 - [x] :metal: Shortcut for SeeMore.
 - [x] :rocket: Intelligently get any page's keywords as search words.
-- [ ] Full-text search the pages you visited and bookmarked.
-- [ ] Search local files， open directory.
 - [ ] :ghost: Add custom search engine.
+- [ ] Support search engines need to POST keywords.
 - [ ] Customize chrome new tab search engine and style.
 - [ ] Preview results in popup page.
+- [ ] Full-text search the pages you visited and bookmarked.
+- [ ] Search local files， open directory.
 - [ ] Customize popup page.
-- [ ] Support search engines need to POST keywords.
-- [ ] Search images
-- [ ] Search audio, videos
+- [ ] Search by images, audio, videos
