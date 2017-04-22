@@ -95,28 +95,29 @@ let Listener = (function () {
 
     onInstalled: function () {
       let manifest = chrome.runtime.getManifest();
-      Setting.set('version', manifest.version);
+      let loadDataPromises = [];
+      loadDataPromises.push(Setting.set('version', manifest.version));
 
       iconData.forEach(group => {
         group.hosts.forEach(host => {
-          Icon.set(host, group.dataURI);
+          loadDataPromises.push(Icon.set(host, group.dataURI));
         });
       });
+
       Object.keys(CONFIG.engineTypes).forEach(function (typeId) {
-        EngineType.set(typeId, CONFIG.engineTypes[typeId]).catch(function (err) {
-          clog.err('Error when init set engineTypes' + err);
-        });
+        loadDataPromises.push(EngineType.set(typeId, CONFIG.engineTypes[typeId]));
       });
+
       Object.keys(CONFIG.engines).forEach(function (key) {
-        Engine.set(key, CONFIG.engines[key]).catch(function (err) {
-          clog.err('Error when init set engines' + err);
-        });
+        loadDataPromises.push(Engine.set(key, CONFIG.engines[key]));
       });
-      Setting.set('cfg_remove_redirect', true);
-      if (!CONFIG.devMode) {
-        // chrome.tabs.create({url: 'chrome://extensions/?options=' + chrome.runtime.id});
-      } else {
-        chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/popup.html'});
+
+      loadDataPromises.push(Setting.set('cfg_remove_redirect', true));
+      if (CONFIG.devMode) {
+        Promise.all(loadDataPromises).then(() => {
+          clog('load init data done!');
+          chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/popup.html'});
+        }).catch(e => clog('load init data error', e.toString()));
       }
     }
   };
