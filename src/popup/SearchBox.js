@@ -12,28 +12,35 @@ class SearchBox {
    * @param {Function} onKeydown
    * @param {Function} onUpdated
    */
-  constructor({$keyword, engines, selectEngineFn = null, onKeyup = null, onKeydown = null, onUpdated = null}) {
-    this.$el = $keyword;
+  constructor({$element, engines, selectEngineFn = null, onKeyup = null, onKeydown = null, onUpdated = null}) {
+    this.$keyword = $element.querySelector('.searchBox__input');
+    this.$translation = $element.querySelector('.searchBox__translation');
+    this.$tip = $element.querySelector('.searchBox__tip');
     this.engines = engines;
     this.suggestions.concat(deepValue(engines));
-    this.$el.focus();
-    this.defaultPlaceholder = this.$el.placeholder;
-    this.$el.addEventListener('keydown', e => {
+    this.$keyword.focus();
+    this.defaultPlaceholder = this.$keyword.placeholder;
+    this.$keyword.addEventListener('keydown', e => {
       if (e.key === 'Tab') {
         // TODO serarch in this.sugesstion, and autocomplete by press Tab
-        if (this.value === '' && this.$el.placeholder !== '') {
-          this.$el.value = this.$el.placeholder;
+        if (this.value === '' && this.$keyword.placeholder !== '') {
+          this.$keyword.value = this.$keyword.placeholder;
         }
         e.preventDefault();
       }
     });
-    selectEngineFn && this.$el.addEventListener('input', debounce(() => this._onInput(selectEngineFn), 500));
+    selectEngineFn && this.$keyword.addEventListener('input', debounce(() => this._onInput(selectEngineFn), 500));
     onKeyup && this.addKeyupHandler(onKeyup);
     onKeydown && this.addKeydownHandler(onKeydown);
     onUpdated && this.addUpdatedHandler(onUpdated);
   }
 
   _onInput(selectEngineFn) {
+    this.$keyword.dispatchEvent(new CustomEvent(
+      'keywordUpdated',
+      {detail: this.value || this.$keyword.placeholder}
+    ));
+
     if (this.engineSelector !== '') {
       let engineSelectorLower = this.engineSelector.toLowerCase();
       let engine = this.engines.find(engine => {
@@ -42,51 +49,47 @@ class SearchBox {
       if(!engine) return;
 
       // TODO: if next input is not Tab, clear tip and remove listener
-      this.$el.parentNode.querySelector('.tip').innerText = `Press Tab to use ${engine.displayName}`;
+      this.$tip.innerText = `Press Tab to use ${engine.displayName}`;
       let handler = e => {
         if (e.key === 'Tab') {
           selectEngineFn(engine ? engine.$$key : '');
-          this.$el.parentNode.querySelector('.tip').innerText = '';
-          this.$el.removeEventListener('keydown', handler);
+          this.$tip.innerText = '';
+          this.$keyword.removeEventListener('keydown', handler);
         }
       };
       this.addKeydownHandler(handler);
     }
-    this.$el.dispatchEvent(new CustomEvent(
-      'keywordUpdated',
-      {detail: this.value || this.$el.placeholder}
-    ));
   }
 
   addUpdatedHandler(fn) {
-    this.$el.addEventListener('keywordUpdated', fn);
+    this.$keyword.addEventListener('keywordUpdated', fn);
   }
 
   addKeyupHandler(fn) {
-    this.$el.addEventListener('keyup', fn);
+    this.$keyword.addEventListener('keyup', fn);
   }
 
   addKeydownHandler(fn) {
-    this.$el.addEventListener('keydown', fn);
+    this.$keyword.addEventListener('keydown', fn);
   }
 
   static engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
 
   get value() {
-    return this.$el.value;
+    return this.$keyword.value;
   }
 
   get placeholder() {
-    return this.$el.placeholder;
+    return this.$keyword.placeholder;
   }
 
   set placeholder(val) {
-    this.$el.placeholder = val;
+    this.$keyword.placeholder = val;
     this._onInput();
   }
 
   get engineSelector() {
-    let match = this.$el.value.match(SearchBox.engineSelectorRegex);
+    let match = this.$keyword.value.match(SearchBox.engineSelectorRegex);
     return match ? match[1] : '';
   }
 }
