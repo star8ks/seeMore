@@ -1,11 +1,16 @@
 import {isEmpty} from 'lodash';
 import {getMouseButton} from '../common/base';
 class Links {
-  static defaultLinkClass = 'icon-link-default';
+  static selectors = {
+    links: '.engines__item'
+  };
+  static statusClass = {
+    defaultLink: 'icon-link-default'
+  };
 
   constructor($linksWrapper, tabId) {
     this.$linksWrapper = $linksWrapper;
-    this.$links = this.$linksWrapper.querySelectorAll('.engines__item');
+    this.$links = this.$linksWrapper.querySelectorAll(Links.selectors.links);
     this.$defaultLink = null;
     this.setDefaultLink();
     this._init(tabId);
@@ -45,10 +50,10 @@ class Links {
 
   _setDefaultLink($link) {
     if (this.$defaultLink) {
-      this.$defaultLink.classList.remove(Links.defaultLinkClass);
+      this.$defaultLink.classList.remove(Links.statusClass.defaultLink);
     }
     this.$defaultLink = $link;
-    this.$defaultLink.classList.add(Links.defaultLinkClass);
+    this.$defaultLink.classList.add(Links.statusClass.defaultLink);
   }
 
   setDefaultLink(seName) {

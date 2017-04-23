@@ -44,6 +44,10 @@ onceLoaded(getCurrentTab).then(async function (tab) {
   $enginesSection.innerHTML = await Render.openEngines(engineListTpl);
 
   let links = new Links($`.engines`, tab.id);
+  Engine.searchKeys(tabUrl.host, {includeRootDomain: true}).then(keys => {
+    keys.length && links.setDefaultLink(keys[0]);
+  });
+
   let engines = await Engine.getOpen({
     returnType: Engine.returnType.normal,
     fields: ['displayName', '$$key']
