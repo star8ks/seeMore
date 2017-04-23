@@ -6,6 +6,13 @@ import CONFIG from '../common/config';
 let searchBoxErr = minErr('searchBox');
 class SearchBox {
   static engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
+  static selectors = {
+    keyword: '.searchBox__input',
+    translation: '.searchBox__translation',
+  };
+  static statusClass = {
+    hide: 'searchBox__translation--hide'
+  };
   suggestions = [];
 
   /**
@@ -17,8 +24,9 @@ class SearchBox {
    * @param {Function} onUpdated
    */
   constructor({$element, engines, selectEngineFn = null, onKeyup = null, onKeydown = null, onUpdated = null}) {
-    this.$keyword = $element.querySelector('.searchBox__input');
-    this.$translation = $element.querySelector('.searchBox__translation');
+    this.$keyword = $element.querySelector(SearchBox.selectors.keyword);
+    this.$translation = $element.querySelector(SearchBox.selectors.translation);
+    this._$translationText = this.$translation.querySelector('span');
     this.$tip = $element.querySelector('.searchBox__tip');
     this.engines = engines;
     this.suggestions.concat(deepValue(engines));
@@ -110,6 +118,15 @@ class SearchBox {
     return match ? match[1] : '';
   }
 
+  set translationText(text) {
+    if(text.length > 0) {
+      this.$translation.classList.remove(SearchBox.statusClass.hide);
+    } else {
+      this.$translation.classList.add(SearchBox.statusClass.hide);
+    }
+    this._$translationText.innerText = text;
+  }
+
   /**
    * @param {String} str
    * */
@@ -124,9 +141,9 @@ class SearchBox {
 
     let lang = navigator.language.split('-', 1)[0];
     let resultObj = await tjs.translate({
-      api: /*CONFIG.devMode
+      api: CONFIG.devMode
        ? 'GoogleCN'
-       :*/ (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
+       : (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
       text: str,
       to: CONFIG.devMode
         ? 'zh-CN'
@@ -137,7 +154,7 @@ class SearchBox {
     let translated = resultObj.detailed || resultObj.result;
     if (isEmpty(filterEmptyStr(translated))) return;
 
-    this.$translation.innerText = translated.filter(line => {
+    this.translationText = translated.filter(line => {
       return line.toLowerCase() !== str.toLowerCase();
     }).reduce((html, line) => html + line + '\n', '');
   }

@@ -24,6 +24,7 @@ function setProperties(engines) {
           return dataURI;
         }
         clog('invalid favicon', dataURI);
+        clog('invalid favicon from:', oUrl.yandexFaviconUrl);
         return '';
       }).catch(e => {
         clog(new renderErr('Error in setProperties' + e.toString()));
