@@ -2,14 +2,17 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>See More</title>
+  <title>SeeMore</title>
 <link href="css/uiCommon.css" rel="stylesheet"><link href="css/popup.css" rel="stylesheet"></head>
 
 <body>
-<input id="keyword" type="text" placeholder="请输入关键词">
-<section class="translation">
 
+<section class="searchBox">
+  <input class="searchBox__input" id="keyword" type="text" placeholder="请输入关键词">
+  <p class="searchBox__translation searchBox__translation--hide"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACJklEQVR4AXySM8BcTRRAz2DN37ZtG7GNJq7jNNE2sc0mdtLEtm3bNnb3zWTfZ5+H4fUVDQbeHu9I1cJaMAAWrDtYCDi3/pze6c11lIFOC9VCIEG4b2EeOf6WQJkKpAVyvzzruaMWjROJA17KQFvIxlIMIYP62c+De48cOXbM69VGa22NAccxSGntw4fpGTpX8IUItPgjxfMhuHQHBiz1kLZw/Hboo7+TNz4KhYIoJbHW4vEo3DESUTWlBYyFlhnhRfsUbWd6GLUmI2yyQzlzJ8jNuynuP3iIMaZ4DlxhC7wYtew8K/n/E0OXKil61krh4ljB4WtBkk+SdB87Bdey+7m4o8zN4NW7gu/eMiw7KJm9Q3HtvshL7LrjhoUbd/LxG68zedFqhs5cwLw1WwpXYcxaDxU+cxjaOJUZDRM3qbyq3OMVYpHn+PmLj3jl2Rh/ff0JNf/8ERdRtd89K4QsXASbN2S7DJR//STXL28m4PfSoNxvaK1RSqFtnmQx+TxhLBy9EyeUTBMI+HAcBymzK6KLyuclKG8je37mbpQ2P33Po9QD5q3dSp2/f0FKgUw/fjLS1Zj3GZP9OcYtW15nOlZzJfksH77xCr9+/hHWGlwEZZBIbA+uO3D1AUA4rGjT9CVeeSmAELghZEaBLFvB9w/ffU2fCfgkreo/x/PPep4K7kVEOiAAJCX+tcYG8TFIijGDnA3EYK+Bvfv6/ZdZAAAAAP//AwACXRUrjcDCAAAAAABJRU5ErkJggg==" alt="Translation" title="Translation"><span></span></p>
+  <span class="searchBox__tip"></span>
 </section>
+
 <section class="engines">
 </section>
 <hr>
@@ -20,7 +23,7 @@
   <ul class="pin">
     <li class="type unselectable"><span>{{typeName}}</span></li>
     {{#engines}}
-    <li><a class="se icon-link unselectable"
+    <li><a class="engines__item unselectable"
       data-se="{{index}}"
       data-favicon="{{favicon}}"
       data-url="{{url}}"

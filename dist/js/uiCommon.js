@@ -146,9 +146,10 @@ var _minErr2 = _interopRequireDefault(_minErr);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 let renderErr = (0, _minErr2.default)('Render');
+
 function setProperties(engines) {
   return Promise.map(engines, function (se) {
-    var oUrl = new _Url2.default(se.url);
+    let oUrl = new _Url2.default(se.url);
     se.index = se['$$key'];
     se.href = se.url.replace(/%s/g, '');
 
@@ -162,6 +163,7 @@ function setProperties(engines) {
           return dataURI;
         }
         (0, _clog2.default)('invalid favicon', dataURI);
+        (0, _clog2.default)('invalid favicon from:', oUrl.yandexFaviconUrl);
         return '';
       }).catch(e => {
         (0, _clog2.default)(new renderErr('Error in setProperties' + e.toString()));
@@ -184,9 +186,12 @@ function renderList(engines) {
 let Render = {
   openEngines: function (template) {
     return _EngineType2.default.getAllReal().map(function (typeObj) {
-      var typeId = typeObj['$$key'];
-      return _Engine2.default.getOpen(_Engine2.default.returnType.normal, function (engine) {
-        return '' + engine.typeId === typeId; // key always saved as string
+      let typeId = typeObj['$$key'];
+      return _Engine2.default.getOpen({
+        returnType: _Engine2.default.returnType.normal,
+        filter: function (engine) {
+          return '' + engine.typeId === typeId; // key always saved as string
+        }
       }).bind({
         typeName: typeObj.name,
         template: template
@@ -198,7 +203,7 @@ let Render = {
 
   defaultEngines: function (template) {
     return _EngineType2.default.getAllDefault().map(function (typeObj) {
-      var typeId = typeObj['$$key'];
+      let typeId = typeObj['$$key'];
       return _Engine2.default.getSortedAll(_Engine2.default.returnType.normal, function (engine) {
         // if(''+engine.defaultTypeId === typeId) clog(engine.displayName, typeId, typeObj.name);
         return '' + engine.defaultTypeId === typeId; // key always saved as string
@@ -216,6 +221,7 @@ function combineHtml(lists) {
   return lists.reduce((html, list) => html + list, '');
 }
 
+/** @module src/common/Render */
 exports.default = Render;
 
 /***/ }),

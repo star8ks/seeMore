@@ -425,46 +425,80 @@ Object.defineProperty(exports, "__esModule", {
 /**
  * Created by ray7551@gmail.com on 16-10-27.
  */
+class DB {
+  /**
+   * @param {LocalForage} localforage
+   * @param {String} storeName
+   * @param {String} name
+   * */
+  constructor(localforage, storeName = 'app', name = 'sc') {
+    this.lf = localforage.createInstance({
+      driver: localforage.INDEXEDDB,
+      // driver: localforage.LOCALSTORAGE,
+      name: name,
+      storeName: storeName
+    });
+  }
 
-/**
- * @param {LocalForage} localforage
- * @param {String} storeName
- * @param {String=} name
- * */
-function DB(localforage, storeName, name) {
-  storeName = storeName || 'app';
-  name = name || 'sc';
-  this.lf = localforage.createInstance({
-    // driver: localforage.INDEXEDDB,
-    driver: localforage.LOCALSTORAGE,
-    name: name,
-    storeName: storeName
-  });
+  /**
+   * @param key
+   * @param withInnerKey
+   * @return {Promise}
+   */
+  get(key, withInnerKey) {
+    withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
+    return this.lf.getItem(key).then(function (item) {
+      return withInnerKey ? _defineInnerKey(item, key) : item;
+    });
+  }
+
+  getAll(withInnerKey, filter) {
+    withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
+    return this.keys().map(function (key) {
+      return this.get(key, withInnerKey);
+    }.bind(this)).then(function (items) {
+      return filter ? items.filter(filter) : items;
+    });
+  }
+
+  set(key, val) {
+    return this.lf.setItem(key, val);
+  }
+
+  clear() {
+    return this.lf.clear();
+  }
+
+  keys() {
+    return this.lf.keys();
+  }
+
+  /**
+   * array to assoc object
+   * */
+  static assoc(array, key) {
+    var res = {};
+    key = key || '$$key';
+    array.forEach(function (item) {
+      if (item[key]) {
+        res[item[key]] = item;
+      }
+    });
+    return res;
+  }
+
+  /**
+   * assoc object to array
+   * */
+  static array(assocObj) {
+    var res = [];
+    Object.keys(assocObj).forEach(function (key) {
+      _defineInnerKey(assocObj[key], key);
+      res.push(assocObj[key]);
+    });
+    return res;
+  }
 }
-/**
- * array to assoc object
- * */
-DB.assoc = function (array, key) {
-  var res = {};
-  key = key || '$$key';
-  array.forEach(function (item) {
-    if (item[key]) {
-      res[item[key]] = item;
-    }
-  });
-  return res;
-};
-/**
- * assoc object to array
- * */
-DB.array = function (assocObj) {
-  var res = [];
-  Object.keys(assocObj).forEach(function (key) {
-    _defineInnerKey(assocObj[key], key);
-    res.push(assocObj[key]);
-  });
-  return res;
-};
 
 function _defineInnerKey(item, key, keyName) {
   keyName = keyName || '$$key';
@@ -490,31 +524,6 @@ function _defineInnerKey(item, key, keyName) {
   }
   return item;
 }
-
-DB.prototype.get = function (key, withInnerKey) {
-  withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
-  return this.lf.getItem(key).then(function (item) {
-    return withInnerKey ? _defineInnerKey(item, key) : item;
-  });
-};
-DB.prototype.getAll = function (withInnerKey, filter) {
-  withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
-  return this.keys().map(function (key) {
-    return this.get(key, withInnerKey);
-  }.bind(this)).then(function (items) {
-    return filter ? items.filter(filter) : items;
-  });
-};
-
-DB.prototype.set = function (key, val) {
-  return this.lf.setItem(key, val);
-};
-DB.prototype.clear = function () {
-  return this.lf.clear();
-};
-DB.prototype.keys = function () {
-  return this.lf.keys();
-};
 
 exports.default = DB;
 
@@ -580,10 +589,9 @@ Engine.getSortedAll = function (returnType = Engine.returnType.normal, filter) {
  * @return {Promise}
  * */
 Engine.getOpen = (() => {
-  var _ref = _asyncToGenerator(function* (returnType = Engine.returnType.normal, filter, fields = []) {
-    filter = filter || function () {
+  var _ref = _asyncToGenerator(function* ({ returnType = Engine.returnType.normal, fields = [], filter = function () {
       return true;
-    };
+    } } = {}) {
     let engines = yield this.getAll(true, function (engine) {
       return engine.open && filter(engine);
     });
@@ -637,6 +645,7 @@ Engine.searchKeys = function (host, { includeRootDomain = false, searchAll = fal
   });
 };
 
+/** @module src/common/db/Engine */
 exports.default = Engine;
 
 /***/ }),
@@ -1018,7 +1027,22 @@ Object.defineProperty(exports, "__esModule", {
 const CONFIG = {
   selectionMaxLength: 200,
   translateMaxLength: 80,
+  // TODO move engineTypes and engines to data file initData.js.
+  // They are data for initialize extension, like iconData.js
+
+  /**
+   * Engines listed in this file are default engines.
+   * 'default' means they are unchangeable, once they write to db, they should not be changed.
+   *
+   * Default engines are used to provide suggestion when user want to add engine to his customized engine list.
+   * Each Engine have an defaultTypeId shows it's default type defined as initial data,
+   * and a
+   */
   engineTypes: {
+    /**
+     * Why not use id to order? Because id is integer, move one type to order 1 will change all type's id,
+     * and you need to change all engine's typeId
+     */
     1: { name: 'Search Engine', order: 1, default: true },
     2: { name: 'Video', order: 2, default: true },
     3: { name: 'Translate', order: 3, default: true },
@@ -1036,8 +1060,21 @@ const CONFIG = {
     106: { name: 'Shopping', order: 6 },
     107: { name: 'Social Network', order: 7 }
   },
+  // Search engines
   engines: {
-    // Search engines
+    /**
+     * @see module:src/common/db/Engine.searchKeys
+     * Hosts is used for getting engine info from tab url's host.
+     *    1. Get favicon of engine {@link module:src/common/Render~setProperties}
+     *    2. Get query string from current tab url {@link module:src/popup/keyword~getQueryString}
+     *
+     * An engine may have many hosts.
+     *    Because we want to get query string when visiting google.com and google.com.hk
+     * An Icon is linked to a host. You should get Icon of an Engine by it's hosts, not the url's host. Because
+     *    1. some engine may use other provider's search service(such as cse.google.com), whose url's host is provider's
+     *    2. you can't get favicon from some url's host using current method {@link module:src/common/Render~setProperties}.
+     *      E.g. For Engine tmall, url's host list.tmall.com will redirect to www.tmall.com, which will cause yandex get a invalid favicon.
+     */
     google: {
       order: 100,
       typeId: 101,
@@ -1276,7 +1313,7 @@ const CONFIG = {
       order: 1725,
       typeId: 103,
       defaultTypeId: 3,
-      displayName: '剑桥',
+      displayName: 'Cambridge',
       open: true,
       hosts: ['dictionary.cambridge.org'],
       url: 'http://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD/%s',
@@ -1288,7 +1325,7 @@ const CONFIG = {
       typeId: 103,
       defaultTypeId: 3,
       displayName: '人人词典',
-      open: true,
+      open: false,
       hosts: ['www.91dict.com'],
       url: 'http://www.91dict.com/words?w=%s'
     },
@@ -1316,9 +1353,19 @@ const CONFIG = {
       typeId: 104,
       defaultTypeId: 4,
       displayName: 'IT eBooks',
-      open: true,
+      open: false,
       hosts: ['it-ebooks.info'],
       url: 'https://cse.google.com/cse?cx=013493258683483688568:xhfa6ctm1ki&q=%s#gsc.tab=0&gsc.q=%s'
+    },
+    //Fox Ebook http://www.foxebook.net/search/%s
+    FoxEbook: {
+      order: 1910,
+      typeId: 104,
+      defaultTypeId: 4,
+      displayName: 'Fox Ebook',
+      open: true,
+      hosts: ['www.foxebook.net'],
+      url: 'https://www.foxebook.net/search/%s'
     },
     // Development
     explainShell: {
@@ -1444,6 +1491,15 @@ const CONFIG = {
       open: false,
       hosts: ['twitter.com'],
       url: 'https://twitter.com/search?q=%s'
+    },
+    weixin: {
+      order: 3300,
+      typeId: 107,
+      defaultTypeId: 9,
+      displayName: '微信搜索',
+      open: true,
+      hosts: ['weixin.sogou.com'],
+      url: 'http://weixin.sogou.com/weixin?type=2&ie=utf8&query=%s'
     }
   },
   /* eslint-disable no-undef */

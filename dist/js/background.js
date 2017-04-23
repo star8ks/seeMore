@@ -78,6 +78,34 @@ let Listener = function () {
     });
   }
 
+  function loadInitData() {
+    let manifest = chrome.runtime.getManifest();
+    let loadDataPromises = [];
+    loadDataPromises.push(_Setting2.default.set('version', manifest.version));
+
+    _iconData2.default.forEach(group => {
+      group.hosts.forEach(host => {
+        loadDataPromises.push(_Icon2.default.set(host, group.dataURI));
+      });
+    });
+
+    Object.keys(_config2.default.engineTypes).forEach(function (typeId) {
+      loadDataPromises.push(_EngineType2.default.set(typeId, _config2.default.engineTypes[typeId]));
+    });
+
+    Object.keys(_config2.default.engines).forEach(function (key) {
+      loadDataPromises.push(_Engine2.default.set(key, _config2.default.engines[key]));
+    });
+
+    loadDataPromises.push(_Setting2.default.set('cfg_remove_redirect', true));
+    if (_config2.default.devMode) {
+      Promise.all(loadDataPromises).then(() => {
+        (0, _base.clog)('load init data done!');
+        chrome.tabs.create({ url: 'chrome-extension://' + chrome.runtime.id + '/popup.html' });
+      }).catch(e => (0, _base.clog)('load init data error', e.toString()));
+    }
+  }
+
   return {
     onTabCreated: function (tabInfo) {
       // chrome.tabs.onCreated listener may not get tab url properly,
@@ -120,35 +148,25 @@ let Listener = function () {
     },
 
     onInstalled: function () {
-      let manifest = chrome.runtime.getManifest();
-      _Setting2.default.set('version', manifest.version);
-
-      _iconData2.default.forEach(group => {
-        group.hosts.forEach(host => {
-          _Icon2.default.set(host, group.dataURI);
-        });
-      });
-      Object.keys(_config2.default.engineTypes).forEach(function (typeId) {
-        _EngineType2.default.set(typeId, _config2.default.engineTypes[typeId]).catch(function (err) {
-          _base.clog.err('Error when init set engineTypes' + err);
-        });
-      });
-      Object.keys(_config2.default.engines).forEach(function (key) {
-        _Engine2.default.set(key, _config2.default.engines[key]).catch(function (err) {
-          _base.clog.err('Error when init set engines' + err);
-        });
-      });
-      _Setting2.default.set('cfg_remove_redirect', true);
-      if (!_config2.default.devMode) {
-        // chrome.tabs.create({url: 'chrome://extensions/?options=' + chrome.runtime.id});
-      } else {
-        chrome.tabs.create({ url: 'chrome-extension://' + chrome.runtime.id + '/popup.html' });
+      (0, _base.clog)('installed');
+      if (_config2.default.devMode) {
+        _Icon2.default.clear();
+        _Setting2.default.clear();
+        _Engine2.default.clear();
+        _EngineType2.default.clear();
+        loadInitData();
       }
+    },
+
+    onStartup() {
+      (0, _base.clog)('startup');
+      loadInitData();
     }
   };
 }();
 
 chrome.runtime.onInstalled.addListener(Listener.onInstalled);
+chrome.runtime.onStartup.addListener(Listener.onStartup);
 
 chrome.tabs.onCreated.addListener(Listener.onTabCreated);
 // Listen for any changes to the URL of any tab.
@@ -169,11 +187,14 @@ const iconData = [{
   hosts: ['default.icon', 'htmlpreview.github.io', 'www.zimuku.net'],
   dataURI: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAMklEQVR4AWMgEkT9R4INWBUgKX0Q1YBXQYQCkhKEMDILogSnAhhEV4AGRqoCTEhkPAMAbO9DU+cdCDkAAAAASUVORK5CYII='
 }, {
+  hosts: ['weixin.sogou.com'],
+  dataURI: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA60lEQVR4AayQJVBFYRBG9y49YI0+g3vCabjT0J5exUmvIRkn4Y1Ewd2lBxIuBYeDP/czc/bbK7+KvxhiQdlikhL5WI3pGCEAp7iE4zg7k7HzZjcBg+OIIUwU1+xjI5PsCOjP4Fxixe1ggHhc+BkjBk0YeYLh4h3nGKUUk+VgtmZ8KpY4fh+OJqVUiu+Ufh7hhSZIfONRKVfiOxdKmRPfWVBKN76K97xir3KzGzRm8R4zY9dUgKaZ6BfPeMa2nzGiAmDZH+O92HOPo5jC4E7LQZbk8DGGDMFUrMACTMQQvtXigQSSDwAAAP//AwC16EMX3j4wHAAAAABJRU5ErkJggg=='
+}, {
+  hosts: ['s.taobao.com'],
+  dataURI: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA9UlEQVR4AZSTIUgGQRCF38rfLVcFe9GgNu2I9exBEAWv2oPBavAU7OXqaUejxZ4Eo9eL4sg+eLA8cWE/GG7Y2fdmZ9lLABAvU+B5QhMHPdJ+nyiOq+MIcbZV5v/G59F6sDHFFP0EudgJ4rl4vOO6TFYQwx7IzSvwdA8cnoL5sAuhOplHZFZekIAG5brVZLCGv3hn5jkMMzjf5tHVUV/lDEcjOOrmY9VPoNnyZusms7rB7RtEXewjuPj7q7wL3U/ZJNfNwDfOI0NIKHFZS/k5Ltcn6DY20cLy8Y7u8gEJAGSSkVHeUIFi/kyO3jhacAM08CuAAAMAbJW62Yvw6tMAAAAASUVORK5CYII='
+}, {
   hosts: ['www.baidu.com'],
   dataURI: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABdklEQVR4AayTU2AjURSG/zhr27Zt27Zt27Ztm++rp7Vr24iNwZ26jZNveHV8eM3ax9LwBiLAU8hZPmzw/pMObbrG49VbDQjXbqmw95AMVgpFsCng+WsNzGYadx+p8eW7AecuK7i5Dx91jgXI5BQIxYvzQShfjo/kZAsIufP2BPz5Z0TPgQmYtzQNa5aXwegRJbBxTTkM7F8cI4eWwLaN5dCooYhYZDuIx07LSFC4JyLSRNui16AEbv3hU1VuEIXIplpVIQhSCQ8VKwoQGGzCrgMyCPjAmWMVubmMTCsIQexaDrkCpk8phXLl+KhXRwSlksJ81hW1hgJh4Yo0PL5TFd27SPHzjxED+xW3XwfpGRZ6yJjEXHdynsmzkmm9gXJcB0oVhZkLUhEXb0Fh/ANNWLg81yqbaSSFY/Nw/ky9equ1L0Ak4sEZFEXbFzB2VAn07C4FoXYtIWZNK4W5M0uhaRMxCJ06SDBpfEnfNpMQAJp3iIOnMAMAOr5M3FY9FL4AAAAASUVORK5CYII='
-}, {
-  hosts: ['dianying.fm'],
-  dataURI: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAX0lEQVR4AbySgQYAMQxD9+r+/5dzHOKUQMsCaUci2Xa24EiaKeFjG8zYCRaQtNE9/TB2DShP2wqeW4qwmyuaNuNUsbaXXfGTAP/dPE4AXHiFV+QkJDhnoAAAAAD//wMA5slQ23+aTBEAAAAASUVORK5CYII='
 }, {
   'hosts': ['btdb.in'],
   'dataURI': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABcElEQVR4AZTTA4wdURTG8UFtI36K7TSo3bBRbbuNG6dWVNt2G5S7G+7GXtve8PHO3f/Z3FlrvuSXXJwzHqt3otHo+Egksi4cDr9HLTJGLd7LntT07rH9AZsLtdZnGW7BDAyWDryybft8aWlpvUWcXs33GR4ZplkyA0ekVnosYsdisXFKqRumOUhuua572vE8byWTzQiazV29PJx38JBACsqM/XnS0MiY9TQ03skBGvAbW3AYz7ELG3HZjHfgDZ5gC46hAvWWOdJDLDGe4i62Igvr8R0bsBNrsQg50I7VkymYi1bMxwzMgwcFBzamYxpqYfm38A87cAx5yMV91GAv9uATXmAnTqPAv4V30EghAw0PChppQ0P1q3tn80Gs58N4wcXMRJC080Vuc8gfJq8RNK+l1ykuLk7Jt83CzwDNP6VHeh2ZyY/Bwn6Gt9CBodKBW1Lb52fyD8IlnWFzC9MPqIMSZvxB9qTGb5Z0CiCAAAMAN8+yDH6UrRYAAAAASUVORK5CYII='
@@ -191,7 +212,7 @@ const iconData = [{
   'dataURI': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACO0lEQVR4AWKgGgDwRQ/AsiRBGIVPdVePvbZt27YRWNu2be+zbYSfbdu2rZnqrrw2vnCe4J+xP8eq2J/jjnZbzrmZ1gti9fRw5L/J16s2C08s7g7lVOz3MVHgEuB5FHcdiKXTVuuFCJ2wtnt09zaj4EEc9Yx19dkH4un9CIMRaQ2M1uIH/wDPABoAY8DKmaB+UiIfY8WKSIYAJQHgGQ94CLgfVG+NMTlAU04VfE5KeTx+apaIVulh8w+glDBj0172BgLGp5wL5LRUHMovz5+d4vtbTuTguIeI8NZ5KUTg91Gr+GXyOvB8qtO2EKAQPKV46YKj+OLWE0jHPCooAISXLzuSmOfSedEe5u/MYwEAjTEIENEOR0Q1Ya2oTzLs8sZVR/PGdRHu6zSboWt2AVAyIgAOwr49eXwrNCYedjkxoRmaN6DAkYJBjGHH/jzz1uxg444D1LavYNm5PyAQmLJ8G4MWbALjQ8FHYwIBwQKDl27kmQ27OOnwFBXmr93N063Hs2Wf4fBMnOIJOCBUUu6THXqBPAyggHvPPY4mz17G4dkoAG+3Hcv/I5cAII6LDSeoZrAWYxTlBOg3ewOTvhzIA+cfyZlHpxk6cy2Vr3YEHEMFhaCpiJBHqWni+HPX7Nh/238jlh6NWOUU9oKIABtxZBCOfzTCFUBUAJfT7rgBK2OANxF+pedz/Tnz3nZYmUJgU+Ln1yDyNch7gtsV6IJI7+K2AxsI6qEWcepX3Fpr9XBLj4Y80jZaJIAAAwBvMQnsKjj3lAAAAABJRU5ErkJggg=='
 }, {
   'hosts': ['dianying.fm'],
-  'dataURI': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAB7ElEQVR4AYyTQ4AcURCGqxHbOcW2beMU27Z5DW+xbV5i27btZGxP/6nendfr3fna/V65SqJUaJpWD8A4fm3HV2lK5Ctfl2VZ3ihJ0lNKDwC5o9HoNmQB79nERnKlJ3wDjBYMwnd0H2wThsDcrQVMnZvBNnYgvId262tCybUUSoTlqOkvbKP6w9S+YbqXY+7k5J5sNGIWlq0j+yZsNHdtDs/WdQg9f4LQy2fwbFsP69CeiPz4hlTUIT0mMOEnq2Hp2RimTk1Y6Gl6waeXj/W6gg9gIvcaIng8N3x7JyFeWPatKkoF72uSc4cpW7PulJz2S72UmqYVFVrcJycxZWUSAMYzK0IRMpBjTUK+HOXIRXnp+O+3lJxLC/MYV5uqKumULGD032ddwWViPhYeQoNszWj5u3v0xPyaUvPuj0Y33yWablReNfSTXgowwUgI/c7MQIODvdDscH+serobD/+9xGPTa2x5eRjd9mxC26UOjNvmg6ZBh59aLSnWSJu4z8eafFaadn0JfXR+p/SokKM5rWw7nUpwCCy8XlGUSaKZcuntCSYYDeHAu5MYcn4umh3pn+DNgLMzse3VUfjCAVG+KwByUjKEkk1x1H5dcmEpnamsw8rGxsa5rMi2njAe5c0c6n9dQlYPAAAA//8DAC/1CuhOHk3iAAAAAElFTkSuQmCC'
+  'dataURI': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAX0lEQVR4AbySgQYAMQxD9+r+/5dzHOKUQMsCaUci2Xa24EiaKeFjG8zYCRaQtNE9/TB2DShP2wqeW4qwmyuaNuNUsbaXXfGTAP/dPE4AXHiFV+QkJDhnoAAAAAD//wMA5slQ23+aTBEAAAAASUVORK5CYII='
 }, {
   'hosts': ['dict.youdao.com'],
   'dataURI': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAzElEQVR4AWIYcMCIzHmjqJYApOZDuR+A2FDk/q0HQPEwIHslTBwoJgjTw4RsAFBiARJXAIm9C10cbgCaC2SQuA9AtkPZPMjimAYggBgS+wASW5ZYA9iR2BeR2MguO4isgQXNAD4kdjzQSxeA9E80F1zAZ8BrJLYBEO/HEnMX8HnhKhCHoYk9QNaMCFhEOsAEiFgBRdl5IFaACiWCohpfQuoHUhuRvJAP1oyw3RDEwBcGBSCMw9+OIAZuAxDJVwBN40SwswctAAgggAADAPQ+NfxbOZCYAAAAAElFTkSuQmCC'
@@ -282,6 +303,9 @@ const iconData = [{
 }, {
   'hosts': ['www.tmall.com', 'list.tmall.com'],
   'dataURI': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAYklEQVR4AWJkAILNDAz/GcgAvgwMjIwgzaxADjuJmn8C8W8gZmIgQzOyHhZkQYf/xPnkACMjnM3EQCFgwTAZ00UIcQQg2QWD2oBRA1gIpDjiXPCTZHsReijOzgAAAAD//wMAc8wRWg9Qsq8AAAAASUVORK5CYII='
+}, {
+  'hosts': ['www.foxebook.net'],
+  'dataURI': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABIElEQVR4AWKAARYWFjcg7mIIXTWTCFwM18eAAC7Ld+woZWNlZeBgY2Pg4uCAY25OTgYudnYGDiCbAyivHxmZfhWqiZEBxmBkXBMSEhIs6FLOQAjM2nNvNsPqsDQA62SgwTAMhOF/1xTGXqEAVX3/Z6mytwhGm1zWf9bgXGrYR4g/5/cdrTWQeZ4RhgH7vqNFfxigPG/eCqKq2LYNy7KgxTRNQFFpFkCV62AcR1jWdcV3xi3ocs7AcUQEMUZYmHMGmv2ClBJwHMK7peaarw24Au8G5n8z6C4NiGdQ80ZB+N0giVtwGpRSXIOa5+Qa9Od3wEHeLTXPKdgCPj74GEQ+P00LEQFe8e4ZvDVjwYIFJQznBB5g6MKMT3haBwgggAADAHIPu5SRk2QjAAAAAElFTkSuQmCC'
 }];
 
 exports.default = iconData;

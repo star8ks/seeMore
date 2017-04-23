@@ -116,10 +116,362 @@ exports.EMPTY_KEYWORDS = EMPTY_KEYWORDS;
 
 /***/ }),
 
+/***/ "0NI0":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _base = __webpack_require__("5a/Z");
+
+var _lodash = __webpack_require__("y7q8");
+
+var _translation = __webpack_require__("RkCM");
+
+var _translation2 = _interopRequireDefault(_translation);
+
+var _config = __webpack_require__("wYMm");
+
+var _config2 = _interopRequireDefault(_config);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+let searchBoxErr = (0, _base.minErr)('searchBox');
+class SearchBox {
+
+  /**
+   * @param {HTMLElement} $element
+   * @param {Array} engines
+   * @param {Function} selectEngineFn
+   * @param {Function} onKeyup
+   * @param {Function} onKeydown
+   * @param {Function} onUpdated
+   */
+  constructor({ $element, engines, selectEngineFn = null, onKeyup = null, onKeydown = null, onUpdated = null }) {
+    this.suggestions = [];
+
+    this.$keyword = $element.querySelector(SearchBox.selectors.keyword);
+    this.$translation = $element.querySelector(SearchBox.selectors.translation);
+    this._$translationText = this.$translation.querySelector('span');
+    this.$tip = $element.querySelector('.searchBox__tip');
+    this.engines = engines;
+    this.suggestions.concat((0, _base.deepValue)(engines));
+
+    this.$translation.addEventListener('mouseleave', () => {
+      this._hideTranslation();
+    });
+
+    this.$keyword.focus();
+    this.defaultPlaceholder = this.$keyword.placeholder;
+    this.$keyword.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        // TODO serarch in this.sugesstion, and autocomplete by press Tab
+        if (this.value === '' && this.$keyword.placeholder !== '') {
+          this.$keyword.value = this.$keyword.placeholder;
+        }
+        e.preventDefault();
+      }
+    });
+    selectEngineFn && this.$keyword.addEventListener('input', (0, _lodash.debounce)(() => this._onInput(selectEngineFn), 500));
+
+    this.addUpdatedHandler(e => {
+      let searchString = e.detail.trim();
+      if (searchString === this.defaultPlaceholder || !searchString) {
+        return;
+      }
+      if (searchString.length <= _config2.default.translateMaxLength) {
+        return this.translate(searchString);
+      }
+    });
+
+    onKeyup && this.addKeyupHandler(onKeyup);
+    onKeydown && this.addKeydownHandler(onKeydown);
+    onUpdated && this.addUpdatedHandler(onUpdated);
+
+    _translation2.default.add(new _translation2.default.BaiDu());
+    _translation2.default.add(new _translation2.default.Google());
+    if (_config2.default.devMode) _translation2.default.add(new _translation2.default.GoogleCN());
+  }
+
+  _onInput(selectEngineFn) {
+    this.$keyword.dispatchEvent(new CustomEvent('keywordUpdated', { detail: this.value || this.$keyword.placeholder }));
+
+    if (this.engineSelector !== '') {
+      let engineSelectorLower = this.engineSelector.toLowerCase();
+      let engine = this.engines.find(engine => {
+        return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
+      });
+      if (!engine) return;
+
+      // TODO: if next input is not Tab, or not match any engine, clear tip and remove listener
+      this.$tip.innerText = `Press Tab to use ${engine.displayName}`;
+      let handler = e => {
+        if (e.key === 'Tab') {
+          selectEngineFn(engine ? engine.$$key : '');
+          this.$tip.innerText = '';
+          this.$keyword.removeEventListener('keydown', handler);
+        }
+      };
+      this.addKeydownHandler(handler);
+    }
+  }
+
+  addUpdatedHandler(fn) {
+    this.$keyword.addEventListener('keywordUpdated', fn);
+  }
+
+  addKeyupHandler(fn) {
+    this.$keyword.addEventListener('keyup', fn);
+  }
+
+  addKeydownHandler(fn) {
+    this.$keyword.addEventListener('keydown', fn);
+  }
+
+  get value() {
+    return this.$keyword.value;
+  }
+
+  get placeholder() {
+    return this.$keyword.placeholder;
+  }
+
+  set placeholder(val) {
+    this.$keyword.placeholder = val;
+    this._onInput();
+  }
+
+  get engineSelector() {
+    let match = this.$keyword.value.match(SearchBox.engineSelectorRegex);
+    return match ? match[1] : '';
+  }
+
+  _hideTranslation() {
+    this.$translation.classList.add(SearchBox.statusClass.hide);
+  }
+  _showTranslation() {
+    this.$translation.classList.remove(SearchBox.statusClass.hide);
+  }
+
+  set translationText(text) {
+    text.length > 0 ? this._showTranslation() : this._hideTranslation();
+    this._$translationText.innerText = text;
+  }
+
+  /**
+   * @param {String} str
+   * */
+  translate(str) {
+    var _this = this;
+
+    return _asyncToGenerator(function* () {
+      str = str.trim().replace(/\n/, '') || '';
+      // @TODO only translate some language, from user config
+      // @TODO not translate some language, from user config
+      // if(chrome.i18n.detect)
+      if (str.length > _config2.default.translateMaxLength) {
+        return Promise.reject(new Error('Translation: String too long: ' + str));
+      }
+
+      let lang = navigator.language.split('-', 1)[0];
+      let resultObj = yield _translation2.default.translate({
+        api: /*CONFIG.devMode
+             ? 'GoogleCN'
+             :*/navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
+        text: str,
+        to: _config2.default.devMode ? 'zh-CN' : lang === 'zh' ? navigator.language : lang
+      });
+      if (resultObj.error) return new searchBoxErr('translate error:' + resultObj.error);
+
+      let translated = resultObj.detailed || resultObj.result;
+      if ((0, _lodash.isEmpty)((0, _base.filterEmptyStr)(translated))) return;
+
+      _this.translationText = translated.filter(function (line) {
+        return line.toLowerCase() !== str.toLowerCase();
+      }).reduce(function (html, line) {
+        return html + line + '　';
+      }, '');
+    })();
+  }
+}
+
+SearchBox.engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
+SearchBox.selectors = {
+  keyword: '.searchBox__input',
+  translation: '.searchBox__translation'
+};
+SearchBox.statusClass = {
+  hide: 'searchBox__translation--hide'
+};
+exports.default = SearchBox;
+
+/***/ }),
+
 /***/ "28sW":
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+
+/***/ "FKZI":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _lodash = __webpack_require__("y7q8");
+
+var _base = __webpack_require__("5a/Z");
+
+class Links {
+
+  constructor($linksWrapper, tabId) {
+    this.$linksWrapper = $linksWrapper;
+    this.$links = this.$linksWrapper.querySelectorAll(Links.selectors.link);
+    this.$defaultLink = null;
+    this.setDefaultLink();
+    this._init(tabId);
+  }
+
+  _init(tabId) {
+    this.$links.forEach($link => {
+      $link.style.backgroundImage = 'url(\'' + $link.getAttribute('data-favicon') + '\')';
+
+      $link.addEventListener('click', evt => {
+        let button = (0, _base.getMouseButton)(evt);
+        switch (button) {
+          case 'left':
+            chrome.tabs.update(tabId, { url: $link.href });
+            break;
+          case 'middle':
+            chrome.tabs.create({ url: $link.href });
+            break;
+          default:
+            break;
+        }
+        evt.preventDefault();
+      });
+    });
+  }
+
+  get defaultLinkIndex() {
+    return Array.from(this.$links).indexOf(this.$defaultLink);
+  }
+
+  updateHref(searchWord) {
+    if (!searchWord) return new Error('invalid param: updateLinkHref with empty string');
+    this.$links.forEach($link => {
+      $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
+    });
+  }
+
+  _setDefaultLink($link) {
+    if ($link === null) return;
+    if (this.$defaultLink) {
+      this.$defaultLink.classList.remove(Links.statusClass.defaultLink);
+    }
+    this.$defaultLink = $link;
+    this.$defaultLink.classList.add(Links.statusClass.defaultLink);
+  }
+
+  _searchLink(engineName) {
+    engineName = engineName.toLowerCase();
+    for (let $link of this.$links) {
+      if ($link.getAttribute('data-se').toLowerCase() === engineName) {
+        return $link;
+      }
+    }
+    return null;
+  }
+
+  setDefaultLink(engineName) {
+    if ((0, _lodash.isEmpty)(engineName)) {
+      if (this.$defaultLink === null) {
+        this._setDefaultLink(this.$links[0]);
+      }
+      return;
+    }
+    this._setDefaultLink(this._searchLink(engineName));
+  }
+
+  setPrevDefaultLink() {
+    let currentIndex = this.defaultLinkIndex;
+    let $link = currentIndex >= 1 ? this.$links[currentIndex - 1] : this.$links[this.$links.length - 1];
+    this._setDefaultLink($link);
+  }
+
+  setNextDefaultLink() {
+    let currentIndex = this.defaultLinkIndex;
+    let $link = currentIndex >= this.$links.length - 1 ? this.$links[0] : this.$links[currentIndex + 1];
+    this._setDefaultLink($link);
+  }
+
+  setRightDefaultLink() {
+    let currentUl = this.$defaultLink.parentElement.parentElement;
+    let nextUl = currentUl.nextElementSibling || currentUl.parentElement.firstElementChild;
+    let nextDefaultLink = nextUl.querySelector(Links.selectors.link);
+    nextDefaultLink && this._setDefaultLink(nextDefaultLink);
+  }
+
+  /**
+   * set another same type link as $defaultLink
+   * @param engineName
+   */
+  setDefaultLinkSameType(engineName) {
+    let $link = this._searchLink(engineName);
+    if ($link === null) return;
+    $link.classList.add(Links.statusClass.tempSelected);
+
+    let ul = $link.parentElement.parentElement;
+    if (ul.querySelectorAll(Links.selectors.link).length > 1) {
+      let defaultLink = ul.querySelector(`${Links.selectors.link}:not(.${Links.statusClass.tempSelected})`);
+      defaultLink && this._setDefaultLink(defaultLink);
+    }
+
+    $link.classList.remove(Links.statusClass.tempSelected);
+  }
+}
+
+/*class ResultList {
+ constructor($listWrapper, tabId, results) {
+ this.$listWrapper = $listWrapper;
+ results.forEach(result => this.add(result));
+ }
+
+ moveToHead() {}
+ add() {}
+ }
+ // result item
+ class Result {
+ innerHtml = '';
+ constructor() {}
+ onSelect() {}
+ onTab() {}
+ onEnter() {}
+ render() {}
+ }
+ class TextResult extends Result {}
+ class LinkResult extends Result {}*/
+
+Links.selectors = {
+  link: '.engines__item'
+};
+Links.statusClass = {
+  defaultLink: 'engines__item--default',
+  tempSelected: 'engines__item--temp'
+};
+exports.default = Links;
 
 /***/ }),
 
@@ -335,7 +687,10 @@ let getSelection = (() => {
   };
 })();
 
-// get keyword from tab url
+/**
+ * Get keyword from tab url
+ * @param {Url} tabUrl
+ */
 
 
 let getQueryString = (() => {
@@ -461,6 +816,9 @@ let getKeyword = (() => {
     return _ref4.apply(this, arguments);
   };
 })();
+
+/** @module src/popup/keyword */
+
 
 var _lodash = __webpack_require__("y7q8");
 
@@ -2982,52 +3340,6 @@ let chromeTabsProxy = chromeAsync.proxy(chrome.tabs);exports.default = getKeywor
 "use strict";
 
 
-/**
- * @param {String} str
- * */
-let translate = (() => {
-  var _ref2 = _asyncToGenerator(function* (str) {
-    str = str.trim().replace(/\n/, '') || '';
-    // @TODO only translate some language, from user config
-    // @TODO not translate some language, from user config
-    // if(chrome.i18n.detect)
-    if (str.length > _config2.default.translateMaxLength) {
-      return Promise.reject(new popupErr('Translation: String too long: ' + str));
-    }
-
-    let lang = navigator.language.split('-', 1)[0];
-    let resultObj = yield _translation2.default.translate({
-      api: _config2.default.devMode ? 'GoogleCN' : navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
-      text: str,
-      to: _config2.default.devMode ? 'zh-CN' : lang === 'zh' ? navigator.language : lang
-    });
-    if (resultObj.error) return null;
-
-    let translated = resultObj.detailed || resultObj.result;
-    if ((0, _lodash.isEmpty)((0, _base.filterEmptyStr)(translated))) return '';
-
-    return translated.filter(function (line) {
-      return line.toLowerCase() !== str.toLowerCase();
-    }).reduce(function (html, line) {
-      return html + line + '\n';
-    }, '');
-  });
-
-  return function translate(_x2) {
-    return _ref2.apply(this, arguments);
-  };
-})();
-
-var _lodash = __webpack_require__("y7q8");
-
-var _translation = __webpack_require__("RkCM");
-
-var _translation2 = _interopRequireDefault(_translation);
-
-var _config = __webpack_require__("wYMm");
-
-var _config2 = _interopRequireDefault(_config);
-
 var _base = __webpack_require__("5a/Z");
 
 var _Url = __webpack_require__("tDBr");
@@ -3050,166 +3362,30 @@ var _Engine = __webpack_require__("gLfi");
 
 var _Engine2 = _interopRequireDefault(_Engine);
 
+var _SearchBox = __webpack_require__("0NI0");
+
+var _SearchBox2 = _interopRequireDefault(_SearchBox);
+
+var _Links = __webpack_require__("FKZI");
+
+var _Links2 = _interopRequireDefault(_Links);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-_translation2.default.add(new _translation2.default.BaiDu());
-_translation2.default.add(new _translation2.default.Google());
-if (_config2.default.devMode) _translation2.default.add(new _translation2.default.GoogleCN());
-
-let popupErr = (0, _base.minErr)('Popup');
-
 /**
  * @param {Error} e
- * */
+ **/
 function errorHandler(e) {
-  _base.clog.err(e.toString());
   //noinspection JSUnresolvedVariable
+  _base.clog.err(e.toString());
   _base.clog.err('Error stack: ', e.stack);
 }
 
-class Links {
-  constructor($linksWrapper, tabId) {
-    this.$linksWrapper = $linksWrapper;
-    this.$links = this.$linksWrapper.querySelectorAll('.icon-link');
-    this.$defaultLink = null;
-    this.setDefaultLink();
-    this._init(tabId);
-  }
-
-  _init(tabId) {
-    this.$links.forEach($link => {
-      $link.style.backgroundImage = 'url(\'' + $link.getAttribute('data-favicon') + '\')';
-
-      $link.addEventListener('click', evt => {
-        let button = (0, _base.getMouseButton)(evt);
-        switch (button) {
-          case 'left':
-            chrome.tabs.update(tabId, { url: $link.href });
-            break;
-          case 'middle':
-            chrome.tabs.create({ url: $link.href });
-            break;
-          default:
-            break;
-        }
-        evt.preventDefault();
-      });
-    });
-  }
-
-  updateHref(searchWord) {
-    if (!searchWord) return new popupErr('invalid param: updateLinkHref with empty string');
-    this.$links.forEach($link => {
-      $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
-    });
-  }
-
-  _setDefaultLink($link) {
-    if (this.$defaultLink) {
-      this.$defaultLink.classList.remove(Links.defaultLinkClass);
-    }
-    this.$defaultLink = $link;
-    this.$defaultLink.classList.add(Links.defaultLinkClass);
-  }
-
-  setDefaultLink(seName) {
-    if ((0, _lodash.isEmpty)(seName)) {
-      if (this.$defaultLink === null) {
-        this._setDefaultLink(this.$links[0]);
-      }
-      return;
-    }
-    seName = seName.toLowerCase();
-    for (let $link of this.$links) {
-      if ($link.getAttribute('data-se').toLowerCase() === seName) {
-        this._setDefaultLink($link);
-        break;
-      }
-    }
-  }
-}
-
-/*class ResultList {
-  constructor($listWrapper, tabId, results) {
-    this.$listWrapper = $listWrapper;
-    results.forEach(result => this.add(result));
-  }
-
-  moveToHead() {}
-  add() {}
-}
-// result item
-class Result {
-  innerHtml = '';
-  constructor() {}
-  onSelect() {}
-  onTab() {}
-  onEnter() {}
-  render() {}
-}
-class TextResult extends Result {}
-class LinkResult extends Result {}*/
-
-Links.defaultLinkClass = 'icon-link-default';
-class SearchBox {
-  constructor($keyword, engines, selectEngineFn) {
-    this.suggestions = [];
-
-    this.$el = $keyword;
-    this.engines = engines;
-    this.suggestions.concat((0, _base.deepValue)(engines));
-    this.$el.focus();
-    this.$el.addEventListener('keydown', e => {
-      if (e.key === 'Tab') {
-        // TODO serarch in this.sugesstion, and autocomplete by press Tab
-        if (this.value === '' && this.$el.placeholder !== '') {
-          this.$el.value = this.$el.placeholder;
-        }
-        e.preventDefault();
-      }
-    });
-    this.$el.addEventListener('input', (0, _lodash.debounce)(() => this._onInput(selectEngineFn), 500));
-  }
-
-  _onInput(selectEngineFn) {
-    if (this.engineSelector !== '') {
-      let engineSelectorLower = this.engineSelector.toLowerCase();
-      let engine = this.engines.find(engine => {
-        return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
-      });
-      selectEngineFn(engine ? engine.$$key : '');
-    }
-    this.$el.dispatchEvent(new CustomEvent('keywordUpdated', { detail: this.value || this.$el.placeholder }));
-  }
-
-  onUpdated(fn) {
-    this.$el.addEventListener('keywordUpdated', fn);
-  }
-
-  onKeyup(fn) {
-    this.$el.addEventListener('keyup', fn);
-  }
-
-  get value() {
-    return this.$el.value;
-  }
-  set placeholder(val) {
-    this.$el.placeholder = val;
-    this._onInput();
-  }
-  get engineSelector() {
-    let match = this.$el.value.match(SearchBox.engineSelectorRegex);
-    return match ? match[1] : '';
-  }
-}
-
-SearchBox.engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
 (0, _base.onceLoaded)(_base.getCurrentTab).then((() => {
   var _ref = _asyncToGenerator(function* (tab) {
     let tabUrl = new _Url2.default(tab.url);
-    let $translation = _base.$`.translation`;
     let engineListTpl = _base.$`#tpl-engines`.innerHTML.trim();
     let $enginesSection = _base.$`.engines`;
 
@@ -3223,36 +3399,54 @@ SearchBox.engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
       keywords.forEach(function (kw) {
         return searchBox.suggestions.push(kw.word.trim());
       });
-      searchBox.placeholder = keywords[0].word.trim();
+      let newPlaceholder = keywords[0].word.trim();
+      if (newPlaceholder) searchBox.placeholder = newPlaceholder;
       return null;
     }).catch(errorHandler);
 
     $enginesSection.innerHTML = yield _Render2.default.openEngines(engineListTpl);
 
-    let links = new Links(_base.$`.engines`, tab.id);
-    let engines = yield _Engine2.default.getOpen(_Engine2.default.returnType.normal, null, ['displayName', '$$key']);
-    var searchBox = new SearchBox(_base.$`#keyword`, engines, function (engineKey) {
-      return links.setDefaultLink(engineKey);
+    let links = new _Links2.default(_base.$`.engines`, tab.id);
+    _Engine2.default.searchKeys(tabUrl.host, { includeRootDomain: true }).then(function (keys) {
+      // TODO if keys.length <= 0, look for history and see which engine will be more likely selected
+      keys.length && links.setDefaultLinkSameType(keys[0]);
     });
 
-    searchBox.onKeyup(function (e) {
-      if (e.key === 'Enter') {
-        links.$defaultLink.dispatchEvent(new MouseEvent('click', { button: _base.btnCode.left }));
-      }
+    let engines = yield _Engine2.default.getOpen({
+      returnType: _Engine2.default.returnType.normal,
+      fields: ['displayName', '$$key']
     });
-    searchBox.onUpdated(function (e) {
-      let searchString = e.detail.trim();
-      (0, _base.clog)('translate ', searchString);
-
-      if (searchString) {
-        links.updateHref(searchString);
-        if (searchString.length <= _config2.default.translateMaxLength) {
-          translate(searchString).then(function (html) {
-            $translation.innerText = html;
-          }).catch(errorHandler);
+    var searchBox = new _SearchBox2.default({
+      $element: _base.$`.searchBox`,
+      engines: engines,
+      selectEngineFn: function (engineKey) {
+        return links.setDefaultLink(engineKey);
+      },
+      onKeyup: function (e) {
+        if (e.key === 'Enter') {
+          links.$defaultLink.dispatchEvent(new MouseEvent('click', { button: _base.btnCode.left }));
         }
+      },
+      onKeydown: function (e) {
+        if (e.key === 'ArrowDown') {
+          links.setNextDefaultLink();
+        } else if (e.key === 'ArrowUp') {
+          links.setPrevDefaultLink();
+        } else if (e.key === 'ArrowRight') {
+          links.setRightDefaultLink();
+        }
+      },
+      onUpdated: function (e) {
+        let searchString = e.detail.trim();
+        if (searchString === searchBox.defaultPlaceholder || !searchString) {
+          return;
+        }
+        (0, _base.clog)('translate ', searchString);
+
+        links.updateHref(searchString);
       }
     });
+
     new _Mason2.default(_base.$`.engines`, {
       itemSelector: '.pin',
       columnNum: 2

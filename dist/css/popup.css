@@ -18,7 +18,7 @@ body {
   white-space: nowrap;
 }
 .engines ul>.type {font-weight: bold}
-.icon-link {
+.engines__item {
   cursor: pointer;
   display: block;
   text-indent: .2rem;
@@ -27,17 +27,56 @@ body {
   background: no-repeat 0 .04rem;
   background-size: 16px 16px;
   color: rgb(51, 102, 204); }
-.icon-link:hover {
+.engines__item:hover {
   text-decoration: underline;}
-a.icon-link-default {
+.engines__item--default {
   outline: 1px solid cadetblue;
 }
 
-input {
+.searchBox__input {
   width: 100%;
   line-height: .2rem;
   border: .01rem solid gray;
   border-radius: .02rem;
+}
+
+.searchBox {position: relative}
+.searchBox__translation {
+  display: inline-block;
+  position: absolute;
+  min-height: .24rem;
+  padding: 0 .6em;
+  margin: .05rem 0 0 0;
+  border-radius: 4px;
+  background-size: 16px 16px;
+  background: rgba(0, 0, 0, 0.66) no-repeat 0 .04rem;
+  color: white;
+  z-index: 1;
+}
+.searchBox__translation--hide {
+  display: none;
+}
+.searchBox__translation img {
+  width: 1em;
+  height: 1em;
+  margin-right: .4em;
+  border-style: none;
+  vertical-align: text-bottom;
+}
+.searchBox__translation:after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 1em;
+  margin-left: -5px;
+  border: 5px solid transparent;
+  border-bottom-color: rgba(0, 0, 0, 0.66) ;
+}
+.searchBox__tip {
+  position: absolute;
+  color: #999;
+  top: 0;
+  right: .04rem;
 }
 
 .setting {
