@@ -53,7 +53,9 @@ describe('Engine', function () {
       return engine.open;
     });
     it('should return assoc object', function () {
-      return Engine.getOpen(Engine.returnType.assoc).then(function (engines) {
+      return Engine.getOpen({
+        returnType: Engine.returnType.assoc
+      }).then(function (engines) {
         expect(engines).to.eql(DB.assoc(openEngines));
       });
     });

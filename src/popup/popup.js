@@ -44,7 +44,10 @@ onceLoaded(getCurrentTab).then(async function (tab) {
   $enginesSection.innerHTML = await Render.openEngines(engineListTpl);
 
   let links = new Links($`.engines`, tab.id);
-  let engines = await Engine.getOpen(Engine.returnType.normal, null, ['displayName', '$$key']);
+  let engines = await Engine.getOpen({
+    returnType: Engine.returnType.normal,
+    fields: ['displayName', '$$key']
+  });
   var searchBox = new SearchBox({
     $element: $`.searchBox`,
     engines: engines,

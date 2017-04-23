@@ -35,8 +35,7 @@ Engine.getSortedAll = function (returnType = Engine.returnType.normal, filter) {
  * @param {String[]?} fields
  * @return {Promise}
  * */
-Engine.getOpen = async function (returnType = Engine.returnType.normal, filter, fields = []) {
-  filter = filter || function() {return true;};
+Engine.getOpen = async function ({returnType = Engine.returnType.normal, fields = [], filter = function() {return true;}} = {}) {
   let engines = await this.getAll(true, function(engine) {
     return engine.open && filter(engine);
   });
