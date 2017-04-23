@@ -51,6 +51,34 @@ let Listener = (function () {
     });
   }
 
+  function loadInitData() {
+    let manifest = chrome.runtime.getManifest();
+    let loadDataPromises = [];
+    loadDataPromises.push(Setting.set('version', manifest.version));
+
+    iconData.forEach(group => {
+      group.hosts.forEach(host => {
+        loadDataPromises.push(Icon.set(host, group.dataURI));
+      });
+    });
+
+    Object.keys(CONFIG.engineTypes).forEach(function (typeId) {
+      loadDataPromises.push(EngineType.set(typeId, CONFIG.engineTypes[typeId]));
+    });
+
+    Object.keys(CONFIG.engines).forEach(function (key) {
+      loadDataPromises.push(Engine.set(key, CONFIG.engines[key]));
+    });
+
+    loadDataPromises.push(Setting.set('cfg_remove_redirect', true));
+    if (CONFIG.devMode) {
+      Promise.all(loadDataPromises).then(() => {
+        clog('load init data done!');
+        chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/popup.html'});
+      }).catch(e => clog('load init data error', e.toString()));
+    }
+  }
+
   return {
     onTabCreated: function (tabInfo) {
       // chrome.tabs.onCreated listener may not get tab url properly,
@@ -94,36 +122,25 @@ let Listener = (function () {
     },
 
     onInstalled: function () {
-      let manifest = chrome.runtime.getManifest();
-      let loadDataPromises = [];
-      loadDataPromises.push(Setting.set('version', manifest.version));
-
-      iconData.forEach(group => {
-        group.hosts.forEach(host => {
-          loadDataPromises.push(Icon.set(host, group.dataURI));
-        });
-      });
-
-      Object.keys(CONFIG.engineTypes).forEach(function (typeId) {
-        loadDataPromises.push(EngineType.set(typeId, CONFIG.engineTypes[typeId]));
-      });
-
-      Object.keys(CONFIG.engines).forEach(function (key) {
-        loadDataPromises.push(Engine.set(key, CONFIG.engines[key]));
-      });
-
-      loadDataPromises.push(Setting.set('cfg_remove_redirect', true));
+      clog('installed');
       if (CONFIG.devMode) {
-        Promise.all(loadDataPromises).then(() => {
-          clog('load init data done!');
-          chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/popup.html'});
-        }).catch(e => clog('load init data error', e.toString()));
+        Icon.clear();
+        Setting.clear();
+        Engine.clear();
+        EngineType.clear();
+        loadInitData();
       }
+    },
+
+    onStartup() {
+      clog('startup');
+      loadInitData();
     }
   };
 })();
 
 chrome.runtime.onInstalled.addListener(Listener.onInstalled);
+chrome.runtime.onStartup.addListener(Listener.onStartup);
 
 chrome.tabs.onCreated.addListener(Listener.onTabCreated);
 // Listen for any changes to the URL of any tab.
