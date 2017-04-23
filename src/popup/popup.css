@@ -18,7 +18,7 @@ body {
   white-space: nowrap;
 }
 .engines ul>.type {font-weight: bold}
-.icon-link {
+.engines__item {
   cursor: pointer;
   display: block;
   text-indent: .2rem;
@@ -27,9 +27,9 @@ body {
   background: no-repeat 0 .04rem;
   background-size: 16px 16px;
   color: rgb(51, 102, 204); }
-.icon-link:hover {
+.engines__item:hover {
   text-decoration: underline;}
-a.icon-link-default {
+.engines__item--default {
   outline: 1px solid cadetblue;
 }
 

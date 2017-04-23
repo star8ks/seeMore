@@ -2,15 +2,16 @@ import {isEmpty} from 'lodash';
 import {getMouseButton} from '../common/base';
 class Links {
   static selectors = {
-    links: '.engines__item'
+    link: '.engines__item'
   };
   static statusClass = {
-    defaultLink: 'icon-link-default'
+    defaultLink: 'engines__item--default',
+    tempSelected: 'engines__item--temp',
   };
 
   constructor($linksWrapper, tabId) {
     this.$linksWrapper = $linksWrapper;
-    this.$links = this.$linksWrapper.querySelectorAll(Links.selectors.links);
+    this.$links = this.$linksWrapper.querySelectorAll(Links.selectors.link);
     this.$defaultLink = null;
     this.setDefaultLink();
     this._init(tabId);
@@ -49,6 +50,7 @@ class Links {
   }
 
   _setDefaultLink($link) {
+    if ($link === null) return;
     if (this.$defaultLink) {
       this.$defaultLink.classList.remove(Links.statusClass.defaultLink);
     }
@@ -56,20 +58,24 @@ class Links {
     this.$defaultLink.classList.add(Links.statusClass.defaultLink);
   }
 
-  setDefaultLink(seName) {
-    if (isEmpty(seName)) {
+  _searchLink(engineName) {
+    engineName = engineName.toLowerCase();
+    for (let $link of this.$links) {
+      if ($link.getAttribute('data-se').toLowerCase() === engineName) {
+        return $link;
+      }
+    }
+    return null;
+  }
+
+  setDefaultLink(engineName) {
+    if (isEmpty(engineName)) {
       if (this.$defaultLink === null) {
         this._setDefaultLink(this.$links[0]);
       }
       return;
     }
-    seName = seName.toLowerCase();
-    for (let $link of this.$links) {
-      if ($link.getAttribute('data-se').toLowerCase() === seName) {
-        this._setDefaultLink($link);
-        break;
-      }
-    }
+    this._setDefaultLink(this._searchLink(engineName));
   }
 
   setPrevDefaultLink() {
@@ -87,8 +93,26 @@ class Links {
   setRightDefaultLink() {
     let currentUl = this.$defaultLink.parentElement.parentElement;
     let nextUl = currentUl.nextElementSibling || currentUl.parentElement.firstElementChild;
-    let nextDefaultLink = nextUl.querySelector('a');
+    let nextDefaultLink = nextUl.querySelector(Links.selectors.link);
     nextDefaultLink && this._setDefaultLink(nextDefaultLink);
+  }
+
+  /**
+   * set another same type link as $defaultLink
+   * @param engineName
+   */
+  setDefaultLinkSameType(engineName) {
+    let $link = this._searchLink(engineName);
+    if ($link === null) return;
+    $link.classList.add(Links.statusClass.tempSelected);
+
+    let ul = $link.parentElement.parentElement;
+    if(ul.querySelectorAll(Links.selectors.link).length > 1) {
+      let defaultLink = ul.querySelector(`${Links.selectors.link}:not(.${Links.statusClass.tempSelected})`);
+      defaultLink && this._setDefaultLink(defaultLink);
+    }
+
+    $link.classList.remove(Links.statusClass.tempSelected);
   }
 }
 

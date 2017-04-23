@@ -45,7 +45,8 @@ onceLoaded(getCurrentTab).then(async function (tab) {
 
   let links = new Links($`.engines`, tab.id);
   Engine.searchKeys(tabUrl.host, {includeRootDomain: true}).then(keys => {
-    keys.length && links.setDefaultLink(keys[0]);
+    // TODO if keys.length <= 0, look for history and see which engine will be more likely selected
+    keys.length && links.setDefaultLinkSameType(keys[0]);
   });
 
   let engines = await Engine.getOpen({

@@ -1,46 +1,80 @@
 /**
  * Created by ray7551@gmail.com on 16-10-27.
  */
+class DB {
+  /**
+   * @param {LocalForage} localforage
+   * @param {String} storeName
+   * @param {String} name
+   * */
+  constructor(localforage, storeName='app', name='sc') {
+    this.lf = localforage.createInstance({
+      driver: localforage.INDEXEDDB,
+      // driver: localforage.LOCALSTORAGE,
+      name: name,
+      storeName: storeName
+    });
+  }
 
-/**
- * @param {LocalForage} localforage
- * @param {String} storeName
- * @param {String=} name
- * */
-function DB(localforage, storeName, name) {
-  storeName = storeName || 'app';
-  name = name || 'sc';
-  this.lf = localforage.createInstance({
-    // driver: localforage.INDEXEDDB,
-    driver: localforage.LOCALSTORAGE,
-    name: name,
-    storeName: storeName
-  });
+  /**
+   * @param key
+   * @param withInnerKey
+   * @return {Promise}
+   */
+  get(key, withInnerKey) {
+    withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
+    return this.lf.getItem(key).then(function (item) {
+      return withInnerKey ? _defineInnerKey(item, key) : item;
+    });
+  }
+
+  getAll(withInnerKey, filter) {
+    withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
+    return this.keys().map(function (key) {
+      return this.get(key, withInnerKey);
+    }.bind(this)).then(function (items) {
+      return filter ? items.filter(filter) : items;
+    });
+  }
+
+  set(key, val) {
+    return this.lf.setItem(key, val);
+  }
+
+  clear() {
+    return this.lf.clear();
+  }
+
+  keys() {
+    return this.lf.keys();
+  }
+
+  /**
+   * array to assoc object
+   * */
+  static assoc(array, key) {
+    var res = {};
+    key = key || '$$key';
+    array.forEach(function (item) {
+      if (item[key]) {
+        res[item[key]] = item;
+      }
+    });
+    return res;
+  }
+
+  /**
+   * assoc object to array
+   * */
+  static array(assocObj) {
+    var res = [];
+    Object.keys(assocObj).forEach(function (key) {
+      _defineInnerKey(assocObj[key], key);
+      res.push(assocObj[key]);
+    });
+    return res;
+  }
 }
-/**
- * array to assoc object
- * */
-DB.assoc = function (array, key) {
-  var res = {};
-  key = key || '$$key';
-  array.forEach(function (item) {
-    if (item[key]) {
-      res[item[key]] = item;
-    }
-  });
-  return res;
-};
-/**
- * assoc object to array
- * */
-DB.array = function (assocObj) {
-  var res = [];
-  Object.keys(assocObj).forEach(function (key) {
-    _defineInnerKey(assocObj[key], key);
-    res.push(assocObj[key]);
-  });
-  return res;
-};
 
 function _defineInnerKey(item, key, keyName) {
   keyName = keyName || '$$key';
@@ -66,35 +100,5 @@ function _defineInnerKey(item, key, keyName) {
   }
   return item;
 }
-
-/**
- * @param key
- * @param withInnerKey
- * @return {Promise.<TResult>}
- */
-DB.prototype.get = function (key, withInnerKey) {
-  withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
-  return this.lf.getItem(key).then(function (item) {
-    return withInnerKey ? _defineInnerKey(item, key) : item;
-  });
-};
-DB.prototype.getAll = function (withInnerKey, filter) {
-  withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
-  return this.keys().map(function (key) {
-    return this.get(key, withInnerKey);
-  }.bind(this)).then(function (items) {
-    return filter ? items.filter(filter) : items;
-  });
-};
-
-DB.prototype.set = function (key, val) {
-  return this.lf.setItem(key, val);
-};
-DB.prototype.clear = function () {
-  return this.lf.clear();
-};
-DB.prototype.keys = function () {
-  return this.lf.keys();
-};
 
 export default DB;
