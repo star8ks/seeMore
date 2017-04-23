@@ -666,6 +666,15 @@ const CONFIG = {
       open: false,
       hosts: ['twitter.com'],
       url: 'https://twitter.com/search?q=%s'
+    },
+    weixin: {
+      order: 3300,
+      typeId: 107,
+      defaultTypeId: 9,
+      displayName: '微信搜索',
+      open: true,
+      hosts: ['weixin.sogou.com'],
+      url: 'http://weixin.sogou.com/weixin?type=2&ie=utf8&query=%s',
     }
   },
   /* eslint-disable no-undef */
