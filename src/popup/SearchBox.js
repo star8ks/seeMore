@@ -30,6 +30,11 @@ class SearchBox {
     this.$tip = $element.querySelector('.searchBox__tip');
     this.engines = engines;
     this.suggestions.concat(deepValue(engines));
+
+    this.$translation.addEventListener('mouseleave', () => {
+      this._hideTranslation();
+    });
+
     this.$keyword.focus();
     this.defaultPlaceholder = this.$keyword.placeholder;
     this.$keyword.addEventListener('keydown', e => {
@@ -118,12 +123,15 @@ class SearchBox {
     return match ? match[1] : '';
   }
 
+  _hideTranslation() {
+    this.$translation.classList.add(SearchBox.statusClass.hide);
+  }
+  _showTranslation() {
+    this.$translation.classList.remove(SearchBox.statusClass.hide);
+  }
+
   set translationText(text) {
-    if(text.length > 0) {
-      this.$translation.classList.remove(SearchBox.statusClass.hide);
-    } else {
-      this.$translation.classList.add(SearchBox.statusClass.hide);
-    }
+    text.length > 0 ? this._showTranslation() : this._hideTranslation();
     this._$translationText.innerText = text;
   }
 
@@ -141,9 +149,9 @@ class SearchBox {
 
     let lang = navigator.language.split('-', 1)[0];
     let resultObj = await tjs.translate({
-      api: CONFIG.devMode
+      api: /*CONFIG.devMode
        ? 'GoogleCN'
-       : (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
+       :*/ (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
       text: str,
       to: CONFIG.devMode
         ? 'zh-CN'
@@ -156,7 +164,7 @@ class SearchBox {
 
     this.translationText = translated.filter(line => {
       return line.toLowerCase() !== str.toLowerCase();
-    }).reduce((html, line) => html + line + '\n', '');
+    }).reduce((html, line) => html + line + '　', '');
   }
 }
 
