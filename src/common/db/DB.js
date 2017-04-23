@@ -50,23 +50,28 @@ function _defineInnerKey(item, key, keyName) {
 
   /* eslint-disable no-unreachable */
   switch (typeof item) {
-  case 'object':
-    Object.defineProperty(item, keyName, {
-      value: key,
-      enumerable: false
-    });
-    return item;
-    break;
-  case 'string':
-  case 'number':
-    var obj = {};
-    obj[key] = item;
-    return _defineInnerKey(obj, key);
-    break;
+    case 'object':
+      Object.defineProperty(item, keyName, {
+        value: key,
+        enumerable: false
+      });
+      return item;
+      break;
+    case 'string':
+    case 'number':
+      var obj = {};
+      obj[key] = item;
+      return _defineInnerKey(obj, key);
+      break;
   }
   return item;
 }
 
+/**
+ * @param key
+ * @param withInnerKey
+ * @return {Promise.<TResult>}
+ */
 DB.prototype.get = function (key, withInnerKey) {
   withInnerKey = withInnerKey === void 0 ? false : !!withInnerKey;
   return this.lf.getItem(key).then(function (item) {

@@ -7,6 +7,7 @@ import clog from './base/clog';
 import minErr from './base/minErr';
 
 let renderErr = minErr('Render');
+
 function setProperties(engines) {
   return Promise.map(engines, function (se) {
     var oUrl = new Url(se.url);
@@ -82,4 +83,5 @@ function combineHtml(lists) {
   return lists.reduce((html, list) => html + list, '');
 }
 
+/** @module src/common/Render */
 export default Render;

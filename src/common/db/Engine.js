@@ -85,4 +85,5 @@ Engine.searchKeys = function(host, {includeRootDomain = false, searchAll = false
   });
 };
 
+/** @module src/common/db/Engine */
 export default Engine;

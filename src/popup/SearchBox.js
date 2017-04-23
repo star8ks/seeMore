@@ -1,11 +1,15 @@
-import {deepValue} from '../common/base';
-import {debounce} from 'lodash';
+import {deepValue, filterEmptyStr, minErr} from '../common/base';
+import {debounce, isEmpty} from 'lodash';
+import tjs from './translation';
+import CONFIG from '../common/config';
 
+let searchBoxErr = minErr('searchBox');
 class SearchBox {
+  static engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
   suggestions = [];
 
   /**
-   * @param {HTMLInputElement} $keyword
+   * @param {HTMLElement} $element
    * @param {Array} engines
    * @param {Function} selectEngineFn
    * @param {Function} onKeyup
@@ -30,9 +34,24 @@ class SearchBox {
       }
     });
     selectEngineFn && this.$keyword.addEventListener('input', debounce(() => this._onInput(selectEngineFn), 500));
+
+    this.addUpdatedHandler(e => {
+      let searchString = e.detail.trim();
+      if (searchString === this.defaultPlaceholder || !searchString) {
+        return;
+      }
+      if (searchString.length <= CONFIG.translateMaxLength) {
+        return this.translate(searchString);
+      }
+    });
+
     onKeyup && this.addKeyupHandler(onKeyup);
     onKeydown && this.addKeydownHandler(onKeydown);
     onUpdated && this.addUpdatedHandler(onUpdated);
+
+    tjs.add(new tjs.BaiDu());
+    tjs.add(new tjs.Google());
+    if (CONFIG.devMode) tjs.add(new tjs.GoogleCN());
   }
 
   _onInput(selectEngineFn) {
@@ -46,9 +65,9 @@ class SearchBox {
       let engine = this.engines.find(engine => {
         return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
       });
-      if(!engine) return;
+      if (!engine) return;
 
-      // TODO: if next input is not Tab, clear tip and remove listener
+      // TODO: if next input is not Tab, or not match any engine, clear tip and remove listener
       this.$tip.innerText = `Press Tab to use ${engine.displayName}`;
       let handler = e => {
         if (e.key === 'Tab') {
@@ -73,8 +92,6 @@ class SearchBox {
     this.$keyword.addEventListener('keydown', fn);
   }
 
-  static engineSelectorRegex = /(?:^|\s)([^\s]+)$/;
-
   get value() {
     return this.$keyword.value;
   }
@@ -91,6 +108,38 @@ class SearchBox {
   get engineSelector() {
     let match = this.$keyword.value.match(SearchBox.engineSelectorRegex);
     return match ? match[1] : '';
+  }
+
+  /**
+   * @param {String} str
+   * */
+  async translate(str) {
+    str = str.trim().replace(/\n/, '') || '';
+    // @TODO only translate some language, from user config
+    // @TODO not translate some language, from user config
+    // if(chrome.i18n.detect)
+    if (str.length > CONFIG.translateMaxLength) {
+      return Promise.reject(new Error('Translation: String too long: ' + str));
+    }
+
+    let lang = navigator.language.split('-', 1)[0];
+    let resultObj = await tjs.translate({
+      api: /*CONFIG.devMode
+       ? 'GoogleCN'
+       :*/ (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
+      text: str,
+      to: CONFIG.devMode
+        ? 'zh-CN'
+        : (lang === 'zh' ? navigator.language : lang)
+    });
+    if (resultObj.error) return new searchBoxErr('translate error:' + resultObj.error);
+
+    let translated = resultObj.detailed || resultObj.result;
+    if (isEmpty(filterEmptyStr(translated))) return;
+
+    this.$translation.innerText = translated.filter(line => {
+      return line.toLowerCase() !== str.toLowerCase();
+    }).reduce((html, line) => html + line + '\n', '');
   }
 }
 

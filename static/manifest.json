@@ -1,6 +1,6 @@
 ﻿{
   "name": "搜索+(SeeMore)",
-  "version": "0.2.2",
+  "version": "0.3.3",
   "minimum_chrome_version": "55",
   "description": "浏览器的搜索增强插件。A browser search enhance extension.",
   "homepage_url": "https://github.com/ray7551/seeMore",

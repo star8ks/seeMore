@@ -3,7 +3,20 @@ const CONFIG = {
   translateMaxLength: 80,
   // TODO move engineTypes and engines to data file initData.js.
   // They are data for initialize extension, like iconData.js
+
+  /**
+   * Engines listed in this file are default engines.
+   * 'default' means they are unchangeable, once they write to db, they should not be changed.
+   *
+   * Default engines are used to provide suggestion when user want to add engine to his customized engine list.
+   * Each Engine have an defaultTypeId shows it's default type defined as initial data,
+   * and a
+   */
   engineTypes: {
+  /**
+   * Why not use id to order? Because id is integer, move one type to order 1 will change all type's id,
+   * and you need to change all engine's typeId
+   */
     1: {name: 'Search Engine', order: 1, default: true},
     2: {name: 'Video', order: 2, default: true},
     3: {name: 'Translate', order: 3, default: true},
@@ -21,8 +34,21 @@ const CONFIG = {
     106: {name: 'Shopping', order: 6},
     107: {name: 'Social Network', order: 7},
   },
+  // Search engines
   engines: {
-    // Search engines
+    /**
+     * @see module:src/common/db/Engine.searchKeys
+     * Hosts is used for getting engine info from tab url's host.
+     *    1. Get favicon of engine {@link module:src/common/Render~setProperties}
+     *    2. Get query string from current tab url {@link module:src/popup/keyword~getQueryString}
+     *
+     * An engine may have many hosts.
+     *    Because we want to get query string when visiting google.com and google.com.hk
+     * An Icon is linked to a host. You should get Icon of an Engine by it's hosts, not the url's host. Because
+     *    1. some engine may use other provider's search service(such as cse.google.com), whose url's host is provider's
+     *    2. you can't get favicon from some url's host using current method {@link module:src/common/Render~setProperties}.
+     *      E.g. For Engine tmall, url's host list.tmall.com will redirect to www.tmall.com, which will cause yandex get a invalid favicon.
+     */
     google: {
       order: 100,
       typeId: 101,
@@ -502,9 +528,19 @@ const CONFIG = {
       typeId: 104,
       defaultTypeId: 4,
       displayName: 'IT eBooks',
-      open: true,
+      open: false,
       hosts: ['it-ebooks.info'],
       url: 'https://cse.google.com/cse?cx=013493258683483688568:xhfa6ctm1ki&q=%s#gsc.tab=0&gsc.q=%s'
+    },
+    //Fox Ebook http://www.foxebook.net/search/%s
+    FoxEbook: {
+      order: 1910,
+      typeId: 104,
+      defaultTypeId: 4,
+      displayName: 'Fox Ebook',
+      open: true,
+      hosts: ['www.foxebook.net'],
+      url: 'https://www.foxebook.net/search/%s'
     },
     // Development
     explainShell: {

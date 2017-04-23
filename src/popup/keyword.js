@@ -36,7 +36,10 @@ async function getSelection(tabUrl) {
   return EMPTY_KEYWORDS;
 }
 
-// get keyword from tab url
+/**
+ * Get keyword from tab url
+ * @param {Url} tabUrl
+ */
 async function getQueryString(tabUrl) {
   if (tabUrl.isGoogleFail) {
     tabUrl = new Url(tabUrl.getQueryVal('continue'));
@@ -141,4 +144,5 @@ async function getKeyword(tabUrl) {
   return keywords;
 }
 
+/** @module src/popup/keyword */
 export default getKeyword;

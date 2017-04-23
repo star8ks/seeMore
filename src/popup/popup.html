@@ -2,13 +2,16 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>See More</title>
+  <title>SeeMore</title>
 </head>
 
 <body>
-<input id="keyword" type="text" placeholder="请输入关键词">
-<section class="translation"></section>
-<section class="tip"></section>
+
+<section class="searchBox">
+  <input class="searchBox__input" id="keyword" type="text" placeholder="请输入关键词">
+  <p class="searchBox__translation"></p>
+  <span class="searchBox__tip"></span>
+</section>
 
 <section class="engines">
 </section>
@@ -20,7 +23,7 @@
   <ul class="pin">
     <li class="type unselectable"><span>{{typeName}}</span></li>
     {{#engines}}
-    <li><a class="se icon-link unselectable"
+    <li><a class="engines__item icon-link unselectable"
       data-se="{{index}}"
       data-favicon="{{favicon}}"
       data-url="{{url}}"

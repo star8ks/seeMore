@@ -33,11 +33,20 @@ a.icon-link-default {
   outline: 1px solid cadetblue;
 }
 
-input {
+.searchBox__input {
   width: 100%;
   line-height: .2rem;
   border: .01rem solid gray;
   border-radius: .02rem;
+}
+
+.searchBox {position: relative}
+.searchBox__translation {margin: 0}
+.searchBox__tip {
+  position: absolute;
+  color: #999;
+  top: 0;
+  right: .4em;
 }
 
 .setting {
