@@ -5,3 +5,5 @@ node_modules/
 dist-dev/
 coverage/
 .nyc_output/
+resource/
+.vscode/

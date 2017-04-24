@@ -149,9 +149,9 @@ class SearchBox {
 
     let lang = navigator.language.split('-', 1)[0];
     let resultObj = await tjs.translate({
-      api: /*CONFIG.devMode
+      api: CONFIG.devMode
        ? 'GoogleCN'
-       :*/ (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
+       : (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
       text: str,
       to: CONFIG.devMode
         ? 'zh-CN'

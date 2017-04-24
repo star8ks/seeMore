@@ -1,4 +1,5 @@
 import {isEmpty} from 'lodash';
+import Mason from '../common/Mason';
 import {getMouseButton} from '../common/base';
 class Links {
   static selectors = {
@@ -14,7 +15,15 @@ class Links {
     this.$links = this.$linksWrapper.querySelectorAll(Links.selectors.link);
     this.$defaultLink = null;
     this.setDefaultLink();
+    this.render();
     this._init(tabId);
+  }
+
+  render() {
+    new Mason(this.$linksWrapper, {
+      itemSelector: '.pin',
+      columnNum: 2
+    });
   }
 
   _init(tabId) {
