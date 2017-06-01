@@ -38,6 +38,7 @@ body {
   line-height: .2rem;
   border: .01rem solid gray;
   border-radius: .02rem;
+  background: transparent;
 }
 
 .searchBox {position: relative}
@@ -74,9 +75,10 @@ body {
 }
 .searchBox__tip {
   position: absolute;
-  color: #999;
+  color: rgba(153, 153, 153, 0.5);
   top: 0;
   right: .04rem;
+  z-index: -1;
 }
 
 .setting {
