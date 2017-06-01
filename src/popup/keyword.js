@@ -41,6 +41,9 @@ async function getSelection(tabUrl) {
  * @param {Url} tabUrl
  */
 async function getQueryString(tabUrl) {
+  if (!tabUrl.isNormal) {
+    return EMPTY_KEYWORDS;
+  }
   if (tabUrl.isGoogleFail) {
     tabUrl = new Url(tabUrl.getQueryVal('continue'));
   }

@@ -33,7 +33,7 @@ onceLoaded(getCurrentTab).then(async function (tab) {
   ]).spread(async (keywords, html) => {
     $enginesSection.innerHTML = html;
     let links = new Links($`.engines`, tab.id);
-    Engine.searchKeys(tabUrl.host, {includeRootDomain: true}).then(keys => {
+    tabUrl.isNormal && Engine.searchKeys(tabUrl.host, {includeRootDomain: true}).then(keys => {
       // TODO if keys.length <= 0, look for history and see which engine will be more likely selected
       keys.length && links.setDefaultLinkSameType(keys[0]);
     });
