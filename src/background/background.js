@@ -72,10 +72,10 @@ let Listener = (function () {
 
     loadDataPromises.push(Setting.set('cfg_remove_redirect', true));
     if (CONFIG.devMode) {
-      Promise.all(loadDataPromises).then(() => {
-        clog('load init data done!');
-        chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/popup.html'});
-      }).catch(e => clog('load init data error', e.toString()));
+      // Promise.all(loadDataPromises).then(() => {
+      //   clog('load init data done!');
+      //   chrome.tabs.create({url: 'chrome-extension://' + chrome.runtime.id + '/popup.html'});
+      // }).catch(e => clog('load init data error', e.toString()));
     }
   }
 

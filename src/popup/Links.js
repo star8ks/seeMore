@@ -54,6 +54,9 @@ class Links {
   updateHref(searchWord) {
     if (!searchWord) return new Error('invalid param: updateLinkHref with empty string');
     this.$links.forEach($link => {
+      if($link.hasAttribute('data-lowercase-keyword')) {
+        searchWord = searchWord.toLowerCase();
+      }
       $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
     });
   }
