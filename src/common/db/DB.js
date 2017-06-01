@@ -9,8 +9,8 @@ class DB {
    * */
   constructor(localforage, storeName='app', name='sc') {
     this.lf = localforage.createInstance({
-      driver: localforage.INDEXEDDB,
-      // driver: localforage.LOCALSTORAGE,
+      // driver: localforage.INDEXEDDB, // too slow!
+      driver: localforage.LOCALSTORAGE,
       name: name,
       storeName: storeName
     });
