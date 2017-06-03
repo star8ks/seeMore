@@ -146,6 +146,10 @@ let searchBoxErr = (0, _base.minErr)('searchBox');
 class SearchBox {
 
   /**
+   * @eventOrder For input element, the event order is keydown->keypress->input & updated->keyup,
+   *  Handlers can get the new input element value AFTER keypress.
+   *  If you press a arrow key, enter, shift, ctrl, there are no keypress and input event.
+   *  See http://jsbin.com/pusicuxanu/2
    * @param {HTMLElement} $element
    * @param {Array} engines
    * @param {Function} selectEngineFn
@@ -168,21 +172,23 @@ class SearchBox {
     });
 
     this.$keyword.focus();
-    this.defaultPlaceholder = this.$keyword.placeholder;
-    this.$keyword.addEventListener('keydown', e => {
+
+    this.addKeydownHandler(e => {
+      // replace $keyword value with placeholder
       if (e.key === 'Tab') {
-        // TODO serarch in this.sugesstion, and autocomplete by press Tab
-        if (this.value === '' && this.$keyword.placeholder !== '') {
+        if (this.value === '') {
           this.$keyword.value = this.$keyword.placeholder;
+          this.deactiveEngineSelect = true;
         }
+        // prevent losing focus when press Tab
         e.preventDefault();
       }
     });
-    selectEngineFn && this.$keyword.addEventListener('input', (0, _lodash.debounce)(() => this._onInput(selectEngineFn), 500));
+    selectEngineFn && this.$keyword.addEventListener('input', (0, _lodash.debounce)(() => this._onInput(), 500));
 
     this.addUpdatedHandler(e => {
       let searchString = e.detail.trim();
-      if (searchString === this.defaultPlaceholder || !searchString) {
+      if (searchString === this.placeholder || !searchString) {
         return;
       }
       if (searchString.length <= _config2.default.translateMaxLength) {
@@ -190,6 +196,7 @@ class SearchBox {
       }
     });
 
+    this.addKeyupHandler(this._getDefaultKeyupHandler(selectEngineFn));
     onKeyup && this.addKeyupHandler(onKeyup);
     onKeydown && this.addKeydownHandler(onKeydown);
     onUpdated && this.addUpdatedHandler(onUpdated);
@@ -199,27 +206,53 @@ class SearchBox {
     if (_config2.default.devMode) _translation2.default.add(new _translation2.default.GoogleCN());
   }
 
-  _onInput(selectEngineFn) {
-    this.$keyword.dispatchEvent(new CustomEvent('keywordUpdated', { detail: this.value || this.$keyword.placeholder }));
-
-    if (this.engineSelector !== '') {
-      let engineSelectorLower = this.engineSelector.toLowerCase();
-      let engine = this.engines.find(engine => {
-        return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
-      });
-      if (!engine) return;
-
-      // TODO: if next input is not Tab, or not match any engine, clear tip and remove listener
-      this.$tip.innerText = `Press Tab to use ${engine.displayName}`;
-      let handler = e => {
+  _getDefaultKeyupHandler(selectEngineFn) {
+    return e => {
+      if (this.matchedEngine) {
         if (e.key === 'Tab') {
-          selectEngineFn(engine ? engine.$$key : '');
-          this.$tip.innerText = '';
-          this.$keyword.removeEventListener('keydown', handler);
+          if (!this.deactiveEngineSelect) {
+            // this.deactiveEngineSelect usually means this.value is just replaced by placeholder by pressing Tab,
+            // in that case, don't need to do select engine below
+            // TODO search in this.suggestion, and autocomplete by press Tab
+            selectEngineFn(this.matchedEngine ? this.matchedEngine.$$key : '');
+            // delete engine selector from input box
+            this.value = this.value.substr(0, this.value.lastIndexOf(this.engineSelector));
+          } else {
+            this.deactiveEngineSelect = false;
+          }
         }
-      };
-      this.addKeydownHandler(handler);
-    }
+      } else {
+        if (e.key === 'Tab') {
+          // TODO: if no matched engine and press Tab, select next link by links.setNextDefaultLink();
+        }
+      }
+      this._set$tip();
+    };
+  }
+
+  /**
+   * input event handler that will triggered when input sth or placeholder changed
+   * @private
+   */
+  _onInput() {
+    this.$keyword.dispatchEvent(new CustomEvent('keywordUpdated', { detail: this.value || this.placeholder }));
+  }
+
+  _set$tip() {
+    this.$tip.innerText = this.matchedEngine ? `Press Tab to use ${this.matchedEngine.displayName}` : '';
+  }
+
+  /**
+   * get engine selector matched engine
+   * @return {Object}
+   */
+  get matchedEngine() {
+    if (!this.engineSelector) return null;
+
+    let engineSelectorLower = this.engineSelector.toLowerCase();
+    return this.engines.find(engine => {
+      return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
+    }) || null;
   }
 
   addUpdatedHandler(fn) {
@@ -237,11 +270,14 @@ class SearchBox {
   get value() {
     return this.$keyword.value;
   }
+  set value(val) {
+    this.$keyword.value = val;
+    this.$keyword.dispatchEvent(new CustomEvent('keywordUpdated', { detail: val || this.placeholder }));
+  }
 
   get placeholder() {
     return this.$keyword.placeholder;
   }
-
   set placeholder(val) {
     this.$keyword.placeholder = val;
     this._onInput();
@@ -281,9 +317,7 @@ class SearchBox {
 
       let lang = navigator.language.split('-', 1)[0];
       let resultObj = yield _translation2.default.translate({
-        api: /*CONFIG.devMode
-             ? 'GoogleCN'
-             :*/navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
+        api: _config2.default.devMode ? 'GoogleCN' : navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
         text: str,
         to: _config2.default.devMode ? 'zh-CN' : lang === 'zh' ? navigator.language : lang
       });
@@ -332,7 +366,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _lodash = __webpack_require__("y7q8");
 
+var _Mason = __webpack_require__("74xW");
+
+var _Mason2 = _interopRequireDefault(_Mason);
+
 var _base = __webpack_require__("5a/Z");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 class Links {
 
@@ -341,7 +381,15 @@ class Links {
     this.$links = this.$linksWrapper.querySelectorAll(Links.selectors.link);
     this.$defaultLink = null;
     this.setDefaultLink();
+    this.render();
     this._init(tabId);
+  }
+
+  render() {
+    new _Mason2.default(this.$linksWrapper, {
+      itemSelector: '.pin',
+      columnNum: 2
+    });
   }
 
   _init(tabId) {
@@ -372,6 +420,9 @@ class Links {
   updateHref(searchWord) {
     if (!searchWord) return new Error('invalid param: updateLinkHref with empty string');
     this.$links.forEach($link => {
+      if ($link.hasAttribute('data-lowercase-keyword')) {
+        searchWord = searchWord.toLowerCase();
+      }
       $link.href = $link.getAttribute('data-url').replace(/%s/g, encodeURIComponent(searchWord));
     });
   }
@@ -695,6 +746,9 @@ let getSelection = (() => {
 
 let getQueryString = (() => {
   var _ref2 = _asyncToGenerator(function* (tabUrl) {
+    if (!tabUrl.isNormal) {
+      return _const.EMPTY_KEYWORDS;
+    }
     if (tabUrl.isGoogleFail) {
       tabUrl = new _Url2.default(tabUrl.getQueryVal('continue'));
     }
@@ -3350,10 +3404,6 @@ var _Render = __webpack_require__("qpDX");
 
 var _Render2 = _interopRequireDefault(_Render);
 
-var _Mason = __webpack_require__("74xW");
-
-var _Mason2 = _interopRequireDefault(_Mason);
-
 var _keyword = __webpack_require__("MjTT");
 
 var _keyword2 = _interopRequireDefault(_keyword);
@@ -3389,68 +3439,65 @@ function errorHandler(e) {
     let engineListTpl = _base.$`#tpl-engines`.innerHTML.trim();
     let $enginesSection = _base.$`.engines`;
 
-    (0, _keyword2.default)(tabUrl).then(function (keywords) {
-      (0, _base.clog)('get keywords: ', JSON.stringify(keywords));
-      // @TODO if input is not empty, cancel getKeyWord and don't change input and link
-      // @TODO add all keywords to auto-complete suggestion list
-      if (typeof searchBox === 'undefined') {
-        return;
-      }
-      keywords.forEach(function (kw) {
-        return searchBox.suggestions.push(kw.word.trim());
-      });
-      let newPlaceholder = keywords[0].word.trim();
-      if (newPlaceholder) searchBox.placeholder = newPlaceholder;
-      return null;
-    }).catch(errorHandler);
+    return Promise.all([(0, _keyword2.default)(tabUrl), _Render2.default.openEngines(engineListTpl)]).spread((() => {
+      var _ref2 = _asyncToGenerator(function* (keywords, html) {
+        $enginesSection.innerHTML = html;
+        let links = new _Links2.default(_base.$`.engines`, tab.id);
+        tabUrl.isNormal && _Engine2.default.searchKeys(tabUrl.host, { includeRootDomain: true }).then(function (keys) {
+          // TODO if keys.length <= 0, look for history and see which engine will be more likely selected
+          keys.length && links.setDefaultLinkSameType(keys[0]);
+        });
 
-    $enginesSection.innerHTML = yield _Render2.default.openEngines(engineListTpl);
+        let searchBox = new _SearchBox2.default({
+          $element: _base.$`.searchBox`,
+          engines: yield _Engine2.default.getOpen({
+            returnType: _Engine2.default.returnType.normal,
+            fields: ['displayName', '$$key']
+          }),
+          selectEngineFn: function (engineKey) {
+            return links.setDefaultLink(engineKey);
+          },
+          onKeyup: function (e) {
+            if (e.key === 'Enter') {
+              links.$defaultLink.dispatchEvent(new MouseEvent('click', { button: _base.btnCode.left }));
+            }
+          },
+          onKeydown: function (e) {
+            if (e.key === 'ArrowDown') {
+              links.setNextDefaultLink();
+            } else if (e.key === 'ArrowUp') {
+              links.setPrevDefaultLink();
+            }
+          },
+          onUpdated: function (e) {
+            let searchString = e.detail.trim();
+            if (searchString === searchBox.placeholder || !searchString) {
+              return;
+            }
+            (0, _base.clog)('translate ', searchString);
 
-    let links = new _Links2.default(_base.$`.engines`, tab.id);
-    _Engine2.default.searchKeys(tabUrl.host, { includeRootDomain: true }).then(function (keys) {
-      // TODO if keys.length <= 0, look for history and see which engine will be more likely selected
-      keys.length && links.setDefaultLinkSameType(keys[0]);
-    });
+            links.updateHref(searchString);
+          }
+        });
 
-    let engines = yield _Engine2.default.getOpen({
-      returnType: _Engine2.default.returnType.normal,
-      fields: ['displayName', '$$key']
-    });
-    var searchBox = new _SearchBox2.default({
-      $element: _base.$`.searchBox`,
-      engines: engines,
-      selectEngineFn: function (engineKey) {
-        return links.setDefaultLink(engineKey);
-      },
-      onKeyup: function (e) {
-        if (e.key === 'Enter') {
-          links.$defaultLink.dispatchEvent(new MouseEvent('click', { button: _base.btnCode.left }));
-        }
-      },
-      onKeydown: function (e) {
-        if (e.key === 'ArrowDown') {
-          links.setNextDefaultLink();
-        } else if (e.key === 'ArrowUp') {
-          links.setPrevDefaultLink();
-        } else if (e.key === 'ArrowRight') {
-          links.setRightDefaultLink();
-        }
-      },
-      onUpdated: function (e) {
-        let searchString = e.detail.trim();
-        if (searchString === searchBox.defaultPlaceholder || !searchString) {
+        (0, _base.clog)('get keywords: ', JSON.stringify(keywords));
+        // @TODO if input is not empty, cancel getKeyWord and don't change input and link
+        // @TODO add all keywords to auto-complete suggestion list
+        if (typeof searchBox === 'undefined') {
+          (0, _base.clog)('no searchBox');
           return;
         }
-        (0, _base.clog)('translate ', searchString);
+        keywords.forEach(function (kw) {
+          return searchBox.suggestions.push(kw.word.trim());
+        });
+        let newPlaceholder = keywords[0].word.trim();
+        if (newPlaceholder) searchBox.placeholder = newPlaceholder;
+      });
 
-        links.updateHref(searchString);
-      }
-    });
-
-    new _Mason2.default(_base.$`.engines`, {
-      itemSelector: '.pin',
-      columnNum: 2
-    });
+      return function (_x2, _x3) {
+        return _ref2.apply(this, arguments);
+      };
+    })());
   });
 
   return function (_x) {

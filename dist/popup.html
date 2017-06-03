@@ -27,6 +27,9 @@
       data-se="{{index}}"
       data-favicon="{{favicon}}"
       data-url="{{url}}"
+      {{#lowerCaseKeyword}}
+        data-lowercase-keyword
+      {{/lowerCaseKeyword}}
       title="See more at {{displayName}}"
       href="{{href}}">{{displayName}}</a></li>
     {{/engines}}

@@ -433,8 +433,8 @@ class DB {
    * */
   constructor(localforage, storeName = 'app', name = 'sc') {
     this.lf = localforage.createInstance({
-      driver: localforage.INDEXEDDB,
-      // driver: localforage.LOCALSTORAGE,
+      // driver: localforage.INDEXEDDB, // too slow!
+      driver: localforage.LOCALSTORAGE,
       name: name,
       storeName: storeName
     });
@@ -1318,7 +1318,8 @@ const CONFIG = {
       hosts: ['dictionary.cambridge.org'],
       url: 'http://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E8%8B%B1%E8%AF%AD/%s',
       resultPageRegex: /dictionary\.cambridge\.org\/zhs\/%E8%AF%8D%E5%85%B8\/%E8%8B%B1%E8%AF%AD\//.source,
-      wordRegex: /\/zhs\/%E8%AF%8D%E5%85%B8\/%E8%8B%B1%E8%AF%AD\/([^?&#/]+)\/?/.source
+      wordRegex: /\/zhs\/%E8%AF%8D%E5%85%B8\/%E8%8B%B1%E8%AF%AD\/([^?&#/]+)\/?/.source,
+      lowerCaseKeyword: true
     },
     renren: {
       order: 1730,
