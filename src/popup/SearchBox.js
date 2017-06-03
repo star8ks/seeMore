@@ -16,6 +16,10 @@ class SearchBox {
   suggestions = [];
 
   /**
+   * @eventOrder For input element, the event order is keydown->keypress->input & updated->keyup,
+   *  Handlers can get the new input element value AFTER keypress.
+   *  If you press a arrow key, enter, shift, ctrl, there are no keypress and input event.
+   *  See http://jsbin.com/pusicuxanu/2
    * @param {HTMLElement} $element
    * @param {Array} engines
    * @param {Function} selectEngineFn
@@ -36,21 +40,23 @@ class SearchBox {
     });
 
     this.$keyword.focus();
-    this.defaultPlaceholder = this.$keyword.placeholder;
-    this.$keyword.addEventListener('keydown', e => {
-      if (e.key === 'Tab') {
-        // TODO serarch in this.sugesstion, and autocomplete by press Tab
-        if (this.value === '' && this.$keyword.placeholder !== '') {
+
+    this.addKeydownHandler((e) => {
+      // replace $keyword value with placeholder
+      if(e.key === 'Tab') {
+        if(this.value === '') {
           this.$keyword.value = this.$keyword.placeholder;
+          this.deactiveEngineSelect = true;
         }
+        // prevent losing focus when press Tab
         e.preventDefault();
       }
     });
-    selectEngineFn && this.$keyword.addEventListener('input', debounce(() => this._onInput(selectEngineFn), 500));
+    selectEngineFn && this.$keyword.addEventListener('input', debounce(() => this._onInput(), 500));
 
     this.addUpdatedHandler(e => {
       let searchString = e.detail.trim();
-      if (searchString === this.defaultPlaceholder || !searchString) {
+      if (searchString === this.placeholder || !searchString) {
         return;
       }
       if (searchString.length <= CONFIG.translateMaxLength) {
@@ -58,6 +64,7 @@ class SearchBox {
       }
     });
 
+    this.addKeyupHandler(this._getDefaultKeyupHandler(selectEngineFn));
     onKeyup && this.addKeyupHandler(onKeyup);
     onKeydown && this.addKeydownHandler(onKeydown);
     onUpdated && this.addUpdatedHandler(onUpdated);
@@ -67,30 +74,58 @@ class SearchBox {
     if (CONFIG.devMode) tjs.add(new tjs.GoogleCN());
   }
 
-  _onInput(selectEngineFn) {
+  _getDefaultKeyupHandler(selectEngineFn) {
+    return (e) => {
+      if(this.matchedEngine) {
+        if (e.key === 'Tab') {
+          if(!this.deactiveEngineSelect) {
+            // this.deactiveEngineSelect usually means this.value is just replaced by placeholder by pressing Tab,
+            // in that case, don't need to do select engine below
+            // TODO search in this.suggestion, and autocomplete by press Tab
+            selectEngineFn(this.matchedEngine ? this.matchedEngine.$$key : '');
+            // delete engine selector from input box
+            this.value = this.value.substr(0, this.value.lastIndexOf(this.engineSelector));
+          } else {
+            this.deactiveEngineSelect = false;
+          }
+        }
+      } else {
+        if (e.key === 'Tab') {
+          // TODO: if no matched engine and press Tab, select next link by links.setNextDefaultLink();
+        }
+      }
+      this._set$tip();
+    };
+  }
+
+  /**
+   * input event handler that will triggered when input sth or placeholder changed
+   * @private
+   */
+  _onInput() {
     this.$keyword.dispatchEvent(new CustomEvent(
       'keywordUpdated',
-      {detail: this.value || this.$keyword.placeholder}
+      {detail: this.value || this.placeholder}
     ));
+  }
 
-    if (this.engineSelector !== '') {
-      let engineSelectorLower = this.engineSelector.toLowerCase();
-      let engine = this.engines.find(engine => {
-        return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
-      });
-      if (!engine) return;
+  _set$tip() {
+    this.$tip.innerText = this.matchedEngine
+      ? `Press Tab to use ${this.matchedEngine.displayName}`
+      : '';
+  }
 
-      // TODO: if next input is not Tab, or not match any engine, clear tip and remove listener
-      this.$tip.innerText = `Press Tab to use ${engine.displayName}`;
-      let handler = e => {
-        if (e.key === 'Tab') {
-          selectEngineFn(engine ? engine.$$key : '');
-          this.$tip.innerText = '';
-          this.$keyword.removeEventListener('keydown', handler);
-        }
-      };
-      this.addKeydownHandler(handler);
-    }
+  /**
+   * get engine selector matched engine
+   * @return {Object}
+   */
+  get matchedEngine() {
+    if(!this.engineSelector) return null;
+
+    let engineSelectorLower = this.engineSelector.toLowerCase();
+    return this.engines.find(engine => {
+      return engine.displayName.toLowerCase().startsWith(engineSelectorLower) || engine.$$key.toLowerCase().startsWith(engineSelectorLower);
+    }) || null;
   }
 
   addUpdatedHandler(fn) {
@@ -108,11 +143,17 @@ class SearchBox {
   get value() {
     return this.$keyword.value;
   }
+  set value(val) {
+    this.$keyword.value = val;
+    this.$keyword.dispatchEvent(new CustomEvent(
+      'keywordUpdated',
+      {detail: val || this.placeholder}
+    ));
+  }
 
   get placeholder() {
     return this.$keyword.placeholder;
   }
-
   set placeholder(val) {
     this.$keyword.placeholder = val;
     this._onInput();

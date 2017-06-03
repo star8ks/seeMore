@@ -58,13 +58,11 @@ onceLoaded(getCurrentTab).then(async function (tab) {
           links.setNextDefaultLink();
         } else if(e.key === 'ArrowUp') {
           links.setPrevDefaultLink();
-        } else if(e.key === 'ArrowRight') {
-          links.setRightDefaultLink();
         }
       },
       onUpdated: function(e) {
         let searchString = e.detail.trim();
-        if (searchString === searchBox.defaultPlaceholder || !searchString) {
+        if (searchString === searchBox.placeholder || !searchString) {
           return;
         }
         clog('translate ', searchString);
