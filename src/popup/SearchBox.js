@@ -54,6 +54,7 @@ class SearchBox {
     });
     selectEngineFn && this.$keyword.addEventListener('input', debounce(() => this._onInput(), 500));
 
+    // once updated, translate it
     this.addUpdatedHandler(e => {
       let searchString = e.detail.trim();
       if (searchString === this.placeholder || !searchString) {

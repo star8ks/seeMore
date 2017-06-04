@@ -62,10 +62,8 @@ onceLoaded(getCurrentTab).then(async function (tab) {
       },
       onUpdated: function(e) {
         let searchString = e.detail.trim();
-        if (searchString === searchBox.placeholder || !searchString) {
-          return;
-        }
-        clog('translate ', searchString);
+        if (!searchString) return;
+        clog('update link by searchString:', searchString);
 
         links.updateHref(searchString);
       }
