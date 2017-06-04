@@ -186,6 +186,7 @@ class SearchBox {
     });
     selectEngineFn && this.$keyword.addEventListener('input', (0, _lodash.debounce)(() => this._onInput(), 500));
 
+    // once updated, translate it
     this.addUpdatedHandler(e => {
       let searchString = e.detail.trim();
       if (searchString === this.placeholder || !searchString) {
@@ -3471,10 +3472,8 @@ function errorHandler(e) {
           },
           onUpdated: function (e) {
             let searchString = e.detail.trim();
-            if (searchString === searchBox.placeholder || !searchString) {
-              return;
-            }
-            (0, _base.clog)('translate ', searchString);
+            if (!searchString) return;
+            (0, _base.clog)('update link by searchString:', searchString);
 
             links.updateHref(searchString);
           }
