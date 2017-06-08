@@ -18,11 +18,17 @@ async function getSelection(tabUrl) {
   }
   // @TODO move it to contentScript.js, and execute while select change
   // @TODO don't block popup here
-  var selection = await chromeTabsProxy.executeScript({
-    code: 'window.getSelection().toString();',
-    allFrames: true
-  });
-
+  let selection = [];
+  try {
+    selection = await chromeTabsProxy.executeScript({
+      code: 'window.getSelection().toString();',
+      allFrames: true
+    });
+  } catch (e) {
+    // ignore some executeScript error in some frames that have no permission to reach
+    // like: executeScriptErr: Cannot access contents of url "data:text/html,chromewebdata"
+    clog(e.toString());
+  }
   selection = filterEmptyStr(selection).filter(selectStr => {
     return selectStr.length <= CONFIG.selectionMaxLength;
   });
