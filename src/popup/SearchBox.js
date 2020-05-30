@@ -1,6 +1,7 @@
 import {deepValue, filterEmptyStr, minErr} from '../common/base';
 import {debounce, isEmpty} from 'lodash';
-import tjs from './translation';
+import './chrome-youdao';
+import * as tjs from 'translation.js';
 import CONFIG from '../common/config';
 
 let searchBoxErr = minErr('searchBox');
@@ -57,7 +58,7 @@ class SearchBox {
     // once updated, translate it
     this.addUpdatedHandler(e => {
       let searchString = e.detail.trim();
-      if (searchString === this.placeholder || !searchString) {
+      if (/*searchString === this.placeholder ||*/ !searchString) {
         return;
       }
       if (searchString.length <= CONFIG.translateMaxLength) {
@@ -69,10 +70,6 @@ class SearchBox {
     onKeyup && this.addKeyupHandler(onKeyup);
     onKeydown && this.addKeydownHandler(onKeydown);
     onUpdated && this.addUpdatedHandler(onUpdated);
-
-    tjs.add(new tjs.BaiDu());
-    tjs.add(new tjs.Google());
-    if (CONFIG.devMode) tjs.add(new tjs.GoogleCN());
   }
 
   _getDefaultKeyupHandler(selectEngineFn) {
@@ -191,9 +188,7 @@ class SearchBox {
 
     let lang = navigator.language.split('-', 1)[0];
     let resultObj = await tjs.translate({
-      api: CONFIG.devMode
-       ? 'GoogleCN'
-       : (navigator.language === 'zh-CN' ? 'BaiDu' : 'Google'),
+      api: 'youdao',
       text: str,
       to: CONFIG.devMode
         ? 'zh-CN'

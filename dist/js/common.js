@@ -1,4 +1,4 @@
-webpackJsonp([0],{
+webpackJsonp([1],{
 
 /***/ "3JzL":
 /***/ (function(module, exports, __webpack_require__) {
@@ -1160,6 +1160,15 @@ const CONFIG = {
       hosts: ['movie.douban.com'],
       url: 'https://movie.douban.com/subject_search?search_text=%s'
     },
+    mvcat: {
+      order: 910,
+      typeId: 102,
+      defaultTypeId: 2,
+      displayName: 'MVCAT',
+      open: true,
+      hosts: ['http://www.mvcat.com/'],
+      url: 'https://www.mvcat.com/search/?type=Title,subTitle,Tags&word=%s'
+    },
     RARBG: {
       order: 1000,
       typeId: 102,
@@ -1185,29 +1194,20 @@ const CONFIG = {
       typeId: 102,
       defaultTypeId: 8,
       displayName: 'BTDB',
-      open: true,
+      open: false,
       hosts: ['btdb.in'],
-      url: 'https://btdb.in/q/%s',
+      url: 'https://btdb.to/q/%s',
       resultPageRegex: /\/q\//.source,
       wordRegex: /\/q\/([^/]+)\/?/.source
     },
     // https://torrentproject.se/?t=
     // https://btdig.com/search?order=0&q=
-    dianyingFM: {
-      order: 1075,
-      typeId: 102,
-      defaultTypeId: 8,
-      displayName: '电影 FM',
-      open: true,
-      hosts: ['dianying.fm'],
-      url: 'http://dianying.fm/search/?text=%s'
-    },
     AcFun: {
       order: 1100,
       typeId: 102,
       defaultTypeId: 2,
       displayName: 'AcFun',
-      open: true,
+      open: false,
       siteKeywords: ['弹幕'],
       hosts: ['www.acfun.cn'],
       url: 'http://www.acfun.cn/search/?#query=%s',
@@ -1251,7 +1251,7 @@ const CONFIG = {
       siteKeywords: ['Sub HD', 'SubHD', '字幕', '字幕翻译', '字幕下载', '电影字幕', '中文字幕', '电影字幕下载', '中文字幕下载', '字幕组', '射手网', '美剧字幕下载', '英剧字幕下载', '双语字幕下载', '美剧', '电影', '美剧下载', '英剧下载', '电影下载', '美剧字幕', '英剧字幕'],
       open: true,
       hosts: ['subhd.com'],
-      url: 'http://subhd.com/search/%s',
+      url: 'http://subhd.tv/search/%s',
       resultPageRegex: /\/search/.source,
       wordRegex: /\/search\/([^/?&#]+)\/?/.source
     },
@@ -1265,12 +1265,32 @@ const CONFIG = {
       url: 'http://www.zimuku.net/search?q=%s'
     },
     // Dictionary
-    iciba: {
+    youdaoDict: {
       order: 1700,
       typeId: 103,
       defaultTypeId: 3,
-      displayName: '爱词霸',
+      displayName: '有道词典',
       open: true,
+      hosts: ['dict.youdao.com'],
+      url: 'http://dict.youdao.com/w/%s',
+      resultPageRegex: /youdao\.com\/w\//.source,
+      wordRegex: /\/w\/([^?&#/]+)\/?/.source
+    },
+    youdaoTranslate: {
+      order: 1701,
+      typeId: 103,
+      defaultTypeId: 3,
+      displayName: '有道翻译',
+      open: false,
+      hosts: ['fanyi.youdao.com'],
+      url: 'http://fanyi.youdao.com/translate?i=%s'
+    },
+    iciba: {
+      order: 1710,
+      typeId: 103,
+      defaultTypeId: 3,
+      displayName: '爱词霸',
+      open: false,
       hosts: ['www.iciba.com'],
       url: 'http://www.iciba.com/%s',
       resultPageRegex: /https?:\/\/www.iciba.com/.source,
@@ -1287,26 +1307,6 @@ const CONFIG = {
       url: 'https://www.merriam-webster.com/dictionary/%s',
       resultPageRegex: /merriam-webster\.com\/dictionary\//.source,
       wordRegex: /\/dictionary\/([^?&#/]+)/.source
-    },
-    youdaoTranslate: {
-      order: 1710,
-      typeId: 103,
-      defaultTypeId: 3,
-      displayName: '有道翻译',
-      open: false,
-      hosts: ['fanyi.youdao.com'],
-      url: 'http://fanyi.youdao.com/translate?i=%s'
-    },
-    youdaoDict: {
-      order: 1720,
-      typeId: 103,
-      defaultTypeId: 3,
-      displayName: '有道词典',
-      open: false,
-      hosts: ['dict.youdao.com'],
-      url: 'http://dict.youdao.com/w/%s',
-      resultPageRegex: /youdao\.com\/w\//.source,
-      wordRegex: /\/w\/([^?&#/]+)\/?/.source
     },
     // http://dictionary.cambridge.org/zhs/词典/英语/
     cambridge: {
@@ -1437,8 +1437,17 @@ const CONFIG = {
       hosts: ['s.etao.com'],
       url: 'http://s.etao.com/search?q=%s'
     },
-    tmall: {
+    taobao: {
       order: 2700,
+      typeId: 106,
+      defaultTypeId: 5,
+      displayName: '淘宝',
+      open: true,
+      hosts: ['s.taobao.com'],
+      url: 'https://s.taobao.com/search?q=%s'
+    },
+    tmall: {
+      order: 2710,
       typeId: 106,
       defaultTypeId: 5,
       displayName: '天猫',
@@ -1464,15 +1473,6 @@ const CONFIG = {
       hosts: ['www.amazon.cn'],
       url: 'https://www.amazon.cn/s/?field-keywords=%s'
     },
-    taobao: {
-      order: 3000,
-      typeId: 106,
-      defaultTypeId: 5,
-      displayName: '淘宝',
-      open: false,
-      hosts: ['s.taobao.com'],
-      url: 'https://s.taobao.com/search?q=%s'
-    },
     weibo: {
       order: 3100,
       typeId: 107,
@@ -1489,7 +1489,7 @@ const CONFIG = {
       typeId: 107,
       defaultTypeId: 9,
       displayName: 'twitter',
-      open: false,
+      open: true,
       hosts: ['twitter.com'],
       url: 'https://twitter.com/search?q=%s'
     },

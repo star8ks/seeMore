@@ -53,13 +53,15 @@
     "postcss-loader": "^1.1.1",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "webpack": "^2.4.1",
+    "webpack": "2.4.1",
+    "webpack-cli": "^2.0.10",
     "webpack-dev-server": "^2.4.2"
   },
   "dependencies": {
     "bluebird": "^3.4.6",
     "localforage": "^1.4.3",
     "lodash": "^4.17.2",
-    "mustache": "^2.3.0"
+    "mustache": "^2.3.0",
+    "translation.js": "^0.6.8"
   }
 }

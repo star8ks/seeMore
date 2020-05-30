@@ -1,4 +1,4 @@
-webpackJsonp([1],{
+webpackJsonp([0],{
 
 /***/ "+9hk":
 /***/ (function(module, exports, __webpack_require__) {
@@ -130,15 +130,19 @@ var _base = __webpack_require__("5a/Z");
 
 var _lodash = __webpack_require__("y7q8");
 
-var _translation = __webpack_require__("RkCM");
+__webpack_require__("jc4J");
 
-var _translation2 = _interopRequireDefault(_translation);
+var _translation = __webpack_require__("qtYd");
+
+var tjs = _interopRequireWildcard(_translation);
 
 var _config = __webpack_require__("wYMm");
 
 var _config2 = _interopRequireDefault(_config);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
@@ -189,7 +193,7 @@ class SearchBox {
     // once updated, translate it
     this.addUpdatedHandler(e => {
       let searchString = e.detail.trim();
-      if (searchString === this.placeholder || !searchString) {
+      if ( /*searchString === this.placeholder ||*/!searchString) {
         return;
       }
       if (searchString.length <= _config2.default.translateMaxLength) {
@@ -201,10 +205,6 @@ class SearchBox {
     onKeyup && this.addKeyupHandler(onKeyup);
     onKeydown && this.addKeydownHandler(onKeydown);
     onUpdated && this.addUpdatedHandler(onUpdated);
-
-    _translation2.default.add(new _translation2.default.BaiDu());
-    _translation2.default.add(new _translation2.default.Google());
-    if (_config2.default.devMode) _translation2.default.add(new _translation2.default.GoogleCN());
   }
 
   _getDefaultKeyupHandler(selectEngineFn) {
@@ -317,8 +317,8 @@ class SearchBox {
       }
 
       let lang = navigator.language.split('-', 1)[0];
-      let resultObj = yield _translation2.default.translate({
-        api: _config2.default.devMode ? 'GoogleCN' : navigator.language === 'zh-CN' ? 'BaiDu' : 'Google',
+      let resultObj = yield tjs.translate({
+        api: 'youdao',
         text: str,
         to: _config2.default.devMode ? 'zh-CN' : lang === 'zh' ? navigator.language : lang
       });
@@ -348,10 +348,368 @@ exports.default = SearchBox;
 
 /***/ }),
 
+/***/ "0nVa":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var utils_1 = __webpack_require__("KOGo");
+function qs(obj) {
+    if (!obj)
+        return '';
+    var r = [];
+    var _loop_1 = function (key) {
+        var v = [].concat(obj[key]);
+        r.push.apply(r, v.map(function (valStr) { return key + "=" + encodeURIComponent(valStr); }));
+    };
+    for (var key in obj) {
+        _loop_1(key);
+    }
+    return r.join('&');
+}
+function default_1(options) {
+    var xhr = new XMLHttpRequest();
+    var urlObj = new URL(options.url);
+    urlObj.search = (urlObj.search ? '' : '?') + qs(options.query);
+    var _a = options.method, method = _a === void 0 ? 'get' : _a;
+    xhr.open(method, urlObj.toString());
+    var body;
+    if (method === 'post') {
+        switch (options.type) {
+            case 'form':
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+                body = qs(options.body);
+                break;
+            case 'json':
+            default:
+                xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+                body = JSON.stringify(options.body);
+                break;
+        }
+    }
+    var headers = options.headers;
+    if (headers) {
+        for (var header in headers) {
+            xhr.setRequestHeader(header, headers[header]);
+        }
+    }
+    return new Promise(function (resolve, reject) {
+        xhr.onload = function () {
+            if (xhr.status !== 200) {
+                reject(new utils_1.TranslatorError("API_SERVER_ERROR" /* API_SERVER_ERROR */));
+            }
+            var res = xhr.responseText;
+            try {
+                resolve(JSON.parse(res));
+            }
+            catch (e) {
+                resolve(res);
+            }
+        };
+        xhr.onerror = function (e) {
+            reject(new utils_1.TranslatorError("NETWORK_ERROR" /* NETWORK_ERROR */, e.message));
+        };
+        xhr.send(body);
+    });
+}
+exports.default = default_1;
+
+
+/***/ }),
+
 /***/ "28sW":
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+
+/***/ "AJcs":
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_RESULT__;/*
+ * JavaScript MD5
+ * https://github.com/blueimp/JavaScript-MD5
+ *
+ * Copyright 2011, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * https://opensource.org/licenses/MIT
+ *
+ * Based on
+ * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
+ * Digest Algorithm, as defined in RFC 1321.
+ * Version 2.2 Copyright (C) Paul Johnston 1999 - 2009
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for more info.
+ */
+
+/* global define */
+
+;(function ($) {
+  'use strict'
+
+  /*
+  * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+  * to work around bugs in some JS interpreters.
+  */
+  function safeAdd (x, y) {
+    var lsw = (x & 0xffff) + (y & 0xffff)
+    var msw = (x >> 16) + (y >> 16) + (lsw >> 16)
+    return (msw << 16) | (lsw & 0xffff)
+  }
+
+  /*
+  * Bitwise rotate a 32-bit number to the left.
+  */
+  function bitRotateLeft (num, cnt) {
+    return (num << cnt) | (num >>> (32 - cnt))
+  }
+
+  /*
+  * These functions implement the four basic operations the algorithm uses.
+  */
+  function md5cmn (q, a, b, x, s, t) {
+    return safeAdd(bitRotateLeft(safeAdd(safeAdd(a, q), safeAdd(x, t)), s), b)
+  }
+  function md5ff (a, b, c, d, x, s, t) {
+    return md5cmn((b & c) | (~b & d), a, b, x, s, t)
+  }
+  function md5gg (a, b, c, d, x, s, t) {
+    return md5cmn((b & d) | (c & ~d), a, b, x, s, t)
+  }
+  function md5hh (a, b, c, d, x, s, t) {
+    return md5cmn(b ^ c ^ d, a, b, x, s, t)
+  }
+  function md5ii (a, b, c, d, x, s, t) {
+    return md5cmn(c ^ (b | ~d), a, b, x, s, t)
+  }
+
+  /*
+  * Calculate the MD5 of an array of little-endian words, and a bit length.
+  */
+  function binlMD5 (x, len) {
+    /* append padding */
+    x[len >> 5] |= 0x80 << (len % 32)
+    x[((len + 64) >>> 9 << 4) + 14] = len
+
+    var i
+    var olda
+    var oldb
+    var oldc
+    var oldd
+    var a = 1732584193
+    var b = -271733879
+    var c = -1732584194
+    var d = 271733878
+
+    for (i = 0; i < x.length; i += 16) {
+      olda = a
+      oldb = b
+      oldc = c
+      oldd = d
+
+      a = md5ff(a, b, c, d, x[i], 7, -680876936)
+      d = md5ff(d, a, b, c, x[i + 1], 12, -389564586)
+      c = md5ff(c, d, a, b, x[i + 2], 17, 606105819)
+      b = md5ff(b, c, d, a, x[i + 3], 22, -1044525330)
+      a = md5ff(a, b, c, d, x[i + 4], 7, -176418897)
+      d = md5ff(d, a, b, c, x[i + 5], 12, 1200080426)
+      c = md5ff(c, d, a, b, x[i + 6], 17, -1473231341)
+      b = md5ff(b, c, d, a, x[i + 7], 22, -45705983)
+      a = md5ff(a, b, c, d, x[i + 8], 7, 1770035416)
+      d = md5ff(d, a, b, c, x[i + 9], 12, -1958414417)
+      c = md5ff(c, d, a, b, x[i + 10], 17, -42063)
+      b = md5ff(b, c, d, a, x[i + 11], 22, -1990404162)
+      a = md5ff(a, b, c, d, x[i + 12], 7, 1804603682)
+      d = md5ff(d, a, b, c, x[i + 13], 12, -40341101)
+      c = md5ff(c, d, a, b, x[i + 14], 17, -1502002290)
+      b = md5ff(b, c, d, a, x[i + 15], 22, 1236535329)
+
+      a = md5gg(a, b, c, d, x[i + 1], 5, -165796510)
+      d = md5gg(d, a, b, c, x[i + 6], 9, -1069501632)
+      c = md5gg(c, d, a, b, x[i + 11], 14, 643717713)
+      b = md5gg(b, c, d, a, x[i], 20, -373897302)
+      a = md5gg(a, b, c, d, x[i + 5], 5, -701558691)
+      d = md5gg(d, a, b, c, x[i + 10], 9, 38016083)
+      c = md5gg(c, d, a, b, x[i + 15], 14, -660478335)
+      b = md5gg(b, c, d, a, x[i + 4], 20, -405537848)
+      a = md5gg(a, b, c, d, x[i + 9], 5, 568446438)
+      d = md5gg(d, a, b, c, x[i + 14], 9, -1019803690)
+      c = md5gg(c, d, a, b, x[i + 3], 14, -187363961)
+      b = md5gg(b, c, d, a, x[i + 8], 20, 1163531501)
+      a = md5gg(a, b, c, d, x[i + 13], 5, -1444681467)
+      d = md5gg(d, a, b, c, x[i + 2], 9, -51403784)
+      c = md5gg(c, d, a, b, x[i + 7], 14, 1735328473)
+      b = md5gg(b, c, d, a, x[i + 12], 20, -1926607734)
+
+      a = md5hh(a, b, c, d, x[i + 5], 4, -378558)
+      d = md5hh(d, a, b, c, x[i + 8], 11, -2022574463)
+      c = md5hh(c, d, a, b, x[i + 11], 16, 1839030562)
+      b = md5hh(b, c, d, a, x[i + 14], 23, -35309556)
+      a = md5hh(a, b, c, d, x[i + 1], 4, -1530992060)
+      d = md5hh(d, a, b, c, x[i + 4], 11, 1272893353)
+      c = md5hh(c, d, a, b, x[i + 7], 16, -155497632)
+      b = md5hh(b, c, d, a, x[i + 10], 23, -1094730640)
+      a = md5hh(a, b, c, d, x[i + 13], 4, 681279174)
+      d = md5hh(d, a, b, c, x[i], 11, -358537222)
+      c = md5hh(c, d, a, b, x[i + 3], 16, -722521979)
+      b = md5hh(b, c, d, a, x[i + 6], 23, 76029189)
+      a = md5hh(a, b, c, d, x[i + 9], 4, -640364487)
+      d = md5hh(d, a, b, c, x[i + 12], 11, -421815835)
+      c = md5hh(c, d, a, b, x[i + 15], 16, 530742520)
+      b = md5hh(b, c, d, a, x[i + 2], 23, -995338651)
+
+      a = md5ii(a, b, c, d, x[i], 6, -198630844)
+      d = md5ii(d, a, b, c, x[i + 7], 10, 1126891415)
+      c = md5ii(c, d, a, b, x[i + 14], 15, -1416354905)
+      b = md5ii(b, c, d, a, x[i + 5], 21, -57434055)
+      a = md5ii(a, b, c, d, x[i + 12], 6, 1700485571)
+      d = md5ii(d, a, b, c, x[i + 3], 10, -1894986606)
+      c = md5ii(c, d, a, b, x[i + 10], 15, -1051523)
+      b = md5ii(b, c, d, a, x[i + 1], 21, -2054922799)
+      a = md5ii(a, b, c, d, x[i + 8], 6, 1873313359)
+      d = md5ii(d, a, b, c, x[i + 15], 10, -30611744)
+      c = md5ii(c, d, a, b, x[i + 6], 15, -1560198380)
+      b = md5ii(b, c, d, a, x[i + 13], 21, 1309151649)
+      a = md5ii(a, b, c, d, x[i + 4], 6, -145523070)
+      d = md5ii(d, a, b, c, x[i + 11], 10, -1120210379)
+      c = md5ii(c, d, a, b, x[i + 2], 15, 718787259)
+      b = md5ii(b, c, d, a, x[i + 9], 21, -343485551)
+
+      a = safeAdd(a, olda)
+      b = safeAdd(b, oldb)
+      c = safeAdd(c, oldc)
+      d = safeAdd(d, oldd)
+    }
+    return [a, b, c, d]
+  }
+
+  /*
+  * Convert an array of little-endian words to a string
+  */
+  function binl2rstr (input) {
+    var i
+    var output = ''
+    var length32 = input.length * 32
+    for (i = 0; i < length32; i += 8) {
+      output += String.fromCharCode((input[i >> 5] >>> (i % 32)) & 0xff)
+    }
+    return output
+  }
+
+  /*
+  * Convert a raw string to an array of little-endian words
+  * Characters >255 have their high-byte silently ignored.
+  */
+  function rstr2binl (input) {
+    var i
+    var output = []
+    output[(input.length >> 2) - 1] = undefined
+    for (i = 0; i < output.length; i += 1) {
+      output[i] = 0
+    }
+    var length8 = input.length * 8
+    for (i = 0; i < length8; i += 8) {
+      output[i >> 5] |= (input.charCodeAt(i / 8) & 0xff) << (i % 32)
+    }
+    return output
+  }
+
+  /*
+  * Calculate the MD5 of a raw string
+  */
+  function rstrMD5 (s) {
+    return binl2rstr(binlMD5(rstr2binl(s), s.length * 8))
+  }
+
+  /*
+  * Calculate the HMAC-MD5, of a key and some data (raw strings)
+  */
+  function rstrHMACMD5 (key, data) {
+    var i
+    var bkey = rstr2binl(key)
+    var ipad = []
+    var opad = []
+    var hash
+    ipad[15] = opad[15] = undefined
+    if (bkey.length > 16) {
+      bkey = binlMD5(bkey, key.length * 8)
+    }
+    for (i = 0; i < 16; i += 1) {
+      ipad[i] = bkey[i] ^ 0x36363636
+      opad[i] = bkey[i] ^ 0x5c5c5c5c
+    }
+    hash = binlMD5(ipad.concat(rstr2binl(data)), 512 + data.length * 8)
+    return binl2rstr(binlMD5(opad.concat(hash), 512 + 128))
+  }
+
+  /*
+  * Convert a raw string to a hex string
+  */
+  function rstr2hex (input) {
+    var hexTab = '0123456789abcdef'
+    var output = ''
+    var x
+    var i
+    for (i = 0; i < input.length; i += 1) {
+      x = input.charCodeAt(i)
+      output += hexTab.charAt((x >>> 4) & 0x0f) + hexTab.charAt(x & 0x0f)
+    }
+    return output
+  }
+
+  /*
+  * Encode a string as utf-8
+  */
+  function str2rstrUTF8 (input) {
+    return unescape(encodeURIComponent(input))
+  }
+
+  /*
+  * Take string arguments and return either raw or hex encoded strings
+  */
+  function rawMD5 (s) {
+    return rstrMD5(str2rstrUTF8(s))
+  }
+  function hexMD5 (s) {
+    return rstr2hex(rawMD5(s))
+  }
+  function rawHMACMD5 (k, d) {
+    return rstrHMACMD5(str2rstrUTF8(k), str2rstrUTF8(d))
+  }
+  function hexHMACMD5 (k, d) {
+    return rstr2hex(rawHMACMD5(k, d))
+  }
+
+  function md5 (string, key, raw) {
+    if (!key) {
+      if (!raw) {
+        return hexMD5(string)
+      }
+      return rawMD5(string)
+    }
+    if (!raw) {
+      return hexHMACMD5(key, string)
+    }
+    return rawHMACMD5(key, string)
+  }
+
+  if (true) {
+    !(__WEBPACK_AMD_DEFINE_RESULT__ = function () {
+      return md5
+    }.call(exports, __webpack_require__, exports, module),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))
+  } else if (typeof module === 'object' && module.exports) {
+    module.exports = md5
+  } else {
+    $.md5 = md5
+  }
+})(this)
+
 
 /***/ }),
 
@@ -691,6 +1049,80 @@ exports.forEachMarked = forEachMarked;
 
 /***/ }),
 
+/***/ "KOGo":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/** 反转对象 */
+function invert(obj) {
+    var result = {};
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            result[obj[key]] = key;
+        }
+    }
+    return result;
+}
+exports.invert = invert;
+/**
+ * 安全的获取一个变量上指定路径的值
+ * @param obj
+ * @param {string | string[]} pathArray
+ * @param defaultValue
+ * @return {any}
+ */
+function getValue(obj, pathArray, defaultValue) {
+    if (obj == null)
+        return defaultValue;
+    if (typeof pathArray === 'string') {
+        pathArray = [pathArray];
+    }
+    var value = obj;
+    for (var i = 0; i < pathArray.length; i += 1) {
+        var key = pathArray[i];
+        value = value[key];
+        if (value == null) {
+            return defaultValue;
+        }
+    }
+    return value;
+}
+exports.getValue = getValue;
+var TranslatorError = /** @class */ (function (_super) {
+    __extends(TranslatorError, _super);
+    function TranslatorError(code, message) {
+        var _this = _super.call(this, message) || this;
+        _this.code = code;
+        return _this;
+    }
+    return TranslatorError;
+}(Error));
+exports.TranslatorError = TranslatorError;
+function transformOptions(options) {
+    if (typeof options === 'string') {
+        return {
+            text: options
+        };
+    }
+    return options;
+}
+exports.transformOptions = transformOptions;
+
+
+/***/ }),
+
 /***/ "Kyhl":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -918,2480 +1350,244 @@ let chromeTabsProxy = chromeAsync.proxy(chrome.tabs);exports.default = getKeywor
 
 /***/ }),
 
-/***/ "RkCM":
+/***/ "OloO":
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
+var node_1 = __webpack_require__("0nVa");
+var utils_1 = __webpack_require__("KOGo");
+var google_token_1 = __webpack_require__("VFFl");
+function translate(options) {
+    var _a = utils_1.transformOptions(options), text = _a.text, _b = _a.from, from = _b === void 0 ? 'auto' : _b, _c = _a.to, to = _c === void 0 ? 'zh-CN' : _c, com = _a.com;
+    text = text.toLowerCase();
+    return google_token_1.default(text, com)
+        .then(function (tk) {
+        return node_1.default({
+            url: 'https://translate.google.' +
+                (com ? 'com' : 'cn') +
+                '/translate_a/single',
+            query: {
+                client: 't',
+                sl: from,
+                tl: to,
+                hl: to,
+                tk: tk,
+                dt: ['at', 'bd', 'ex', 'ld', 'md', 'qca', 'rw', 'rm', 'ss', 't'],
+                ie: 'UTF-8',
+                oe: 'UTF-8',
+                otf: '1',
+                ssel: '0',
+                tsel: '0',
+                kc: '7',
+                q: text
+            }
+        });
+    })
+        .then(function (body) {
+        var googleFrom = body[2];
+        var result = {
+            text: text,
+            raw: body,
+            from: googleFrom,
+            to: to,
+            link: "https://translate.google." + (com ? 'com' : 'cn') + "/#" + googleFrom + "/" + to + "/" + encodeURIComponent(text)
+        };
+        try {
+            result.dict = body[1].map(function (arr) {
+                return arr[0] + '：' + arr[1].join('，');
+            });
+        }
+        catch (e) { }
+        try {
+            result.result = body[0]
+                .map(function (arr) { return arr[0]; })
+                .filter(function (x) { return x; })
+                .map(function (x) { return x.trim(); });
+        }
+        catch (e) { }
+        return result;
+    });
+}
+function detect(options) {
+    var text = utils_1.transformOptions(options).text;
+    return translate(text).then(function (result) { return result.from; });
+}
+function audio(options) {
+    var _a = utils_1.transformOptions(options), text = _a.text, from = _a.from, com = _a.com;
+    return Promise.all([
+        new Promise(function (resolve, reject) {
+            if (from) {
+                resolve(from);
+            }
+            else {
+                detect(text).then(resolve, reject);
+            }
+        }),
+        google_token_1.default(text, com)
+    ]).then(function (_a) {
+        var lang = _a[0], tk = _a[1];
+        return "https://translate.google." + (com ? 'com' : 'cn') + "/translate_tts?ie=UTF-8&q=" + encodeURIComponent(text) + "&tl=" + lang + "&total=1&idx=0&textlen=" + text.length + "&tk=" + tk + "&client=t";
+    });
+}
+exports.default = {
+    id: 'google',
+    translate: translate,
+    detect: detect,
+    audio: audio
+};
 
-/*!
- * translation.js v0.4.0
- * https://github.com/Selection-Translator/translation.js#readme
- * Copyright 2015 Milk Lee <milk.lee@qq.com>
- * Licensed under MIT
+
+/***/ }),
+
+/***/ "Peua":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var node_1 = __webpack_require__("SbOy");
+var node_2 = __webpack_require__("0nVa");
+var utils_1 = __webpack_require__("KOGo");
+var link = 'https://fanyi.youdao.com';
+var translateAPI = link + '/translate_o?smartresult=dict&smartresult=rule';
+var languageList = {
+    en: 'en',
+    ru: 'ru',
+    pt: 'pt',
+    es: 'es',
+    'zh-CN': 'zh-CHS',
+    ja: 'ja',
+    ko: 'ko',
+    fr: 'fr'
+};
+var client = 'fanyideskweb';
+var sk = "rY0D^0'nM0}g5Mm1z%1G4";
+/**
+ * 有道翻译接口的签名算法
+ * @param {string} text
+ * @return {{client: string, salt: number, sign: string}}
  */
-(function webpackUniversalModuleDefinition(root, factory) {
-	if (true) module.exports = factory();else if (typeof define === 'function' && define.amd) define([], factory);else if (typeof exports === 'object') exports["tjs"] = factory();else root["tjs"] = factory();
-})(undefined, function () {
-	return (/******/function (modules) {
-			// webpackBootstrap
-			/******/ // The module cache
-			/******/var installedModules = {};
+function sign(text) {
+    var salt = Date.now() + parseInt(String(10 * Math.random()), 10);
+    return {
+        client: client,
+        salt: salt,
+        sign: node_1.default(client + text + salt + sk)
+    };
+}
+var languageListInvert = utils_1.invert(languageList);
+function translate(options) {
+    var _a = utils_1.transformOptions(options), text = _a.text, from = _a.from, to = _a.to;
+    text = text.slice(0, 5000);
+    if (from) {
+        from = languageList[from];
+    }
+    else {
+        from = 'AUTO';
+    }
+    if (to) {
+        to = languageList[to];
+    }
+    else {
+        to = 'AUTO';
+    }
+    // 有道网页翻译的接口的语种与目标语种中必须有一个是中文
+    if (!((from === 'AUTO' && to === 'AUTO') ||
+        (from === 'zh-CHS' || to === 'zh-CHS'))) {
+        return Promise.reject(new utils_1.TranslatorError("UNSUPPORTED_LANG" /* UNSUPPORTED_LANG */, '有道翻译的源语种与目标语种中必须有一个是中文，或者两个都是 AUTO'));
+    }
+    return node_2.default({
+        method: 'post',
+        url: translateAPI,
+        type: 'form',
+        body: Object.assign(sign(text), {
+            i: text,
+            from: from,
+            to: to,
+            smartresult: 'dict',
+            doctype: 'json',
+            version: '2.1',
+            keyfrom: 'fanyi.web',
+            action: 'FY_BY_REALTIME',
+            typoResult: 'true'
+        }),
+        // tslint:disable-next-line:strict-type-predicates
+        headers: typeof window === 'undefined' ? { Referer: link } : undefined
+    }).then(function (body) {
+        if (body.errorCode !== 0) {
+            throw new utils_1.TranslatorError("API_SERVER_ERROR" /* API_SERVER_ERROR */, '有道翻译接口出错了');
+        }
+        var _a = body.type.split('2'), from = _a[0], to = _a[1];
+        from = languageListInvert[from];
+        to = languageListInvert[to];
+        var smartResult = body.smartResult;
+        var result = {
+            raw: body,
+            text: text,
+            from: from,
+            to: to,
+            link: smartResult
+                ? "https://dict.youdao.com/search?q=" + encodeURIComponent(text) + "&keyfrom=fanyi.smartResult"
+                : "http://fanyi.youdao.com/translate?i=" + encodeURIComponent(text)
+        };
+        if (smartResult) {
+            try {
+                result.dict = smartResult.entries.filter(function (s) { return s; }).map(function (s) { return s.trim(); });
+            }
+            catch (e) { }
+        }
+        try {
+            result.result = body.translateResult[0].map(function (o) { return o.tgt.trim(); });
+        }
+        catch (e) { }
+        return result;
+    });
+}
+function detect(options) {
+    var text = utils_1.transformOptions(options).text;
+    return translate(text).then(function (result) {
+        var from = result.from;
+        if (!from) {
+            throw new utils_1.TranslatorError("UNSUPPORTED_LANG" /* UNSUPPORTED_LANG */, '有道翻译不支持这个语种');
+        }
+        return from;
+    });
+}
+function audio(options) {
+    var _a = utils_1.transformOptions(options), text = _a.text, from = _a.from;
+    return new Promise(function (res, rej) {
+        if (from) {
+            res(from);
+        }
+        else {
+            detect(text).then(res, rej);
+        }
+    }).then(function (from) {
+        return "https://dict.youdao.com/dictvoice?audio=" + encodeURIComponent(text) + "&le=" + languageList[from];
+    });
+}
+exports.default = {
+    id: 'youdao',
+    translate: translate,
+    detect: detect,
+    audio: audio
+};
 
-			/******/ // The require function
-			/******/function __webpack_require__(moduleId) {
 
-				/******/ // Check if module is in cache
-				/******/if (installedModules[moduleId])
-					/******/return installedModules[moduleId].exports;
+/***/ }),
 
-				/******/ // Create a new module (and put it into the cache)
-				/******/var module = installedModules[moduleId] = {
-					/******/exports: {},
-					/******/id: moduleId,
-					/******/loaded: false
-					/******/ };
+/***/ "SbOy":
+/***/ (function(module, exports, __webpack_require__) {
 
-				/******/ // Execute the module function
-				/******/modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+"use strict";
 
-				/******/ // Flag the module as loaded
-				/******/module.loaded = true;
+Object.defineProperty(exports, "__esModule", { value: true });
+// blueimp-md5 是一个 CommonJS 模块，为了跟 ./node.ts 保持一致，这里将它转换为 ES6 模块
+var bluemd5 = __webpack_require__("AJcs");
+exports.default = bluemd5;
 
-				/******/ // Return the exports of the module
-				/******/return module.exports;
-				/******/
-			}
-
-			/******/ // expose the modules object (__webpack_modules__)
-			/******/__webpack_require__.m = modules;
-
-			/******/ // expose the module cache
-			/******/__webpack_require__.c = installedModules;
-
-			/******/ // __webpack_public_path__
-			/******/__webpack_require__.p = "";
-
-			/******/ // Load entry module and return exports
-			/******/return __webpack_require__(0);
-			/******/
-		}(
-		/************************************************************************/
-		/******/[
-		/* 0 */
-		/***/function (module, exports, __webpack_require__) {
-
-			// 请求 API 接口时发生了网络错误
-			var NETWORK_ERROR = 0;
-
-			// 请求 HTTP 接口时产生了服务器错误，例如 4xx 或 5xx 的响应，
-			// 详情见 http://visionmedia.github.io/superagent/#error-handling
-			var SERVER_ERROR = 1;
-
-			function Translation() {
-				this.APIs = {};
-			}
-
-			/**
-    * 判断 superAgent 的错误对象的类型
-    * @param {{timeout?:Number,status?:Number}} superAgentErr
-    * @returns {Number}
-    */
-			function analyzeErrorType(superAgentErr) {
-				if (!superAgentErr.status) {
-					return NETWORK_ERROR;
-				} else {
-					return SERVER_ERROR;
-				}
-			}
-
-			var p = Translation.prototype;
-
-			/**
-    * 添加一个翻译实例
-    * @param {API} apiObject
-    */
-			p.add = function (apiObject) {
-				var APIs = this.APIs;
-				var type = apiObject.type;
-				var instances = APIs[type] || (APIs[type] = []);
-				instances.push(apiObject);
-			};
-
-			/**
-    * 翻译方法
-    * @param {Query} queryObj
-    * @returns {Promise}
-    */
-			p.translate = function (queryObj) {
-				return this.call('translate', queryObj);
-			};
-
-			/**
-    * 返回语音 url 的方法
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.audio = function (queryObj) {
-				return this.call('audio', queryObj);
-			};
-
-			/**
-    * 检测语种的方法。注意，此方法返回的语种类型是 API 相关的，可能不会遵守标准。
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.detect = function (queryObj) {
-				return this.call('detect', queryObj);
-			};
-
-			/**
-    * 调用实例方法
-    * @param {String} method - 想调用实例的哪个方法
-    * @param {Query} queryObj
-    * @returns {Promise}
-    */
-			p.call = function (method, queryObj) {
-				var that = this;
-				return new Promise(function (resolve, reject) {
-					var instances = that.APIs[queryObj.api];
-					if (!instances) {
-						return reject('没有注册 ' + queryObj.api + ' API。');
-					}
-
-					var a = instances.shift();
-					instances.push(a);
-					a[method](queryObj).then(function (resultObj) {
-						if (method === 'translate') {
-							resultObj.api = a;
-						}
-						resolve(resultObj);
-					}, function (superAgentError) {
-						if (superAgentError == null) {
-							return reject();
-						}
-						reject(analyzeErrorType(superAgentError));
-					});
-				});
-			};
-
-			var tjs = new Translation();
-
-			tjs.NETWORK_ERROR = NETWORK_ERROR;
-			tjs.SERVER_ERROR = SERVER_ERROR;
-
-			// 绑定内置构造函数
-			tjs.BaiDu = __webpack_require__(1);
-			tjs.YouDao = __webpack_require__(8);
-			tjs.Bing = __webpack_require__(9);
-			tjs.Google = __webpack_require__(10);
-			tjs.GoogleCN = __webpack_require__(12);
-
-			module.exports = tjs;
-
-			/***/
-		},
-		/* 1 */
-		/***/function (module, exports, __webpack_require__) {
-
-			/**
-    * 因为百度翻译 API 要收费，所以没有使用官方提供的接口，而是直接使用 fanyi.baidu.com 的翻译接口
-    */
-
-			var superagent = __webpack_require__(2);
-			var invertObj = __webpack_require__(7);
-
-			// http://api.fanyi.baidu.com/api/trans/product/apidoc#languageList
-			var standard2custom = {
-				en: 'en',
-				th: 'th',
-				ru: 'ru',
-				pt: 'pt',
-				el: 'el',
-				nl: 'nl',
-				pl: 'pl',
-				bg: 'bul',
-				et: 'est',
-				da: 'dan',
-				fi: 'fin',
-				cs: 'cs',
-				ro: 'rom',
-				sl: 'slo',
-				sv: 'swe',
-				hu: 'hu',
-				de: 'de',
-				it: 'it',
-				zh: 'zh',
-				'zh-CN': 'zh',
-				'zh-TW': 'cht',
-				'zh-HK': 'yue',
-				ja: 'jp',
-				ko: 'kor',
-				es: 'spa',
-				fr: 'fra',
-				ar: 'ara'
-			};
-
-			var custom2standard = invertObj(standard2custom);
-
-			/**
-    * 百度翻译构造函数
-    */
-			function BaiDu() {
-				this.name = '百度翻译';
-				this.type = 'BaiDu';
-				this.link = 'http://fanyi.baidu.com/';
-			}
-
-			/**
-    * 在自定义语种与标准语种之间转换，默认会将标准语种转换为自定义语种
-    * @param {String} lang
-    * @param {Boolean} [invert] - 但如果 invert 为真值，则会将自定义语种转换为标准语种
-    * @return {String}
-    */
-			function langResolve(lang, invert) {
-				return (invert ? custom2standard : standard2custom)[lang] || null;
-			}
-
-			var p = BaiDu.prototype;
-
-			/**
-    * 翻译的方法
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.translate = function (queryObj) {
-				var that = this;
-				return new Promise(function (resolve, reject) {
-					superagent.get(that.link + '/v2transapi').query({
-						from: standard2custom[queryObj.from] || 'auto',
-						to: standard2custom[queryObj.to] || 'zh', // 非标准接口一定要提供目标语种
-						query: queryObj.text,
-						transtype: 'hash',
-						simple_means_flag: 3
-					}).end(function (err, res) {
-						if (err) {
-							reject(err);
-						} else {
-							resolve(that.transform(res.body, queryObj));
-						}
-					});
-				});
-			};
-
-			/**
-    * 百度翻译返回的数据结构
-    * @typedef {Object} BaiDuRes
-    * @property {Number} [error_code] - 百度翻译错误码
-    * @property {String} from - 翻译结果的源语种，百度格式的
-    * @property {String} to - 翻译结果的目标语种，百度格式的
-    * @property {{src:String,dst:String}[]} [trans_result] - 翻译结果，偶尔抽风可能没有
-    */
-
-			/**
-    * 将百度接口的数据转换为统一格式
-    * @param {BaiDuRes} rawRes
-    * @param {Query} queryObj
-    * @returns {{}}
-    */
-			p.transform = function (rawRes, queryObj) {
-				var obj = {
-					text: queryObj.text,
-					response: rawRes
-				};
-
-				// 源语种、目标语种与在线翻译地址
-				try {
-					var transResult = rawRes.trans_result || {};
-					obj.from = langResolve(transResult.from, true);
-					obj.to = langResolve(transResult.to, true);
-					obj.linkToResult = this.link + '#auto/' + (transResult.to || 'auto') + '/' + queryObj.text;
-				} catch (e) {}
-
-				// 详细释义
-				try {
-					var detailed = [];
-					rawRes.dict_result.simple_means.symbols[0].parts.forEach(function (v) {
-						detailed.push(v.part + ' ' + v.means.join('，'));
-					});
-					obj.detailed = detailed;
-				} catch (e) {}
-
-				// 翻译结果
-				try {
-					obj.result = rawRes.trans_result.data.map(function (v) {
-						return v.dst;
-					});
-				} catch (e) {}
-
-				if (!obj.detailed && !obj.result) {
-					obj.error = this.name + '没有返回有效的翻译结果，请稍后重试。';
-				}
-
-				return obj;
-			};
-
-			/**
-    * 检测语种的方法， 返回的语种为百度自己格式的语种。
-    * @param {Query} queryObj
-    * @returns {Promise}
-    */
-			p.detect = function (queryObj) {
-				var that = this;
-				return new Promise(function (resolve, reject) {
-					var from = queryObj.from;
-
-					if (from) {
-						return resolve(langResolve(from) ? from : null);
-					}
-
-					superagent.post(that.link + '/langdetect').send('query=' + queryObj.text.slice(0, 73)).end(function (err, res) {
-						if (err) return reject(err);
-
-						var body = res.body;
-						if (body.error === 0) {
-							var lang = langResolve(body.lan, true);
-							if (lang) return resolve(lang);
-						}
-
-						resolve(null);
-					});
-				});
-			};
-
-			/**
-    * 返回语音播放的 url
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.audio = function (queryObj) {
-				return this.detect(queryObj).then(function (lang) {
-					if (!lang) return null;
-					var l = langResolve(lang);
-					return l ? 'http://fanyi.baidu.com/gettts?lan=' + l + '&text=' + queryObj.text + '&spd=2&source=web' : null;
-				});
-			};
-
-			module.exports = BaiDu;
-
-			/***/
-		},
-		/* 2 */
-		/***/function (module, exports, __webpack_require__) {
-
-			/**
-    * Root reference for iframes.
-    */
-
-			var root;
-			if (typeof window !== 'undefined') {
-				// Browser window
-				root = window;
-			} else if (typeof self !== 'undefined') {
-				// Web Worker
-				root = self;
-			} else {
-				// Other environments
-				console.warn("Using browser-only version of superagent in non-browser environment");
-				root = this;
-			}
-
-			var Emitter = __webpack_require__(3);
-			var requestBase = __webpack_require__(4);
-			var isObject = __webpack_require__(5);
-
-			/**
-    * Noop.
-    */
-
-			function noop() {};
-
-			/**
-    * Expose `request`.
-    */
-
-			var request = module.exports = __webpack_require__(6).bind(null, Request);
-
-			/**
-    * Determine XHR.
-    */
-
-			request.getXHR = function () {
-				if (root.XMLHttpRequest && (!root.location || 'file:' != root.location.protocol || !root.ActiveXObject)) {
-					return new XMLHttpRequest();
-				} else {
-					try {
-						return new ActiveXObject('Microsoft.XMLHTTP');
-					} catch (e) {}
-					try {
-						return new ActiveXObject('Msxml2.XMLHTTP.6.0');
-					} catch (e) {}
-					try {
-						return new ActiveXObject('Msxml2.XMLHTTP.3.0');
-					} catch (e) {}
-					try {
-						return new ActiveXObject('Msxml2.XMLHTTP');
-					} catch (e) {}
-				}
-				throw Error("Browser-only verison of superagent could not find XHR");
-			};
-
-			/**
-    * Removes leading and trailing whitespace, added to support IE.
-    *
-    * @param {String} s
-    * @return {String}
-    * @api private
-    */
-
-			var trim = ''.trim ? function (s) {
-				return s.trim();
-			} : function (s) {
-				return s.replace(/(^\s*|\s*$)/g, '');
-			};
-
-			/**
-    * Serialize the given `obj`.
-    *
-    * @param {Object} obj
-    * @return {String}
-    * @api private
-    */
-
-			function serialize(obj) {
-				if (!isObject(obj)) return obj;
-				var pairs = [];
-				for (var key in obj) {
-					pushEncodedKeyValuePair(pairs, key, obj[key]);
-				}
-				return pairs.join('&');
-			}
-
-			/**
-    * Helps 'serialize' with serializing arrays.
-    * Mutates the pairs array.
-    *
-    * @param {Array} pairs
-    * @param {String} key
-    * @param {Mixed} val
-    */
-
-			function pushEncodedKeyValuePair(pairs, key, val) {
-				if (val != null) {
-					if (Array.isArray(val)) {
-						val.forEach(function (v) {
-							pushEncodedKeyValuePair(pairs, key, v);
-						});
-					} else if (isObject(val)) {
-						for (var subkey in val) {
-							pushEncodedKeyValuePair(pairs, key + '[' + subkey + ']', val[subkey]);
-						}
-					} else {
-						pairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(val));
-					}
-				} else if (val === null) {
-					pairs.push(encodeURIComponent(key));
-				}
-			}
-
-			/**
-    * Expose serialization method.
-    */
-
-			request.serializeObject = serialize;
-
-			/**
-    * Parse the given x-www-form-urlencoded `str`.
-    *
-    * @param {String} str
-    * @return {Object}
-    * @api private
-    */
-
-			function parseString(str) {
-				var obj = {};
-				var pairs = str.split('&');
-				var pair;
-				var pos;
-
-				for (var i = 0, len = pairs.length; i < len; ++i) {
-					pair = pairs[i];
-					pos = pair.indexOf('=');
-					if (pos == -1) {
-						obj[decodeURIComponent(pair)] = '';
-					} else {
-						obj[decodeURIComponent(pair.slice(0, pos))] = decodeURIComponent(pair.slice(pos + 1));
-					}
-				}
-
-				return obj;
-			}
-
-			/**
-    * Expose parser.
-    */
-
-			request.parseString = parseString;
-
-			/**
-    * Default MIME type map.
-    *
-    *     superagent.types.xml = 'application/xml';
-    *
-    */
-
-			request.types = {
-				html: 'text/html',
-				json: 'application/json',
-				xml: 'application/xml',
-				urlencoded: 'application/x-www-form-urlencoded',
-				'form': 'application/x-www-form-urlencoded',
-				'form-data': 'application/x-www-form-urlencoded'
-			};
-
-			/**
-    * Default serialization map.
-    *
-    *     superagent.serialize['application/xml'] = function(obj){
-    *       return 'generated xml here';
-    *     };
-    *
-    */
-
-			request.serialize = {
-				'application/x-www-form-urlencoded': serialize,
-				'application/json': JSON.stringify
-			};
-
-			/**
-    * Default parsers.
-    *
-    *     superagent.parse['application/xml'] = function(str){
-    *       return { object parsed from str };
-    *     };
-    *
-    */
-
-			request.parse = {
-				'application/x-www-form-urlencoded': parseString,
-				'application/json': JSON.parse
-			};
-
-			/**
-    * Parse the given header `str` into
-    * an object containing the mapped fields.
-    *
-    * @param {String} str
-    * @return {Object}
-    * @api private
-    */
-
-			function parseHeader(str) {
-				var lines = str.split(/\r?\n/);
-				var fields = {};
-				var index;
-				var line;
-				var field;
-				var val;
-
-				lines.pop(); // trailing CRLF
-
-				for (var i = 0, len = lines.length; i < len; ++i) {
-					line = lines[i];
-					index = line.indexOf(':');
-					field = line.slice(0, index).toLowerCase();
-					val = trim(line.slice(index + 1));
-					fields[field] = val;
-				}
-
-				return fields;
-			}
-
-			/**
-    * Check if `mime` is json or has +json structured syntax suffix.
-    *
-    * @param {String} mime
-    * @return {Boolean}
-    * @api private
-    */
-
-			function isJSON(mime) {
-				return (/[\/+]json\b/.test(mime)
-				);
-			}
-
-			/**
-    * Return the mime type for the given `str`.
-    *
-    * @param {String} str
-    * @return {String}
-    * @api private
-    */
-
-			function type(str) {
-				return str.split(/ *; */).shift();
-			};
-
-			/**
-    * Return header field parameters.
-    *
-    * @param {String} str
-    * @return {Object}
-    * @api private
-    */
-
-			function params(str) {
-				return str.split(/ *; */).reduce(function (obj, str) {
-					var parts = str.split(/ *= */),
-					    key = parts.shift(),
-					    val = parts.shift();
-
-					if (key && val) obj[key] = val;
-					return obj;
-				}, {});
-			};
-
-			/**
-    * Initialize a new `Response` with the given `xhr`.
-    *
-    *  - set flags (.ok, .error, etc)
-    *  - parse header
-    *
-    * Examples:
-    *
-    *  Aliasing `superagent` as `request` is nice:
-    *
-    *      request = superagent;
-    *
-    *  We can use the promise-like API, or pass callbacks:
-    *
-    *      request.get('/').end(function(res){});
-    *      request.get('/', function(res){});
-    *
-    *  Sending data can be chained:
-    *
-    *      request
-    *        .post('/user')
-    *        .send({ name: 'tj' })
-    *        .end(function(res){});
-    *
-    *  Or passed to `.send()`:
-    *
-    *      request
-    *        .post('/user')
-    *        .send({ name: 'tj' }, function(res){});
-    *
-    *  Or passed to `.post()`:
-    *
-    *      request
-    *        .post('/user', { name: 'tj' })
-    *        .end(function(res){});
-    *
-    * Or further reduced to a single call for simple cases:
-    *
-    *      request
-    *        .post('/user', { name: 'tj' }, function(res){});
-    *
-    * @param {XMLHTTPRequest} xhr
-    * @param {Object} options
-    * @api private
-    */
-
-			function Response(req, options) {
-				options = options || {};
-				this.req = req;
-				this.xhr = this.req.xhr;
-				// responseText is accessible only if responseType is '' or 'text' and on older browsers
-				this.text = this.req.method != 'HEAD' && (this.xhr.responseType === '' || this.xhr.responseType === 'text') || typeof this.xhr.responseType === 'undefined' ? this.xhr.responseText : null;
-				this.statusText = this.req.xhr.statusText;
-				this._setStatusProperties(this.xhr.status);
-				this.header = this.headers = parseHeader(this.xhr.getAllResponseHeaders());
-				// getAllResponseHeaders sometimes falsely returns "" for CORS requests, but
-				// getResponseHeader still works. so we get content-type even if getting
-				// other headers fails.
-				this.header['content-type'] = this.xhr.getResponseHeader('content-type');
-				this._setHeaderProperties(this.header);
-				this.body = this.req.method != 'HEAD' ? this._parseBody(this.text ? this.text : this.xhr.response) : null;
-			}
-
-			/**
-    * Get case-insensitive `field` value.
-    *
-    * @param {String} field
-    * @return {String}
-    * @api public
-    */
-
-			Response.prototype.get = function (field) {
-				return this.header[field.toLowerCase()];
-			};
-
-			/**
-    * Set header related properties:
-    *
-    *   - `.type` the content type without params
-    *
-    * A response of "Content-Type: text/plain; charset=utf-8"
-    * will provide you with a `.type` of "text/plain".
-    *
-    * @param {Object} header
-    * @api private
-    */
-
-			Response.prototype._setHeaderProperties = function (header) {
-				// content-type
-				var ct = this.header['content-type'] || '';
-				this.type = type(ct);
-
-				// params
-				var obj = params(ct);
-				for (var key in obj) this[key] = obj[key];
-			};
-
-			/**
-    * Parse the given body `str`.
-    *
-    * Used for auto-parsing of bodies. Parsers
-    * are defined on the `superagent.parse` object.
-    *
-    * @param {String} str
-    * @return {Mixed}
-    * @api private
-    */
-
-			Response.prototype._parseBody = function (str) {
-				var parse = request.parse[this.type];
-				if (!parse && isJSON(this.type)) {
-					parse = request.parse['application/json'];
-				}
-				return parse && str && (str.length || str instanceof Object) ? parse(str) : null;
-			};
-
-			/**
-    * Set flags such as `.ok` based on `status`.
-    *
-    * For example a 2xx response will give you a `.ok` of __true__
-    * whereas 5xx will be __false__ and `.error` will be __true__. The
-    * `.clientError` and `.serverError` are also available to be more
-    * specific, and `.statusType` is the class of error ranging from 1..5
-    * sometimes useful for mapping respond colors etc.
-    *
-    * "sugar" properties are also defined for common cases. Currently providing:
-    *
-    *   - .noContent
-    *   - .badRequest
-    *   - .unauthorized
-    *   - .notAcceptable
-    *   - .notFound
-    *
-    * @param {Number} status
-    * @api private
-    */
-
-			Response.prototype._setStatusProperties = function (status) {
-				// handle IE9 bug: http://stackoverflow.com/questions/10046972/msie-returns-status-code-of-1223-for-ajax-request
-				if (status === 1223) {
-					status = 204;
-				}
-
-				var type = status / 100 | 0;
-
-				// status / class
-				this.status = this.statusCode = status;
-				this.statusType = type;
-
-				// basics
-				this.info = 1 == type;
-				this.ok = 2 == type;
-				this.clientError = 4 == type;
-				this.serverError = 5 == type;
-				this.error = 4 == type || 5 == type ? this.toError() : false;
-
-				// sugar
-				this.accepted = 202 == status;
-				this.noContent = 204 == status;
-				this.badRequest = 400 == status;
-				this.unauthorized = 401 == status;
-				this.notAcceptable = 406 == status;
-				this.notFound = 404 == status;
-				this.forbidden = 403 == status;
-			};
-
-			/**
-    * Return an `Error` representative of this response.
-    *
-    * @return {Error}
-    * @api public
-    */
-
-			Response.prototype.toError = function () {
-				var req = this.req;
-				var method = req.method;
-				var url = req.url;
-
-				var msg = 'cannot ' + method + ' ' + url + ' (' + this.status + ')';
-				var err = new Error(msg);
-				err.status = this.status;
-				err.method = method;
-				err.url = url;
-
-				return err;
-			};
-
-			/**
-    * Expose `Response`.
-    */
-
-			request.Response = Response;
-
-			/**
-    * Initialize a new `Request` with the given `method` and `url`.
-    *
-    * @param {String} method
-    * @param {String} url
-    * @api public
-    */
-
-			function Request(method, url) {
-				var self = this;
-				this._query = this._query || [];
-				this.method = method;
-				this.url = url;
-				this.header = {}; // preserves header name case
-				this._header = {}; // coerces header names to lowercase
-				this.on('end', function () {
-					var err = null;
-					var res = null;
-
-					try {
-						res = new Response(self);
-					} catch (e) {
-						err = new Error('Parser is unable to parse the response');
-						err.parse = true;
-						err.original = e;
-						// issue #675: return the raw response if the response parsing fails
-						err.rawResponse = self.xhr && self.xhr.responseText ? self.xhr.responseText : null;
-						// issue #876: return the http status code if the response parsing fails
-						err.statusCode = self.xhr && self.xhr.status ? self.xhr.status : null;
-						return self.callback(err);
-					}
-
-					self.emit('response', res);
-
-					var new_err;
-					try {
-						if (res.status < 200 || res.status >= 300) {
-							new_err = new Error(res.statusText || 'Unsuccessful HTTP response');
-							new_err.original = err;
-							new_err.response = res;
-							new_err.status = res.status;
-						}
-					} catch (e) {
-						new_err = e; // #985 touching res may cause INVALID_STATE_ERR on old Android
-					}
-
-					// #1000 don't catch errors from the callback to avoid double calling it
-					if (new_err) {
-						self.callback(new_err, res);
-					} else {
-						self.callback(null, res);
-					}
-				});
-			}
-
-			/**
-    * Mixin `Emitter` and `requestBase`.
-    */
-
-			Emitter(Request.prototype);
-			for (var key in requestBase) {
-				Request.prototype[key] = requestBase[key];
-			}
-
-			/**
-    * Set Content-Type to `type`, mapping values from `request.types`.
-    *
-    * Examples:
-    *
-    *      superagent.types.xml = 'application/xml';
-    *
-    *      request.post('/')
-    *        .type('xml')
-    *        .send(xmlstring)
-    *        .end(callback);
-    *
-    *      request.post('/')
-    *        .type('application/xml')
-    *        .send(xmlstring)
-    *        .end(callback);
-    *
-    * @param {String} type
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			Request.prototype.type = function (type) {
-				this.set('Content-Type', request.types[type] || type);
-				return this;
-			};
-
-			/**
-    * Set responseType to `val`. Presently valid responseTypes are 'blob' and
-    * 'arraybuffer'.
-    *
-    * Examples:
-    *
-    *      req.get('/')
-    *        .responseType('blob')
-    *        .end(callback);
-    *
-    * @param {String} val
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			Request.prototype.responseType = function (val) {
-				this._responseType = val;
-				return this;
-			};
-
-			/**
-    * Set Accept to `type`, mapping values from `request.types`.
-    *
-    * Examples:
-    *
-    *      superagent.types.json = 'application/json';
-    *
-    *      request.get('/agent')
-    *        .accept('json')
-    *        .end(callback);
-    *
-    *      request.get('/agent')
-    *        .accept('application/json')
-    *        .end(callback);
-    *
-    * @param {String} accept
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			Request.prototype.accept = function (type) {
-				this.set('Accept', request.types[type] || type);
-				return this;
-			};
-
-			/**
-    * Set Authorization field value with `user` and `pass`.
-    *
-    * @param {String} user
-    * @param {String} pass
-    * @param {Object} options with 'type' property 'auto' or 'basic' (default 'basic')
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			Request.prototype.auth = function (user, pass, options) {
-				if (!options) {
-					options = {
-						type: 'basic'
-					};
-				}
-
-				switch (options.type) {
-					case 'basic':
-						var str = btoa(user + ':' + pass);
-						this.set('Authorization', 'Basic ' + str);
-						break;
-
-					case 'auto':
-						this.username = user;
-						this.password = pass;
-						break;
-				}
-				return this;
-			};
-
-			/**
-   * Add query-string `val`.
-   *
-   * Examples:
-   *
-   *   request.get('/shoes')
-   *     .query('size=10')
-   *     .query({ color: 'blue' })
-   *
-   * @param {Object|String} val
-   * @return {Request} for chaining
-   * @api public
-   */
-
-			Request.prototype.query = function (val) {
-				if ('string' != typeof val) val = serialize(val);
-				if (val) this._query.push(val);
-				return this;
-			};
-
-			/**
-    * Queue the given `file` as an attachment to the specified `field`,
-    * with optional `filename`.
-    *
-    * ``` js
-    * request.post('/upload')
-    *   .attach('content', new Blob(['<a id="a"><b id="b">hey!</b></a>'], { type: "text/html"}))
-    *   .end(callback);
-    * ```
-    *
-    * @param {String} field
-    * @param {Blob|File} file
-    * @param {String} filename
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			Request.prototype.attach = function (field, file, filename) {
-				this._getFormData().append(field, file, filename || file.name);
-				return this;
-			};
-
-			Request.prototype._getFormData = function () {
-				if (!this._formData) {
-					this._formData = new root.FormData();
-				}
-				return this._formData;
-			};
-
-			/**
-    * Invoke the callback with `err` and `res`
-    * and handle arity check.
-    *
-    * @param {Error} err
-    * @param {Response} res
-    * @api private
-    */
-
-			Request.prototype.callback = function (err, res) {
-				var fn = this._callback;
-				this.clearTimeout();
-				fn(err, res);
-			};
-
-			/**
-    * Invoke callback with x-domain error.
-    *
-    * @api private
-    */
-
-			Request.prototype.crossDomainError = function () {
-				var err = new Error('Request has been terminated\nPossible causes: the network is offline, Origin is not allowed by Access-Control-Allow-Origin, the page is being unloaded, etc.');
-				err.crossDomain = true;
-
-				err.status = this.status;
-				err.method = this.method;
-				err.url = this.url;
-
-				this.callback(err);
-			};
-
-			/**
-    * Invoke callback with timeout error.
-    *
-    * @api private
-    */
-
-			Request.prototype._timeoutError = function () {
-				var timeout = this._timeout;
-				var err = new Error('timeout of ' + timeout + 'ms exceeded');
-				err.timeout = timeout;
-				this.callback(err);
-			};
-
-			/**
-    * Compose querystring to append to req.url
-    *
-    * @api private
-    */
-
-			Request.prototype._appendQueryString = function () {
-				var query = this._query.join('&');
-				if (query) {
-					this.url += ~this.url.indexOf('?') ? '&' + query : '?' + query;
-				}
-			};
-
-			/**
-    * Initiate request, invoking callback `fn(res)`
-    * with an instanceof `Response`.
-    *
-    * @param {Function} fn
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			Request.prototype.end = function (fn) {
-				var self = this;
-				var xhr = this.xhr = request.getXHR();
-				var timeout = this._timeout;
-				var data = this._formData || this._data;
-
-				// store callback
-				this._callback = fn || noop;
-
-				// state change
-				xhr.onreadystatechange = function () {
-					if (4 != xhr.readyState) return;
-
-					// In IE9, reads to any property (e.g. status) off of an aborted XHR will
-					// result in the error "Could not complete the operation due to error c00c023f"
-					var status;
-					try {
-						status = xhr.status;
-					} catch (e) {
-						status = 0;
-					}
-
-					if (0 == status) {
-						if (self.timedout) return self._timeoutError();
-						if (self._aborted) return;
-						return self.crossDomainError();
-					}
-					self.emit('end');
-				};
-
-				// progress
-				var handleProgress = function (direction, e) {
-					if (e.total > 0) {
-						e.percent = e.loaded / e.total * 100;
-					}
-					e.direction = direction;
-					self.emit('progress', e);
-				};
-				if (this.hasListeners('progress')) {
-					try {
-						xhr.onprogress = handleProgress.bind(null, 'download');
-						if (xhr.upload) {
-							xhr.upload.onprogress = handleProgress.bind(null, 'upload');
-						}
-					} catch (e) {
-						// Accessing xhr.upload fails in IE from a web worker, so just pretend it doesn't exist.
-						// Reported here:
-						// https://connect.microsoft.com/IE/feedback/details/837245/xmlhttprequest-upload-throws-invalid-argument-when-used-from-web-worker-context
-					}
-				}
-
-				// timeout
-				if (timeout && !this._timer) {
-					this._timer = setTimeout(function () {
-						self.timedout = true;
-						self.abort();
-					}, timeout);
-				}
-
-				// querystring
-				this._appendQueryString();
-
-				// initiate request
-				if (this.username && this.password) {
-					xhr.open(this.method, this.url, true, this.username, this.password);
-				} else {
-					xhr.open(this.method, this.url, true);
-				}
-
-				// CORS
-				if (this._withCredentials) xhr.withCredentials = true;
-
-				// body
-				if ('GET' != this.method && 'HEAD' != this.method && 'string' != typeof data && !this._isHost(data)) {
-					// serialize stuff
-					var contentType = this._header['content-type'];
-					var serialize = this._serializer || request.serialize[contentType ? contentType.split(';')[0] : ''];
-					if (!serialize && isJSON(contentType)) serialize = request.serialize['application/json'];
-					if (serialize) data = serialize(data);
-				}
-
-				// set header fields
-				for (var field in this.header) {
-					if (null == this.header[field]) continue;
-					xhr.setRequestHeader(field, this.header[field]);
-				}
-
-				if (this._responseType) {
-					xhr.responseType = this._responseType;
-				}
-
-				// send stuff
-				this.emit('request', this);
-
-				// IE11 xhr.send(undefined) sends 'undefined' string as POST payload (instead of nothing)
-				// We need null here if data is undefined
-				xhr.send(typeof data !== 'undefined' ? data : null);
-				return this;
-			};
-
-			/**
-    * Expose `Request`.
-    */
-
-			request.Request = Request;
-
-			/**
-    * GET `url` with optional callback `fn(res)`.
-    *
-    * @param {String} url
-    * @param {Mixed|Function} [data] or fn
-    * @param {Function} [fn]
-    * @return {Request}
-    * @api public
-    */
-
-			request.get = function (url, data, fn) {
-				var req = request('GET', url);
-				if ('function' == typeof data) fn = data, data = null;
-				if (data) req.query(data);
-				if (fn) req.end(fn);
-				return req;
-			};
-
-			/**
-    * HEAD `url` with optional callback `fn(res)`.
-    *
-    * @param {String} url
-    * @param {Mixed|Function} [data] or fn
-    * @param {Function} [fn]
-    * @return {Request}
-    * @api public
-    */
-
-			request.head = function (url, data, fn) {
-				var req = request('HEAD', url);
-				if ('function' == typeof data) fn = data, data = null;
-				if (data) req.send(data);
-				if (fn) req.end(fn);
-				return req;
-			};
-
-			/**
-    * OPTIONS query to `url` with optional callback `fn(res)`.
-    *
-    * @param {String} url
-    * @param {Mixed|Function} [data] or fn
-    * @param {Function} [fn]
-    * @return {Request}
-    * @api public
-    */
-
-			request.options = function (url, data, fn) {
-				var req = request('OPTIONS', url);
-				if ('function' == typeof data) fn = data, data = null;
-				if (data) req.send(data);
-				if (fn) req.end(fn);
-				return req;
-			};
-
-			/**
-    * DELETE `url` with optional callback `fn(res)`.
-    *
-    * @param {String} url
-    * @param {Function} [fn]
-    * @return {Request}
-    * @api public
-    */
-
-			function del(url, fn) {
-				var req = request('DELETE', url);
-				if (fn) req.end(fn);
-				return req;
-			};
-
-			request['del'] = del;
-			request['delete'] = del;
-
-			/**
-    * PATCH `url` with optional `data` and callback `fn(res)`.
-    *
-    * @param {String} url
-    * @param {Mixed} [data]
-    * @param {Function} [fn]
-    * @return {Request}
-    * @api public
-    */
-
-			request.patch = function (url, data, fn) {
-				var req = request('PATCH', url);
-				if ('function' == typeof data) fn = data, data = null;
-				if (data) req.send(data);
-				if (fn) req.end(fn);
-				return req;
-			};
-
-			/**
-    * POST `url` with optional `data` and callback `fn(res)`.
-    *
-    * @param {String} url
-    * @param {Mixed} [data]
-    * @param {Function} [fn]
-    * @return {Request}
-    * @api public
-    */
-
-			request.post = function (url, data, fn) {
-				var req = request('POST', url);
-				if ('function' == typeof data) fn = data, data = null;
-				if (data) req.send(data);
-				if (fn) req.end(fn);
-				return req;
-			};
-
-			/**
-    * PUT `url` with optional `data` and callback `fn(res)`.
-    *
-    * @param {String} url
-    * @param {Mixed|Function} [data] or fn
-    * @param {Function} [fn]
-    * @return {Request}
-    * @api public
-    */
-
-			request.put = function (url, data, fn) {
-				var req = request('PUT', url);
-				if ('function' == typeof data) fn = data, data = null;
-				if (data) req.send(data);
-				if (fn) req.end(fn);
-				return req;
-			};
-
-			/***/
-		},
-		/* 3 */
-		/***/function (module, exports, __webpack_require__) {
-
-			/**
-    * Expose `Emitter`.
-    */
-
-			if (true) {
-				module.exports = Emitter;
-			}
-
-			/**
-    * Initialize a new `Emitter`.
-    *
-    * @api public
-    */
-
-			function Emitter(obj) {
-				if (obj) return mixin(obj);
-			};
-
-			/**
-    * Mixin the emitter properties.
-    *
-    * @param {Object} obj
-    * @return {Object}
-    * @api private
-    */
-
-			function mixin(obj) {
-				for (var key in Emitter.prototype) {
-					obj[key] = Emitter.prototype[key];
-				}
-				return obj;
-			}
-
-			/**
-    * Listen on the given `event` with `fn`.
-    *
-    * @param {String} event
-    * @param {Function} fn
-    * @return {Emitter}
-    * @api public
-    */
-
-			Emitter.prototype.on = Emitter.prototype.addEventListener = function (event, fn) {
-				this._callbacks = this._callbacks || {};
-				(this._callbacks['$' + event] = this._callbacks['$' + event] || []).push(fn);
-				return this;
-			};
-
-			/**
-    * Adds an `event` listener that will be invoked a single
-    * time then automatically removed.
-    *
-    * @param {String} event
-    * @param {Function} fn
-    * @return {Emitter}
-    * @api public
-    */
-
-			Emitter.prototype.once = function (event, fn) {
-				function on() {
-					this.off(event, on);
-					fn.apply(this, arguments);
-				}
-
-				on.fn = fn;
-				this.on(event, on);
-				return this;
-			};
-
-			/**
-    * Remove the given callback for `event` or all
-    * registered callbacks.
-    *
-    * @param {String} event
-    * @param {Function} fn
-    * @return {Emitter}
-    * @api public
-    */
-
-			Emitter.prototype.off = Emitter.prototype.removeListener = Emitter.prototype.removeAllListeners = Emitter.prototype.removeEventListener = function (event, fn) {
-				this._callbacks = this._callbacks || {};
-
-				// all
-				if (0 == arguments.length) {
-					this._callbacks = {};
-					return this;
-				}
-
-				// specific event
-				var callbacks = this._callbacks['$' + event];
-				if (!callbacks) return this;
-
-				// remove all handlers
-				if (1 == arguments.length) {
-					delete this._callbacks['$' + event];
-					return this;
-				}
-
-				// remove specific handler
-				var cb;
-				for (var i = 0; i < callbacks.length; i++) {
-					cb = callbacks[i];
-					if (cb === fn || cb.fn === fn) {
-						callbacks.splice(i, 1);
-						break;
-					}
-				}
-				return this;
-			};
-
-			/**
-    * Emit `event` with the given args.
-    *
-    * @param {String} event
-    * @param {Mixed} ...
-    * @return {Emitter}
-    */
-
-			Emitter.prototype.emit = function (event) {
-				this._callbacks = this._callbacks || {};
-				var args = [].slice.call(arguments, 1),
-				    callbacks = this._callbacks['$' + event];
-
-				if (callbacks) {
-					callbacks = callbacks.slice(0);
-					for (var i = 0, len = callbacks.length; i < len; ++i) {
-						callbacks[i].apply(this, args);
-					}
-				}
-
-				return this;
-			};
-
-			/**
-    * Return array of callbacks for `event`.
-    *
-    * @param {String} event
-    * @return {Array}
-    * @api public
-    */
-
-			Emitter.prototype.listeners = function (event) {
-				this._callbacks = this._callbacks || {};
-				return this._callbacks['$' + event] || [];
-			};
-
-			/**
-    * Check if this emitter has `event` handlers.
-    *
-    * @param {String} event
-    * @return {Boolean}
-    * @api public
-    */
-
-			Emitter.prototype.hasListeners = function (event) {
-				return !!this.listeners(event).length;
-			};
-
-			/***/
-		},
-		/* 4 */
-		/***/function (module, exports, __webpack_require__) {
-
-			/**
-    * Module of mixed-in functions shared between node and client code
-    */
-			var isObject = __webpack_require__(5);
-
-			/**
-    * Clear previous timeout.
-    *
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			exports.clearTimeout = function _clearTimeout() {
-				this._timeout = 0;
-				clearTimeout(this._timer);
-				return this;
-			};
-
-			/**
-    * Override default response body parser
-    *
-    * This function will be called to convert incoming data into request.body
-    *
-    * @param {Function}
-    * @api public
-    */
-
-			exports.parse = function parse(fn) {
-				this._parser = fn;
-				return this;
-			};
-
-			/**
-    * Override default request body serializer
-    *
-    * This function will be called to convert data set via .send or .attach into payload to send
-    *
-    * @param {Function}
-    * @api public
-    */
-
-			exports.serialize = function serialize(fn) {
-				this._serializer = fn;
-				return this;
-			};
-
-			/**
-    * Set timeout to `ms`.
-    *
-    * @param {Number} ms
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			exports.timeout = function timeout(ms) {
-				this._timeout = ms;
-				return this;
-			};
-
-			/**
-    * Promise support
-    *
-    * @param {Function} resolve
-    * @param {Function} reject
-    * @return {Request}
-    */
-
-			exports.then = function then(resolve, reject) {
-				if (!this._fullfilledPromise) {
-					var self = this;
-					this._fullfilledPromise = new Promise(function (innerResolve, innerReject) {
-						self.end(function (err, res) {
-							if (err) innerReject(err);else innerResolve(res);
-						});
-					});
-				}
-				return this._fullfilledPromise.then(resolve, reject);
-			};
-
-			exports.catch = function (cb) {
-				return this.then(undefined, cb);
-			};
-
-			/**
-    * Allow for extension
-    */
-
-			exports.use = function use(fn) {
-				fn(this);
-				return this;
-			};
-
-			/**
-    * Get request header `field`.
-    * Case-insensitive.
-    *
-    * @param {String} field
-    * @return {String}
-    * @api public
-    */
-
-			exports.get = function (field) {
-				return this._header[field.toLowerCase()];
-			};
-
-			/**
-    * Get case-insensitive header `field` value.
-    * This is a deprecated internal API. Use `.get(field)` instead.
-    *
-    * (getHeader is no longer used internally by the superagent code base)
-    *
-    * @param {String} field
-    * @return {String}
-    * @api private
-    * @deprecated
-    */
-
-			exports.getHeader = exports.get;
-
-			/**
-    * Set header `field` to `val`, or multiple fields with one object.
-    * Case-insensitive.
-    *
-    * Examples:
-    *
-    *      req.get('/')
-    *        .set('Accept', 'application/json')
-    *        .set('X-API-Key', 'foobar')
-    *        .end(callback);
-    *
-    *      req.get('/')
-    *        .set({ Accept: 'application/json', 'X-API-Key': 'foobar' })
-    *        .end(callback);
-    *
-    * @param {String|Object} field
-    * @param {String} val
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			exports.set = function (field, val) {
-				if (isObject(field)) {
-					for (var key in field) {
-						this.set(key, field[key]);
-					}
-					return this;
-				}
-				this._header[field.toLowerCase()] = val;
-				this.header[field] = val;
-				return this;
-			};
-
-			/**
-    * Remove header `field`.
-    * Case-insensitive.
-    *
-    * Example:
-    *
-    *      req.get('/')
-    *        .unset('User-Agent')
-    *        .end(callback);
-    *
-    * @param {String} field
-    */
-			exports.unset = function (field) {
-				delete this._header[field.toLowerCase()];
-				delete this.header[field];
-				return this;
-			};
-
-			/**
-    * Write the field `name` and `val`, or multiple fields with one object
-    * for "multipart/form-data" request bodies.
-    *
-    * ``` js
-    * request.post('/upload')
-    *   .field('foo', 'bar')
-    *   .end(callback);
-    *
-    * request.post('/upload')
-    *   .field({ foo: 'bar', baz: 'qux' })
-    *   .end(callback);
-    * ```
-    *
-    * @param {String|Object} name
-    * @param {String|Blob|File|Buffer|fs.ReadStream} val
-    * @return {Request} for chaining
-    * @api public
-    */
-			exports.field = function (name, val) {
-
-				// name should be either a string or an object.
-				if (null === name || undefined === name) {
-					throw new Error('.field(name, val) name can not be empty');
-				}
-
-				if (isObject(name)) {
-					for (var key in name) {
-						this.field(key, name[key]);
-					}
-					return this;
-				}
-
-				// val should be defined now
-				if (null === val || undefined === val) {
-					throw new Error('.field(name, val) val can not be empty');
-				}
-				this._getFormData().append(name, val);
-				return this;
-			};
-
-			/**
-    * Abort the request, and clear potential timeout.
-    *
-    * @return {Request}
-    * @api public
-    */
-			exports.abort = function () {
-				if (this._aborted) {
-					return this;
-				}
-				this._aborted = true;
-				this.xhr && this.xhr.abort(); // browser
-				this.req && this.req.abort(); // node
-				this.clearTimeout();
-				this.emit('abort');
-				return this;
-			};
-
-			/**
-    * Enable transmission of cookies with x-domain requests.
-    *
-    * Note that for this to work the origin must not be
-    * using "Access-Control-Allow-Origin" with a wildcard,
-    * and also must set "Access-Control-Allow-Credentials"
-    * to "true".
-    *
-    * @api public
-    */
-
-			exports.withCredentials = function () {
-				// This is browser-only functionality. Node side is no-op.
-				this._withCredentials = true;
-				return this;
-			};
-
-			/**
-    * Set the max redirects to `n`. Does noting in browser XHR implementation.
-    *
-    * @param {Number} n
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			exports.redirects = function (n) {
-				this._maxRedirects = n;
-				return this;
-			};
-
-			/**
-    * Convert to a plain javascript object (not JSON string) of scalar properties.
-    * Note as this method is designed to return a useful non-this value,
-    * it cannot be chained.
-    *
-    * @return {Object} describing method, url, and data of this request
-    * @api public
-    */
-
-			exports.toJSON = function () {
-				return {
-					method: this.method,
-					url: this.url,
-					data: this._data,
-					headers: this._header
-				};
-			};
-
-			/**
-    * Check if `obj` is a host object,
-    * we don't want to serialize these :)
-    *
-    * TODO: future proof, move to compoent land
-    *
-    * @param {Object} obj
-    * @return {Boolean}
-    * @api private
-    */
-
-			exports._isHost = function _isHost(obj) {
-				var str = {}.toString.call(obj);
-
-				switch (str) {
-					case '[object File]':
-					case '[object Blob]':
-					case '[object FormData]':
-						return true;
-					default:
-						return false;
-				}
-			};
-
-			/**
-    * Send `data` as the request body, defaulting the `.type()` to "json" when
-    * an object is given.
-    *
-    * Examples:
-    *
-    *       // manual json
-    *       request.post('/user')
-    *         .type('json')
-    *         .send('{"name":"tj"}')
-    *         .end(callback)
-    *
-    *       // auto json
-    *       request.post('/user')
-    *         .send({ name: 'tj' })
-    *         .end(callback)
-    *
-    *       // manual x-www-form-urlencoded
-    *       request.post('/user')
-    *         .type('form')
-    *         .send('name=tj')
-    *         .end(callback)
-    *
-    *       // auto x-www-form-urlencoded
-    *       request.post('/user')
-    *         .type('form')
-    *         .send({ name: 'tj' })
-    *         .end(callback)
-    *
-    *       // defaults to x-www-form-urlencoded
-    *      request.post('/user')
-    *        .send('name=tobi')
-    *        .send('species=ferret')
-    *        .end(callback)
-    *
-    * @param {String|Object} data
-    * @return {Request} for chaining
-    * @api public
-    */
-
-			exports.send = function (data) {
-				var obj = isObject(data);
-				var type = this._header['content-type'];
-
-				// merge
-				if (obj && isObject(this._data)) {
-					for (var key in data) {
-						this._data[key] = data[key];
-					}
-				} else if ('string' == typeof data) {
-					// default to x-www-form-urlencoded
-					if (!type) this.type('form');
-					type = this._header['content-type'];
-					if ('application/x-www-form-urlencoded' == type) {
-						this._data = this._data ? this._data + '&' + data : data;
-					} else {
-						this._data = (this._data || '') + data;
-					}
-				} else {
-					this._data = data;
-				}
-
-				if (!obj || this._isHost(data)) return this;
-
-				// default to json
-				if (!type) this.type('json');
-				return this;
-			};
-
-			/***/
-		},
-		/* 5 */
-		/***/function (module, exports) {
-
-			/**
-    * Check if `obj` is an object.
-    *
-    * @param {Object} obj
-    * @return {Boolean}
-    * @api private
-    */
-
-			function isObject(obj) {
-				return null !== obj && 'object' === typeof obj;
-			}
-
-			module.exports = isObject;
-
-			/***/
-		},
-		/* 6 */
-		/***/function (module, exports) {
-
-			// The node and browser modules expose versions of this with the
-			// appropriate constructor function bound as first argument
-			/**
-    * Issue a request:
-    *
-    * Examples:
-    *
-    *    request('GET', '/users').end(callback)
-    *    request('/users').end(callback)
-    *    request('/users', callback)
-    *
-    * @param {String} method
-    * @param {String|Function} url or callback
-    * @return {Request}
-    * @api public
-    */
-
-			function request(RequestConstructor, method, url) {
-				// callback
-				if ('function' == typeof url) {
-					return new RequestConstructor('GET', method).end(url);
-				}
-
-				// url first
-				if (2 == arguments.length) {
-					return new RequestConstructor('GET', method);
-				}
-
-				return new RequestConstructor(method, url);
-			}
-
-			module.exports = request;
-
-			/***/
-		},
-		/* 7 */
-		/***/function (module, exports) {
-
-			/**
-    * 反转一个对象的键值对
-    * @param obj
-    * @return {Object}
-    */
-			module.exports = function (obj) {
-				var result = {};
-				for (var key in obj) {
-					if (obj.hasOwnProperty(key)) {
-						result[obj[key]] = key;
-					}
-				}
-				return result;
-			};
-
-			/***/
-		},
-		/* 8 */
-		/***/function (module, exports, __webpack_require__) {
-
-			// @see http://fanyi.youdao.com/openapi?path=data-mode#bd
-
-			/**
-    * 有道翻译返回的数据结构
-    * @typedef {Object} YouDaoRes
-    * @property {Number} errorCode - 有道翻译错误码，0 表示正常
-    * @property {{phonetic?:String,explains?:String[]}} [basic] - 翻译结果的源语种，百度格式的
-    * @property {String[]} [translation] - 翻译结果，偶尔抽风可能没有
-    */
-
-			var request = __webpack_require__(2);
-			var invertObj = __webpack_require__(7);
-			var standard2custom = {
-				en: 'eng',
-				ja: 'jap',
-				ko: 'ko',
-				fr: 'fr',
-				ru: 'ru',
-				es: 'es'
-			};
-			var custom2standard = invertObj(standard2custom);
-
-			function langTransform(lang, invert) {
-				return (invert ? custom2standard : standard2custom)[lang] || null;
-			}
-
-			YouDao.resolve = langTransform;
-
-			/**
-    * 有道翻译构造函数
-    * @param {Object} config
-    * @param {String} config.apiKey
-    * @param {String} config.keyFrom
-    */
-			function YouDao(config) {
-				if (!config || !config.apiKey || !config.keyFrom) {
-					throw new Error('有道翻译必须要有 API Key 及 keyFrom，否则无法使用翻译接口。');
-				}
-
-				this.apiKey = config.apiKey;
-				this.keyFrom = config.keyFrom;
-
-				this.name = '有道翻译';
-				this.link = 'http://fanyi.youdao.com/';
-				this.type = 'YouDao';
-				this.errMsg = {
-					20: '有道翻译服务一次性只能翻译200个字符',
-					30: '有道翻译暂时无法翻译这段文本',
-					40: '有道翻译不支持这种语言',
-					50: 'api key被封禁',
-					60: '无词典结果'
-				};
-			}
-
-			var p = YouDao.prototype;
-
-			/**
-    * 翻译的方法。有道不支持指定源语种或目标语种。
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.translate = function (queryObj) {
-				var that = this;
-				return new Promise(function (resolve, reject) {
-					request.get('https://fanyi.youdao.com/openapi.do').query({
-						key: that.apiKey,
-						keyfrom: that.keyFrom,
-						type: 'data',
-						doctype: 'json',
-						version: '1.1',
-						q: queryObj.text
-					}).end(function (err, res) {
-						if (err) {
-							reject(err);
-						} else {
-							resolve(that.transform(res.body, queryObj));
-						}
-					});
-				});
-			};
-
-			/**
-    * 将有道接口的数据转换为统一格式
-    * @param {YouDaoRes} rawRes
-    * @param {Query} queryObj
-    * @returns {{}}
-    */
-			p.transform = function (rawRes, queryObj) {
-				var obj = {
-					text: queryObj.text,
-					response: rawRes,
-					linkToResult: 'http://fanyi.youdao.com/translate?i=' + queryObj.text
-				};
-
-				// rawRes 偶尔是 null
-				if (rawRes) {
-					// 如果有错误码则直接处理错误
-					if (rawRes.errorCode !== 0) {
-						obj.error = this.errMsg[rawRes.errorCode];
-					} else {
-						// 详细释义
-						try {
-							var basic = rawRes.basic;
-							obj.detailed = basic.explains;
-							obj.phonetic = basic.phonetic;
-						} catch (e) {}
-
-						// 翻译结果
-						try {
-							obj.result = rawRes.translation;
-						} catch (e) {}
-					}
-				}
-
-				if (!obj.error && !obj.detailed && !obj.result) {
-					obj.error = this.name + '没有返回有效的翻译结果，请稍后重试。';
-				}
-
-				return obj;
-			};
-
-			/**
-    * 检测语种的方法，有道没有，所以若没有提供源语种就总是返回 null
-    * @param {Query} queryObj
-    * @returns {Promise}
-    */
-			p.detect = function (queryObj) {
-				return new Promise(function (resolve, reject) {
-					var from = queryObj.from;
-
-					if (langTransform(from)) {
-						resolve(from);
-					} else {
-						resolve(null);
-					}
-				});
-			};
-
-			/**
-    * 返回语音播放的 url
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.audio = function (queryObj) {
-				return this.detect(queryObj).then(function (lang) {
-					if (!lang) return null;
-					var l = langTransform(lang);
-					return l ? 'http://tts.youdao.com/fanyivoice?keyfrom=fanyi%2Eweb%2Eindex&le=' + l + '&word=' + queryObj.text : null;
-				});
-			};
-
-			module.exports = YouDao;
-
-			/***/
-		},
-		/* 9 */
-		/***/function (module, exports, __webpack_require__) {
-
-			/**
-    * 必应词典的这个接口仅支持中文和英文；
-    * 中文会翻译成英文，反之英文会翻译成中文，
-    * 但其它语种全都不支持；
-    * 若翻译了一个不支持的语种（如日语），
-    * 那么语种会被判断为 EN，
-    * 但不会有任何翻译结果。
-    */
-
-			var superagent = __webpack_require__(2);
-			var invertObj = __webpack_require__(7);
-			var custom2standard = {
-				cn: 'zh-CN',
-				en: 'en'
-			};
-			var standard2custom = invertObj(custom2standard);
-
-			/**
-    * 在自定义语种与标准语种之间转换，默认会将标准语种转换为自定义语种
-    * @param {String} lang
-    * @param {Boolean} [invert] - 但如果 invert 为真值，则会将自定义语种转换为标准语种
-    * @return {String}
-    */
-			function langTransform(lang, invert) {
-				return (invert ? custom2standard : standard2custom)[lang] || null;
-			}
-
-			/**
-    * 必应翻译
-    */
-			function Bing() {
-				this.name = '必应翻译';
-				this.type = 'Bing';
-				this.link = 'http://cn.bing.com/dict/';
-			}
-
-			var p = Bing.prototype;
-
-			/**
-    * 翻译的方法
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.translate = function (queryObj) {
-				var that = this;
-				return new Promise(function (resolve, reject) {
-					superagent.post('http://dict.bing.com.cn/io.aspx').type('form').send({
-						t: 'dict',
-						ut: 'default',
-						q: queryObj.text,
-						ulang: 'AUTO',
-						tlang: 'AUTO'
-					}).timeout(that.timeout).end(function (err, res) {
-						if (err) {
-							reject(err);
-						} else {
-							resolve(that.transform(res.text, queryObj));
-						}
-					});
-				});
-			};
-
-			/**
-    * 将必应翻译的数据转换为统一格式
-    * @param responseText
-    * @param queryObj
-    * @returns {{}}
-    */
-			p.transform = function (responseText, queryObj) {
-				var rawRes = JSON.parse(responseText);
-				var ROOT = rawRes.ROOT;
-				var obj = {
-					text: queryObj.text,
-					to: queryObj.to || 'auto',
-					response: rawRes,
-					from: langTransform(ROOT.$LANG, true),
-					linkToResult: this.link + 'search?q=' + queryObj.text
-				};
-
-				// 尝试获取错误消息
-				try {
-					var error = rawRes.ERR.$;
-					if (error) {
-						obj.error = error;
-						return obj;
-					}
-				} catch (e) {}
-
-				// 尝试获取详细释义
-				try {
-					var d = [];
-					ROOT.DEF[0].SENS.forEach(function (v) {
-						var s = v.$POS + '. ';
-						if (Array.isArray(v.SEN)) {
-							v.SEN.forEach(function (j) {
-								s += j.D.$ + ' ';
-							});
-						} else {
-							s += v.SEN.D.$;
-						}
-						d.push(s);
-					});
-					obj.detailed = d;
-				} catch (e) {}
-
-				// 尝试获取翻译结果
-				try {
-					obj.result = [ROOT.SMT.R.$.replace(/\{\d+#|\$\d+\}/g, '')];
-				} catch (e) {}
-
-				if (!obj.detailed && !obj.result) {
-					obj.error = '必应翻译不支持此语种。';
-					obj.from = ''; // 不支持的语种始终会被解析为 en，这是不正确的
-				}
-				return obj;
-			};
-
-			/**
-    * 使用必应翻译检测文本语种。
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.detect = function (queryObj) {
-				return new Promise(function (resolve) {
-					var from = queryObj.from;
-					if (langTransform(from)) {
-						resolve(from);
-					} else {
-						resolve(null);
-					}
-				});
-			};
-
-			/**
-    * 暂时找不到必应的语音播放的接口。它网页上的语音播放没有规律可循。
-    * @returns {Promise}
-    */
-			p.audio = function () {
-				return Promise.resolve(null);
-			};
-
-			module.exports = Bing;
-
-			/***/
-		},
-		/* 10 */
-		/***/function (module, exports, __webpack_require__) {
-
-			/**
-    * 谷歌翻译支持几乎所有语种，并且它的语种格式就是标准的。
-    */
-			var request = __webpack_require__(2);
-			var isEmpty = __webpack_require__(11);
-
-			/**
-    * 谷歌翻译
-    */
-			function Google() {
-				this.name = '谷歌翻译';
-				this.type = 'Google';
-				this.translatePath = '/translate_a/single';
-				this.link = 'https://translate.google.com';
-				// To avoid browser same origin policy block request,
-				// use googleapis as apiRoot in browser
-				this.apiRoot = typeof window === 'object' && window.window === window ? Google.API_URL : this.link;
-				this.audioRoot = this.link + '/translate_tts';
-			}
-
-			Google.API_URL = 'https://translate.googleapis.com';
-			Google.ERROR = {
-				UNKNOWN: '谷歌翻译发生了一个错误，可能是因为查询文本过长，或请求频率太高造成的。',
-				NO_RESULT: '没有返回翻译结果，请稍后重试。'
-			};
-
-			var p = Google.prototype;
-
-			// ISO839-1 Code from https://cloud.google.com/translate/docs/languages
-			var supportedLang = ['af', 'sq', 'am', 'ar', 'hy', 'az', 'eu', 'be', 'bn', 'bs', 'bg', 'ca', 'ceb', 'ny', 'zh-CN', 'zh-TW', 'co', 'hr', 'cs', 'da', 'nl', 'en', 'eo', 'et', 'tl', 'fi', 'fr', 'fy', 'gl', 'ka', 'de', 'el', 'gu', 'ht', 'ha', 'haw', 'iw', 'hi', 'hmn', 'hu', 'is', 'ig', 'id', 'ga', 'it', 'ja', 'jw', 'kn', 'kk', 'km', 'ko', 'ku', 'ky', 'lo', 'la', 'lv', 'lt', 'lb', 'mk', 'mg', 'ms', 'ml', 'mt', 'mi', 'mr', 'mn', 'my', 'ne', 'no', 'ps', 'fa', 'pl', 'pt', 'ma', 'ro', 'ru', 'sm', 'gd', 'sr', 'st', 'sn', 'sd', 'si', 'sk', 'sl', 'so', 'es', 'su', 'sw', 'sv', 'tg', 'ta', 'te', 'th', 'tr', 'uk', 'ur', 'uz', 'vi', 'cy', 'xh', 'yi', 'yo', 'zu'];
-
-			/**
-    * 翻译的方法
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.translate = function (queryObj) {
-				var that = this;
-				var acceptLanguage = queryObj.to ? queryObj.to + (queryObj.to.indexOf('-') > -1 ? ',' + queryObj.to.split('-')[0] : '') : 'en';
-				acceptLanguage += ';q=0.8,en;q=0.6';
-				return new Promise(function (resolve, reject) {
-					request.get(that.apiRoot + that.translatePath).set('Accept-Language', acceptLanguage) // it affects dict language
-					.query({
-						// for detect language, just {client: 'gtx', sl: auto, dj: 1, ie: 'UTF-8', oe: 'UTF-8', q: 'test'}
-						client: 'gtx',
-						sl: queryObj.from || 'auto', // source language
-						tl: queryObj.to || 'auto', // translated language
-						dj: 1, // ensure return json is GoogleRes structure
-						ie: 'UTF-8', // input string encoding
-						oe: 'UTF-8', // output string encoding
-						source: 'icon', // source
-						q: queryObj.text, // text to be translated
-						dt: ['t', 'bd'] // a list to add content to return json
-						// possible dt values: correspond return json key
-						// t: sentences
-						// rm: sentences[1]
-						// bd: dict
-						// at: alternative_translations
-						// ss: synsets
-						// rw: related_words
-						// ex: examples
-						// ld: ld_result
-					}).timeout(that.timeout).end(function (err, res) {
-						if (err) {
-							reject(err);
-						} else {
-							resolve(that.transform(res.body, queryObj));
-						}
-					});
-				});
-			};
-
-			/**
-    * Google 翻译返回的数据结构
-    * @typedef {Object} GoogleRes
-    * @property {String} src - 原字符串语种，ISO839-1 格式，如果 queryObj dt 为空，则返回 json 只有这一个字段
-    * @property {Object[]} sentences
-    * @property {{trans: String, orig: String, backend: Number}} sentences[0] trans:翻译结果，orig:被翻译的字符串
-    * @property {{translit: String, src_translit: String}} sentences[1] translit:翻译结果音标，src_translit:原字符串音标
-    * @property {{pos: String, terms: String[], entry: Object[]}[]} dict 查词结果，只有请求单个单词翻译时会有，
-    * 中翻英经常有，小语种经常没有 pos:词性 terms:词语列表 entry:对每个词的详解
-    * @property {{srclangs: String[], srclangs_confidences: Number[], extended_srclangs: String[]}} ld_result
-    */
-			/**
-    * 将谷歌翻译的数据转换为统一格式
-    * @param {GoogleRes} rawRes
-    * @param queryObj
-    * @returns {{}}
-    */
-			p.transform = function (rawRes, queryObj) {
-				var obj = {
-					text: queryObj.text,
-					to: queryObj.to || 'auto',
-					response: rawRes
-				};
-
-				obj.linkToResult = this.link + '/#auto/' + obj.to + '/' + queryObj.text;
-
-				if (typeof rawRes === 'string') {
-					obj.error = Google.ERROR.UNKNOWN;
-				} else {
-					try {
-						// 尝试获取详细释义
-						obj.detailed = rawRes.dict.map(function (v) {
-							return v.pos + '：' + (v.terms.slice(0, 3) || []).join(',');
-						});
-					} catch (e) {}
-					try {
-						// 尝试取得翻译结果
-						var sentences = rawRes.sentences.filter(function (sentence) {
-							return sentence.trans !== queryObj.text;
-						});
-						if (isEmpty(sentences)) {
-							obj.from = null;
-						} else {
-							obj.from = rawRes.src;
-							obj.result = sentences.map(function (sentence) {
-								return sentence.trans;
-							});
-						}
-					} catch (e) {}
-
-					if (isEmpty(obj.detailed) && isEmpty(obj.result)) {
-						obj.error = this.name + Google.ERROR.NO_RESULT;
-					}
-				}
-				return obj;
-			};
-
-			/**
-    * 使用谷歌翻译检测文本语种。
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.detect = function (queryObj) {
-				var from = queryObj.from;
-				if (from) {
-					return supportedLang.indexOf(from) > -1 ? Promise.resolve(from) : Promise.resolve(null);
-				}
-
-				return this.translate(queryObj).then(function (result) {
-					return result.from ? Promise.resolve(result.from) : Promise.resolve(null);
-				});
-			};
-
-			/**
-    * 返回语音播放的 url
-    * @param queryObj
-    * @returns {Promise}
-    */
-			p.audio = function (queryObj) {
-				var that = this;
-				return this.detect(queryObj).then(function (lang) {
-					return supportedLang.indexOf(lang) > -1 ? that.audioRoot + '?ie=UTF-8&q=' + encodeURIComponent(queryObj.text) + '&tl=' + lang + '&client=gtx' : null;
-				});
-			};
-
-			module.exports = Google;
-
-			/***/
-		},
-		/* 11 */
-		/***/function (module, exports) {
-
-			/**
-    * This things are empty
-    * 1. undefined, null, void 0, [], {},
-    * 2. object with .length === 0,
-    * 3. object without a own enumerable property
-    * @param {Object} obj
-    * @return Boolean
-    */
-			module.exports = function isEmpty(obj) {
-				if (obj == null) return true;
-				if (obj.length !== undefined) return obj.length === 0;
-				return Object.keys(obj).length === 0;
-			};
-
-			/***/
-		},
-		/* 12 */
-		/***/function (module, exports, __webpack_require__) {
-
-			var Google = __webpack_require__(10);
-
-			function GoogleCN(config) {
-				Google.call(this, config);
-				this.name = '谷歌翻译（国内）';
-				this.type = 'GoogleCN';
-				this.link = 'https://translate.google.cn';
-				this.audioRoot = this.link + '/translate_tts';
-				// To avoid browser same origin policy block request,
-				// use googleapis as apiRoot in browser
-				this.apiRoot = typeof window === 'object' && window.window === window ? Google.API_URL : this.link;
-			}
-
-			GoogleCN.prototype = Object.create(Google.prototype);
-			GoogleCN.prototype.constructor = GoogleCN;
-
-			module.exports = GoogleCN;
-
-			/***/
-		}
-		/******/])
-	);
-});
-;
 
 /***/ }),
 
@@ -3512,6 +1708,272 @@ function errorHandler(e) {
 
 /***/ }),
 
+/***/ "VFFl":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/**
+ * 代码来自 https://github.com/matheuss/google-translate-token
+ * 做了一些修改以适应本项目
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+var node_1 = __webpack_require__("0nVa");
+var tk = '';
+// region 复制过来的代码，做了一些修改确保 typescript 不会报错
+/* tslint:disable */
+var yr = null;
+function sM(a) {
+    var b;
+    if (null !== yr)
+        b = yr;
+    else {
+        b = (yr = tk || '') || '';
+    }
+    var d = ['t', 'k'];
+    var c1 = '&' + d.join('') + '=';
+    d = b.split('.');
+    b = Number(d[0]) || 0;
+    for (var e = [], f = 0, g = 0; g < a.length; g++) {
+        var l = a.charCodeAt(g);
+        128 > l
+            ? (e[f++] = l)
+            : (2048 > l
+                ? (e[f++] = (l >> 6) | 192)
+                : (55296 == (l & 64512) &&
+                    g + 1 < a.length &&
+                    56320 == (a.charCodeAt(g + 1) & 64512)
+                    ? ((l = 65536 + ((l & 1023) << 10) + (a.charCodeAt(++g) & 1023)),
+                        (e[f++] = (l >> 18) | 240),
+                        (e[f++] = ((l >> 12) & 63) | 128))
+                    : (e[f++] = (l >> 12) | 224),
+                    (e[f++] = ((l >> 6) & 63) | 128)),
+                (e[f++] = (l & 63) | 128));
+    }
+    a = b;
+    for (f = 0; f < e.length; f++)
+        (a += e[f]), (a = xr(a, '+-a^+6'));
+    a = xr(a, '+-3^+b+-f');
+    a ^= Number(d[1]) || 0;
+    0 > a && (a = (a & 2147483647) + 2147483648);
+    a %= 1e6;
+    return c1 + (a.toString() + '.' + (a ^ b));
+}
+function xr(a, b) {
+    for (var c = 0; c < b.length - 2; c += 3) {
+        var d = b.charAt(c + 2), d1 = 'a' <= d ? d.charCodeAt(0) - 87 : Number(d), d2 = '+' == b.charAt(c + 1) ? a >>> d1 : a << d1;
+        a = '+' == b.charAt(c) ? (a + d2) & 4294967295 : a ^ d2;
+    }
+    return a;
+}
+// endregion
+/* tslint:enable */
+function default_1(text, com) {
+    return new Promise(function (resolve, reject) {
+        var now = Math.floor(Date.now() / 3600000);
+        // token 每小时才刷新一次，如果没过期则直接使用上次更新的 token
+        if (Number(tk.split('.')[0]) === now) {
+            resolve();
+        }
+        else {
+            // 从谷歌翻译的网页上获取到最新的 token
+            node_1.default({
+                url: 'https://translate.google.' + (com ? 'com' : 'cn')
+            }).then(function (text) {
+                var match = text.match(/TKK=eval\('\(\(function\(\){(.*?)}\)\(\)\)'\);/);
+                if (match) {
+                    // 函数体不接收 ASCII 码，所以这里要手动转换一遍
+                    var code = match[1].replace(/\\x3d/g, '=').replace(/\\x27/g, "'");
+                    try {
+                        tk = new Function(code)();
+                    }
+                    catch (e) { }
+                }
+                resolve();
+            }, reject);
+        }
+    }).then(function () { return sM(text).replace('&tk=', ''); });
+}
+exports.default = default_1;
+
+
+/***/ }),
+
+/***/ "aRHt":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var utils_1 = __webpack_require__("KOGo");
+var node_1 = __webpack_require__("0nVa");
+// http://api.fanyi.baidu.com/api/trans/product/apidoc#languageList
+// 共 27 个，除去了百度特有的文言文（wyw）无法归类进去
+var languageList = {
+    en: 'en',
+    th: 'th',
+    ru: 'ru',
+    pt: 'pt',
+    el: 'el',
+    nl: 'nl',
+    pl: 'pl',
+    bg: 'bul',
+    et: 'est',
+    da: 'dan',
+    fi: 'fin',
+    cs: 'cs',
+    ro: 'rom',
+    sl: 'slo',
+    sv: 'swe',
+    hu: 'hu',
+    de: 'de',
+    it: 'it',
+    // zh: 'zh',
+    'zh-CN': 'zh',
+    'zh-TW': 'cht',
+    'zh-HK': 'yue',
+    ja: 'jp',
+    ko: 'kor',
+    es: 'spa',
+    fr: 'fra',
+    ar: 'ara'
+};
+var languageListInvert = utils_1.invert(languageList);
+var link = 'https://fanyi.baidu.com';
+function detect(options) {
+    var text = utils_1.transformOptions(options).text;
+    return node_1.default({
+        method: 'post',
+        url: link + '/langdetect',
+        body: {
+            query: text.slice(0, 73)
+        },
+        type: 'form'
+    }).then(function (body) {
+        if (body.error === 0) {
+            var iso689lang = languageListInvert[body.lan];
+            if (iso689lang)
+                return iso689lang;
+        }
+        throw new utils_1.TranslatorError("UNSUPPORTED_LANG" /* UNSUPPORTED_LANG */, '百度翻译不支持这个语种');
+    });
+}
+function getAudioURI(text, lang) {
+    return (link +
+        ("/gettts?lan=" + lang + "&text=" + encodeURIComponent(text) + "&spd=3&source=web"));
+}
+/**
+ * 获取指定文本的网络语音地址
+ * @param {string} options
+ * @return {string|void}
+ */
+function audio(options) {
+    var _a = utils_1.transformOptions(options), text = _a.text, from = _a.from;
+    return new Promise(function (res, rej) {
+        if (from) {
+            res(from);
+        }
+        else {
+            detect(text).then(res, rej);
+        }
+    }).then(function (from) {
+        var lang;
+        if (from === 'en-GB') {
+            lang = 'uk';
+        }
+        else {
+            lang = languageList[from];
+        }
+        return getAudioURI(text, lang);
+    });
+}
+function translate(options) {
+    var _a = utils_1.transformOptions(options), from = _a.from, to = _a.to, text = _a.text;
+    return new Promise(function (res, rej) {
+        if (from) {
+            res(from);
+        }
+        else {
+            detect(text).then(res, rej);
+        }
+    }).then(function (from) {
+        return node_1.default({
+            url: link + '/v2transapi',
+            type: 'form',
+            method: 'post',
+            body: {
+                from: (from && languageList[from]) || 'auto',
+                to: (to && languageList[to]) || 'zh',
+                query: text,
+                transtype: 'hash',
+                simple_means_flag: 3
+            }
+        }).then(function (body) {
+            var transResult = body.trans_result;
+            var baiduFrom = utils_1.getValue(transResult, 'from', 'auto');
+            var baiduTo = utils_1.getValue(transResult, 'to', 'auto');
+            var result = {
+                text: text,
+                raw: body,
+                link: link + ("/#" + baiduFrom + "/" + baiduTo + "/" + encodeURIComponent(text)),
+                from: languageListInvert[baiduFrom],
+                to: languageListInvert[baiduTo]
+            };
+            var symbols = utils_1.getValue(body, [
+                'dict_result',
+                'simple_means',
+                'symbols',
+                '0'
+            ]);
+            if (symbols) {
+                // region 解析音标
+                var phonetic = [];
+                var ph_am = symbols.ph_am, ph_en = symbols.ph_en;
+                if (ph_am) {
+                    phonetic.push({
+                        name: '美',
+                        ttsURI: getAudioURI(text, 'en'),
+                        value: ph_am
+                    });
+                }
+                if (ph_en) {
+                    phonetic.push({
+                        name: '英',
+                        ttsURI: getAudioURI(text, 'en-GB'),
+                        value: ph_en
+                    });
+                }
+                if (phonetic.length) {
+                    result.phonetic = phonetic;
+                }
+                // endregion
+                // 解析词典数据
+                try {
+                    result.dict = symbols.parts.map(function (part) {
+                        return part.part + ' ' + part.means.join('；');
+                    });
+                }
+                catch (e) { }
+            }
+            // 解析普通的翻译结果
+            try {
+                result.result = transResult.data.map(function (d) { return d.dst; });
+            }
+            catch (e) { }
+            return result;
+        });
+    });
+}
+exports.default = {
+    id: 'baidu',
+    translate: translate,
+    detect: detect,
+    audio: audio
+};
+
+
+/***/ }),
+
 /***/ "cY+b":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3569,6 +2031,32 @@ class ChromeAsync {
 }
 
 exports.default = ChromeAsync;
+
+/***/ }),
+
+/***/ "jc4J":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// see https://github.com/Selection-Translator/translation.js#2-%E7%BB%99%E6%9C%89%E9%81%93%E7%BF%BB%E8%AF%91%E6%8E%A5%E5%8F%A3%E6%B7%BB%E5%8A%A0-referer-%E8%AF%B7%E6%B1%82%E5%A4%B4
+chrome.webRequest.onBeforeSendHeaders.addListener(({ requestHeaders }) => {
+  const r = {
+    name: 'Referer',
+    value: 'https://fanyi.youdao.com'
+  };
+  const index = requestHeaders.findIndex(({ name }) => name.toLowerCase() === 'referer');
+  if (index >= 0) {
+    requestHeaders.splice(index, 1, r);
+  } else {
+    requestHeaders.push(r);
+  }
+  return { requestHeaders };
+}, {
+  urls: ['https://fanyi.youdao.com/translate_o'],
+  types: ['xmlhttprequest']
+}, ['blocking', 'requestHeaders']);
 
 /***/ }),
 
@@ -3808,6 +2296,53 @@ function smartKeyword(tabUrl, { meta = [], title = '', h1 = '', h2 = [] }, siteK
 }
 
 exports.default = smartKeyword;
+
+/***/ }),
+
+/***/ "qtYd":
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var baidu_1 = __webpack_require__("aRHt");
+var youdao_1 = __webpack_require__("Peua");
+var google_1 = __webpack_require__("OloO");
+var utils_1 = __webpack_require__("KOGo");
+var defaultAPI = 'google';
+var apis = {};
+add(baidu_1.default);
+add(youdao_1.default);
+add(google_1.default);
+function getAPI(id) {
+    return apis[id];
+}
+function add(api) {
+    apis[api.id] = api;
+}
+function call(method, options) {
+    var _a = utils_1.transformOptions(options).api, apiID = _a === void 0 ? defaultAPI : _a;
+    var api = getAPI(apiID);
+    if (api) {
+        return api[method](options);
+    }
+    else {
+        return Promise.reject(new utils_1.TranslatorError("NO_THIS_API" /* NO_THIS_API */, "\u627E\u4E0D\u5230 \"" + apiID + "\" \u63A5\u53E3\u3002"));
+    }
+}
+function translate(options) {
+    return call('translate', options);
+}
+exports.translate = translate;
+function detect(options) {
+    return call('detect', options);
+}
+exports.detect = detect;
+function audio(options) {
+    return call('audio', options);
+}
+exports.audio = audio;
+
 
 /***/ }),
 
