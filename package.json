@@ -60,7 +60,7 @@
   "dependencies": {
     "bluebird": "^3.4.6",
     "localforage": "^1.4.3",
-    "lodash": "^4.17.13",
+    "lodash": "^4.17.21",
     "mustache": "^2.3.0",
     "translation.js": "^0.6.8"
   }
